@@ -54,5 +54,30 @@ export const LoginSignUp = StyleSheet.create({
         fontSize: 20,
         textAlign: 'center',
         color: mainColorGreen,
+    },
+    containerImage: {
+        flex: 0.7,
+        marginHorizontal: 50,
+        justifyContent: 'flex-end'
+    },
+    image: {
+        flex: 0.7,
+        height: undefined,
+        width: undefined
+    }
+});
+
+export const Profile = StyleSheet.create({
+    header: {
+       backgroundColor: mainColorGreen
+    },
+    headerText:{
+        color: 'white',
+        fontSize: 30,
+        marginHorizontal: 20
+    },
+    container: {
+        flex: 1,
+        backgroundColor: 'white'
     }
 });

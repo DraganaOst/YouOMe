@@ -5,28 +5,32 @@
  * @format
  * @flow
  */
-console.ignoredYellowBox = ['Setting a timer'];
-
 import React from 'react';
 import Login from './sceens/Login';
-import {createStackNavigator, createAppContainer} from 'react-navigation';
+import {createStackNavigator, createAppContainer, createBottomTabNavigator} from 'react-navigation';
 import Firebase from "./components/Firebase";
 import SignUp from "./sceens/SignUp";
+import Profile from "./sceens/Profile";
 import './components/SettingTimerError';
 
 const AppNavigator = createStackNavigator({
   Login: {
     screen: Login,
+    navigationOptions: {
+      header: null,
+    }
   },
   SignUp: {
-    screen: SignUp
+    screen: SignUp,
+    navigationOptions: {
+      header: null,
+    }
+  },
+  Profile: {
+    screen: Profile,
   }
 }, {
-  initialRouteName: 'Login',
-  headerMode: 'none',
-  navigationOptions: {
-    headerVisible: false,
-  }
+  initialRouteName: 'Login'
 });
 
 //export default createAppContainer(AppNavigator);

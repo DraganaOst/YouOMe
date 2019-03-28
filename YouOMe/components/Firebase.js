@@ -17,6 +17,7 @@ export default class Firebase {
     static auth;
     static uid;
     static database;
+    static username;
 
     static init(){
         //firebase.initializeApp(config);
@@ -29,6 +30,8 @@ export default class Firebase {
             if(Firebase.auth.currentUser.emailVerified){
                 await Firebase.auth.signInWithEmailAndPassword(email, password);
                 Firebase.uid = Firebase.auth.currentUser.uid;
+                let data = Firebase.database.ref('/users/'+Firebase.uid);
+                await data.once('value', (snapshot) => {Firebase.username = snapshot.val().username});
                 return true;
             }
             else{
