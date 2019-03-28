@@ -1,10 +1,8 @@
 import React from 'react';
-import {StyleSheet, Text, View, TextInput, TouchableOpacity, Image} from 'react-native';
+import {Text, View, TextInput, TouchableOpacity, Image} from 'react-native';
 import {NavigationActions, StackActions} from "react-navigation";
 import Firebase from "../components/Firebase";
 import * as styles from "../components/Styles";
-import {Dimensions} from 'react-native';
-const { width, height } = Dimensions.get('window');
 
 export default class Login extends React.Component{
     constructor(){

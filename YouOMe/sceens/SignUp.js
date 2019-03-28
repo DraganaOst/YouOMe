@@ -1,5 +1,5 @@
 import React from 'react';
-import {StyleSheet, Text, View, TextInput, TouchableOpacity, Image} from 'react-native';
+import {Text, View, TextInput, TouchableOpacity, Image} from 'react-native';
 import {NavigationActions, StackActions} from "react-navigation";
 import Firebase from "../components/Firebase";
 import * as styles from "../components/Styles";
@@ -17,14 +17,15 @@ export default class SignUpScreen extends React.Component{
     onPressSignUp = async () => {
         try{
             let response = false;
-            await Firebase.signUp(this.state.email, this.state.password, this.state.username);
-            this.props.navigation.dispatch(StackActions.reset({
-                index: 0,
-                actions: [
-                    NavigationActions.navigate({ routeName: 'Login' })
-                ],
-            }))
-
+            response = await Firebase.signUp(this.state.email, this.state.password, this.state.username);
+            if(response === true){
+                this.props.navigation.dispatch(StackActions.reset({
+                    index: 0,
+                    actions: [
+                        NavigationActions.navigate({ routeName: 'Login' })
+                    ],
+                }))
+            }
         }
         catch (e) {
             alert(e);
@@ -41,7 +42,7 @@ export default class SignUpScreen extends React.Component{
                         resizeMode="center"
                     />
                 </View>
-                <View style={{flex: 1}}>
+                <View style={{flex: 1.5}}>
                     <TextInput
                         style={styles.LoginSignUp.input}
                         placeholder={'Username'}

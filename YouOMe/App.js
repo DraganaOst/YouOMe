@@ -12,6 +12,9 @@ import Firebase from "./components/Firebase";
 import SignUp from "./sceens/SignUp";
 import Profile from "./sceens/Profile";
 import './components/SettingTimerError';
+import AddMoney from "./sceens/AddMoney";
+import * as styles from "./components/Styles";
+import AddUser from "./sceens/AddUser";
 
 const AppNavigator = createStackNavigator({
   Login: {
@@ -28,6 +31,23 @@ const AppNavigator = createStackNavigator({
   },
   Profile: {
     screen: Profile,
+  },
+  AddUser: {
+    screen: AddUser,
+    navigationOptions: {
+      headerStyle: styles.Profile.header,
+      headerTitleStyle: styles.Profile.headerText,
+      headerTintColor: 'white',
+      title: "Add User"
+    },
+  },
+  AddMoney: {
+    screen: AddMoney,
+    navigationOptions: {
+      headerStyle: styles.Profile.header,
+      headerTitleStyle: styles.Profile.headerText,
+      headerTintColor: 'white'
+    },
   }
 }, {
   initialRouteName: 'Login'

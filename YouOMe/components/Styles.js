@@ -74,10 +74,58 @@ export const Profile = StyleSheet.create({
     headerText:{
         color: 'white',
         fontSize: 30,
-        marginHorizontal: 20
+        marginHorizontal: 25
     },
     container: {
         flex: 1,
         backgroundColor: 'white'
+    },
+    subContainer: {
+        flex: 1,
+        backgroundColor: 'white',
+        marginTop: 20,
+        //marginHorizontal: 10,
+        borderRadius: 5,
+        borderWidth: 1,
+        borderColor: 'white'
+    },
+    text: {
+        fontSize: 35,
+        marginLeft: 15,
+        color: mainColorGrey,
+        fontWeight: 'bold'
+        //borderBottomWidth: 2,
+        //borderBottomColor: mainColorGreen
+    },
+    containerHeader: {
+        flexDirection: 'row',
+        marginHorizontal: 10,
+        justifyContent: 'space-between',
+        borderBottomWidth: 2,
+        borderColor: '#8acb88'
+    },
+    containerText: {
+        flexDirection: 'row',
+        alignItems: 'center'
+    },
+    button: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        margin: 5,
+    },
+    containerButton: {
+        flexDirection: 'row',
+        marginRight: 10
+    }
+});
+
+export const AddUserScreen = StyleSheet.create({
+    search: {
+        height: 40,
+        borderRadius: 20,
+        margin: 10,
+        backgroundColor: '#d9d9d9',
+        paddingLeft: 30,
+        paddingRight: 30
     }
 });

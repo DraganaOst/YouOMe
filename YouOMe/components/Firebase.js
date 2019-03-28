@@ -9,8 +9,6 @@ const config = {
     messagingSenderId: "644106863317"
 };
 
-//const _firebase = firebase;
-
 const _firebase = firebase.initializeApp(config);
 
 export default class Firebase {
@@ -41,8 +39,6 @@ export default class Firebase {
                     alert(error);
                 });
             }
-            //App().haj();
-            //App().loadNotes(Firebase.database().ref('/'+Firebase.uid));
         }
         catch (e) {
             alert(e);
@@ -56,6 +52,7 @@ export default class Firebase {
                 if (snapshot.exists()) {
                     alert("Username already exists.")
                     console.log("exists");
+                    return false;
                 }else{
                     await Firebase.auth.createUserWithEmailAndPassword(email, password);
                     alert("Please verify your email address.");
@@ -66,13 +63,12 @@ export default class Firebase {
                     });
 
                     Firebase.auth.currentUser.sendEmailVerification().then(()=>{
-
+                        return true;
                     }).catch((error) => {
                         alert(error);
                     });
                 }
             });
-
         }
         catch (e) {
             alert(e);
