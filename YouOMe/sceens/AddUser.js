@@ -5,17 +5,29 @@ import Firebase from "../components/Firebase";
 import * as styles from "../components/Styles";
 
 class User extends React.Component {
-    sendRequest = () => {
+    constructor(){
+        super();
+        this.state = {
+            opacity: 1
+        }
+    }
 
+    sendRequest = (uid) => {
+        let update = {
+            ['/connections/'+Firebase.uid+'/'+uid]: Firebase.uid,
+            ['/connections/'+uid+'/'+Firebase.uid]: Firebase.uid,
+        };
+        Firebase.database.ref().update(update);
+        this.setState({opacity: 0.3});
     };
 
     render(): React.ReactNode {
         return (
-            <View key={this.props.userKey} style={{flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: 25, marginVertical: 5}}>
+            <View style={[styles.AddUserScreen.user, {opacity: this.state.opacity}]}>
                 <Text style={{fontSize: 20}}>
                     {this.props.username}
                 </Text>
-                <TouchableOpacity style={styles.Profile.button} onPress={() => this.sendRequest}>
+                <TouchableOpacity style={styles.Profile.button} onPress={() => this.sendRequest(this.props.userUid)}>
                     <Image source={require('../images/add-user.png')} />
                 </TouchableOpacity>
             </View>
@@ -32,22 +44,75 @@ export default class AddUser extends React.Component{
         }
     }
 
-    onSearch = () => {
+    async onSearch() {
         if(this.state.search !== ""){
+            let connections = [];
+            let exists = false;
+            await Firebase.database.ref('/').once('value').then(
+                function(snapshot) {
+                    if (snapshot.child('connections/' + Firebase.uid).exists())
+                    {
+                        let data = Firebase.database.ref('/connections/' + Firebase.uid);
+                        data.once('value', (snapshot) => {
+                            snapshot.forEach((child) => connections.push(child));
+                        });
+                    }
+                }
+            );
+
+
             let data = Firebase.database.ref('/users');
             data.once('value', (snapshot) => {
                 this.setState({array: []});
                 snapshot.forEach((childSnapshot) =>{
                     if(childSnapshot.val().username.toLowerCase().includes(this.state.search.toLowerCase())
-                        && childSnapshot.key !== Firebase.uid){
+                        && childSnapshot.key !== Firebase.uid
+                        && !connections.find(x => x.key === childSnapshot.key)
+                    ){
                         let code = (
-                            <User userKey={childSnapshot.key} username={childSnapshot.val().username}/>
+                            <User key={childSnapshot.key} userUid={childSnapshot.key} username={childSnapshot.val().username}/>
                         );
-
                         this.setState((previousState) => ({'array': [...previousState.array, code]}));
                     }
                 })
             });
+
+            /*let ref = Firebase.database.ref('/');
+            ref.child('connections/' + Firebase.uid).on('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    let data = Firebase.database.ref('/users');
+                    data.once('value', (snapshot2) => {
+                        this.setState({array: []});
+                        snapshot2.forEach((childSnapshot) =>{
+                            if(childSnapshot.val().username.toLowerCase().includes(this.state.search.toLowerCase())
+                                && childSnapshot.key !== Firebase.uid
+                                && !snapshot.find(x => x.key === childSnapshot.key)
+                            ){
+                                let code = (
+                                    <User key={childSnapshot.key} userUid={childSnapshot.key} username={childSnapshot.val().username}/>
+                                );
+                                this.setState((previousState) => ({'array': [...previousState.array, code]}));
+                            }
+                        })
+                    });
+                }
+                else{
+                    let data = Firebase.database.ref('/users');
+                    data.once('value', (snapshot2) => {
+                        this.setState({array: []});
+                        snapshot2.forEach((childSnapshot) =>{
+                            if(childSnapshot.val().username.toLowerCase().includes(this.state.search.toLowerCase())
+                                && childSnapshot.key !== Firebase.uid
+                            ){
+                                let code = (
+                                    <User key={childSnapshot.key} userUid={childSnapshot.key} username={childSnapshot.val().username}/>
+                                );
+                                this.setState((previousState) => ({'array': [...previousState.array, code]}));
+                            }
+                        })
+                    });
+                }
+            });*/
         }
         else{
             this.setState({array: []});

@@ -15,6 +15,7 @@ import './components/SettingTimerError';
 import AddMoney from "./sceens/AddMoney";
 import * as styles from "./components/Styles";
 import AddUser from "./sceens/AddUser";
+import Users from "./sceens/Users";
 
 const AppNavigator = createStackNavigator({
   Login: {
@@ -47,6 +48,15 @@ const AppNavigator = createStackNavigator({
       headerStyle: styles.Profile.header,
       headerTitleStyle: styles.Profile.headerText,
       headerTintColor: 'white'
+    },
+  },
+  Users: {
+    screen: Users,
+    navigationOptions: {
+      headerStyle: styles.Profile.header,
+      headerTitleStyle: styles.Profile.headerText,
+      headerTintColor: 'white',
+      title: 'Users'
     },
   }
 }, {

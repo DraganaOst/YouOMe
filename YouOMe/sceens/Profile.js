@@ -18,8 +18,9 @@ export default class Profile extends React.Component {
                 owed_to_me_number: 0,
                 owed_to_me_items: ""
             },
-            modalVisible: false
-        }
+            usersImage: require('../images/list_button2_smaller.png')
+        };
+        this.checkConnections();
     }
 
     static navigationOptions = ({ navigation }) => ({
@@ -27,6 +28,37 @@ export default class Profile extends React.Component {
         headerStyle: styles.Profile.header,
         headerTitleStyle: styles.Profile.headerText
     });
+
+    checkConnections = () => {
+        /*Firebase.database.ref('/').once('value').then(
+            (snapshot) => {
+                if (snapshot.child('connections/' + Firebase.uid).exists())
+                {
+                    let data = Firebase.database.ref('/connections/' + Firebase.uid);
+                    data.on('value', (snapshot) => {
+                            snapshot.forEach((child) => {
+                                if(child.val() !== true && child.val() !== Firebase.uid){
+                                    this.setState({usersImage: require('../images/list_button2_smaller_notification2.png')})
+                                    return 0;
+                                }
+                            })
+                        }
+                    )
+                }
+            });*/
+
+        let data = Firebase.database.ref('/');
+        data.child('connections/' + Firebase.uid).on('value', (snapshot) => {
+            this.setState({usersImage: require('../images/list_button2_smaller.png')});
+            if (snapshot.exists()) {
+                snapshot.forEach((child) => {
+                    if(child.val() !== true && child.val() !== Firebase.uid){
+                        this.setState({usersImage: require('../images/list_button2_smaller_notification2.png')})
+                    }
+                })
+            }
+        });
+    };
 
     render() {
         return (
@@ -106,8 +138,8 @@ export default class Profile extends React.Component {
                             <Text style={styles.Profile.text}>Users</Text>
                         </View>
                         <View style={styles.Profile.containerButton}>
-                            <TouchableOpacity style={styles.Profile.button} onPress={() => {}}>
-                                <Image source={require('../images/list_button2_smaller.png')} />
+                            <TouchableOpacity style={styles.Profile.button} onPress={() => this.props.navigation.navigate('Users')}>
+                                <Image source={this.state.usersImage} />
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.Profile.button} onPress={() => this.props.navigation.navigate('AddUser')}>
                                 <Image source={require('../images/plus_button_smaller.png')} />

@@ -25,8 +25,8 @@ export default class Firebase {
 
     static async login(email, password){
         try{
+            await Firebase.auth.signInWithEmailAndPassword(email, password);
             if(Firebase.auth.currentUser.emailVerified){
-                await Firebase.auth.signInWithEmailAndPassword(email, password);
                 Firebase.uid = Firebase.auth.currentUser.uid;
                 let data = Firebase.database.ref('/users/'+Firebase.uid);
                 await data.once('value', (snapshot) => {Firebase.username = snapshot.val().username});

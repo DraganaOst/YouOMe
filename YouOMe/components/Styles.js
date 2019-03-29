@@ -127,5 +127,36 @@ export const AddUserScreen = StyleSheet.create({
         backgroundColor: '#d9d9d9',
         paddingLeft: 30,
         paddingRight: 30
+    },
+    user: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginHorizontal: 25,
+        marginVertical: 5,
+        alignItems: 'center'
     }
+});
+
+export const Users = StyleSheet.create({
+    button: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        margin: 5,
+        marginLeft: 15
+    },
+});
+
+export const AddMoneyItem = StyleSheet.create({
+    button: {
+        margin: 10,
+        borderRadius: 5,
+        alignItems: 'stretch',
+        backgroundColor: mainColorGreen,
+    },
+    buttonText: {
+        padding: 10,
+        fontSize: 20,
+        color: 'white',
+        textAlign: 'center'
+    },
 });

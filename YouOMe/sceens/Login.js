@@ -9,7 +9,8 @@ export default class Login extends React.Component{
         super();
         this.state = {
             email: "",
-            password: ""
+            password: "",
+
         };
     };
 
@@ -47,12 +48,15 @@ export default class Login extends React.Component{
                         style={styles.LoginSignUp.input}
                         placeholder={'Email'}
                         onChangeText={(text) => this.setState({email: text})}
+                        keyboardType={'email-address'}
+                        defaultValue={"dragana.ost@gmail.co"}
                     />
                     <TextInput
                         style={styles.LoginSignUp.input}
                         placeholder={'Password'}
                         secureTextEntry={true}
                         onChangeText={(text) => this.setState({password: text})}
+                        defaultValue={"testtes"}
                     />
                     <TouchableOpacity
                         onPress={this.onPressLogin}
