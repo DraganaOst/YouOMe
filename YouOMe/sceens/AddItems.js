@@ -5,7 +5,7 @@ import Firebase from "../components/Firebase";
 import * as styles from "../components/Styles";
 import ImageCalendar from '../images/calendar.svg';
 
-export default class AddMoney extends React.Component {
+export default class AddItems extends React.Component {
     constructor(){
         super();
         this.state = {
@@ -13,7 +13,7 @@ export default class AddMoney extends React.Component {
             array: [],
             dateIncured: new Date(),
             dateDue: "",
-            amount: 0,
+            name: 0,
             reason: "",
             visibleDatePickerIOSDue: false,
             visibleDatePickerIOSIncured: false,
@@ -90,27 +90,27 @@ export default class AddMoney extends React.Component {
 
         if(this.state.userIndex === 0)
             alertMessange += " - choose a user\n";
-        if(this.state.amount == 0)
-            alertMessange += " - write the amount";
+        if(this.state.name == "")
+            alertMessange += " - write the item's name";
 
         if(alertMessange !== "Form wasn't filled in correctly: \n")
             alert(alertMessange);
         else{
             let update = {};
-            let ref = Firebase.database.ref('/transactions/money');
+            let ref = Firebase.database.ref('/transactions/items');
             let uid = this.state.array[this.state.userIndex].key;
 
             let balance = { owed_by_me: 0, owed_to_me: 0};
             let balanceUser = {owed_by_me: 0, owed_to_me: 0};
             
-            await Firebase.database.ref('/users/' + Firebase.uid + '/balance/money').once('value').then((snapshot) => {
+            await Firebase.database.ref('/users/' + Firebase.uid + '/balance/items').once('value').then((snapshot) => {
                 if(snapshot.child('owed_by_me').exists())
                     balance.owed_by_me = snapshot.val().owed_by_me;
                 if(snapshot.child('owed_to_me').exists())
                     balance.owed_to_me = snapshot.val().owed_to_me;
             });
 
-            await Firebase.database.ref('/users/' + uid + '/balance/money').once('value').then((snapshot) => {
+            await Firebase.database.ref('/users/' + uid + '/balance/items').once('value').then((snapshot) => {
                 if(snapshot.child('owed_by_me').exists())
                     balanceUser.owed_by_me = snapshot.val().owed_by_me;
                 if(snapshot.child('owed_to_me').exists())
@@ -123,28 +123,28 @@ export default class AddMoney extends React.Component {
             if(this.state.option !== 'i_gave'){
                 from = uid;
                 to = Firebase.uid;
-                update['/users/'+Firebase.uid+'/balance/money/owed_by_me'] = Number(balance.owed_by_me) + this.state.amount;
-                update['/users/'+uid+'/balance/money/owed_to_me'] = Number(balanceUser.owed_to_me) + this.state.amount;
+                update['/users/'+Firebase.uid+'/balance/items/owed_by_me'] = Number(balance.owed_by_me) + 1;
+                update['/users/'+uid+'/balance/items/owed_to_me'] = Number(balanceUser.owed_to_me) + 1;
             }
             else{
-                update['/users/'+Firebase.uid+'/balance/money/owed_to_me'] = Number(balance.owed_to_me) + this.state.amount;
-                update['/users/'+uid+'/balance/money/owed_by_me'] = Number(balanceUser.owed_by_me) + this.state.amount;
+                update['/users/'+Firebase.uid+'/balance/items/owed_to_me'] = Number(balance.owed_to_me) + 1;
+                update['/users/'+uid+'/balance/items/owed_by_me'] = Number(balanceUser.owed_by_me) + 1;
             }
-            Firebase.database.ref().update(update);
             
             let item = ref.push(
                 {
                     'from': from, 
                     'to': to, 
                     'reason': this.state.reason,
-                    'amount': this.state.amount,
+                    'name': this.state.name,
                     'date_incured': this.state.dateIncured.toISOString(),
                     'date_due': this.state.dateDue
                 }
             );
-
-            Firebase.database.ref('/transactions/users/'+Firebase.uid+'/money/'+uid).push(item.key);
-            Firebase.database.ref('/transactions/users/'+uid+'/money/'+Firebase.uid).push(item.key);
+            Firebase.database.ref('/transactions/users/'+Firebase.uid+'/items/'+uid).push(item.key);
+            Firebase.database.ref('/transactions/users/'+uid+'/items/'+Firebase.uid).push(item.key);
+            
+            Firebase.database.ref().update(update);
 
             this.props.navigation.dispatch(StackActions.reset({
                 index: 0,
@@ -203,10 +203,10 @@ export default class AddMoney extends React.Component {
                     </Picker>
                 </View>
                 <View style={styles.AddMoneyItem.containerViewRow}>
-                    <Text style={styles.AddMoneyItem.textFont}>Amount</Text>
+                    <Text style={styles.AddMoneyItem.textFont}>Name</Text>
                     <Text style={[styles.AddMoneyItem.textFont, {color: 'red'}]}>*</Text>
                     <Text style={styles.AddMoneyItem.textFont}>:</Text>
-                    <TextInput keyboardType={'numeric'} style={styles.AddMoneyItem.inputMoney} onChangeText={(number) => this.setState({amount: Number(number)})}></TextInput>
+                    <TextInput style={styles.AddMoneyItem.inputReason} onChangeText={(text) => this.setState({name: text})}></TextInput>
                     <Text style={styles.AddMoneyItem.textFont}>€</Text>
                 </View>
                 <View style={styles.AddMoneyItem.containerViewRow}>

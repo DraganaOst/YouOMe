@@ -10,7 +10,6 @@ export default class Login extends React.Component{
         this.state = {
             email: "",
             password: "",
-
         };
     };
 
@@ -33,13 +32,13 @@ export default class Login extends React.Component{
         }
     };
 
-    render(): React.ReactNode {
+    render() {
         return (
             <View style={styles.LoginSignUp.containerLogin}>
                 <View style={styles.LoginSignUp.containerImage}>
                     <Image
                         style={styles.LoginSignUp.image}
-                        source={require("../images/logo.png")}
+                        source={require("../images/logo3.png")}
                         resizeMode="center"
                     />
                 </View>

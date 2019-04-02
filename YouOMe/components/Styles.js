@@ -7,9 +7,18 @@ const mainColorBlue = '#648381';
 const mainColorGrey = '#575761';
 const mainColorOrange = '#ffbf46';
 
+const fontSize = 18;
+const margin = 20;
+
+export const Global = StyleSheet.create({
+    text: {
+        fontSize: fontSize
+    }
+});
+
 export const LoginSignUp = StyleSheet.create({
     containerLogin: {
-        flex: 1,
+        flex: 0.8,
         justifyContent: 'center',
         backgroundColor: 'white'
     },
@@ -23,7 +32,7 @@ export const LoginSignUp = StyleSheet.create({
         borderBottomColor: mainColorGreen,
         paddingHorizontal: 20,
         borderRadius: 5,
-        fontSize: 20
+        fontSize: 18
     },
     button: {
         margin: 10,
@@ -35,7 +44,7 @@ export const LoginSignUp = StyleSheet.create({
     },
     buttonText: {
         padding: 10,
-        fontSize: 20,
+        fontSize: 18,
         color: 'white',
         textAlign: 'center'
     },
@@ -51,7 +60,7 @@ export const LoginSignUp = StyleSheet.create({
     },
     buttonTextInverse: {
         padding: 10,
-        fontSize: 20,
+        fontSize: 18,
         textAlign: 'center',
         color: mainColorGreen,
     },
@@ -73,8 +82,8 @@ export const Profile = StyleSheet.create({
     },
     headerText:{
         color: 'white',
-        fontSize: 30,
-        marginHorizontal: 25
+        fontSize: 25,
+        marginHorizontal: 20
     },
     container: {
         flex: 1,
@@ -90,8 +99,8 @@ export const Profile = StyleSheet.create({
         borderColor: 'white'
     },
     text: {
-        fontSize: 35,
-        marginLeft: 15,
+        fontSize: 28,
+        marginLeft: 10,
         color: mainColorGrey,
         fontWeight: 'bold'
         //borderBottomWidth: 2,
@@ -115,7 +124,11 @@ export const Profile = StyleSheet.create({
     },
     containerButton: {
         flexDirection: 'row',
-        marginRight: 10
+        marginRight: 5
+    },
+    subText: {
+        fontSize: fontSize, 
+        fontWeight: 'bold'
     }
 });
 
@@ -131,7 +144,7 @@ export const AddUserScreen = StyleSheet.create({
     user: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginHorizontal: 25,
+        marginHorizontal: 20,
         marginVertical: 5,
         alignItems: 'center'
     }
@@ -142,21 +155,69 @@ export const Users = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         margin: 5,
-        marginLeft: 15
+        marginLeft: 20,
     },
 });
 
+
+
 export const AddMoneyItem = StyleSheet.create({
+    containerViewRow: {
+        flexDirection: 'row', 
+        marginHorizontal: 20, 
+        alignItems: 'center'
+    },
+    containerButton: {
+        flexDirection: 'row',
+        alignItems: 'stretch', 
+        marginHorizontal: 10
+    },
     button: {
+        margin: 10,
+        borderRadius: 5,
+        alignItems: 'stretch',
+        backgroundColor: mainColorOrange,
+    },
+    button2: {
         margin: 10,
         borderRadius: 5,
         alignItems: 'stretch',
         backgroundColor: mainColorGreen,
     },
+    textFont: {
+        fontSize: fontSize
+    },
+    picker: {
+        height: 50, 
+        flex: 1,
+    },
     buttonText: {
+        fontSize: fontSize,
         padding: 10,
-        fontSize: 20,
         color: 'white',
         textAlign: 'center'
     },
+    inputMoney: {
+        fontSize: fontSize,
+        borderBottomWidth: 1, 
+        flex: 1, 
+        textAlign: 'right', 
+        paddingHorizontal: 20, 
+        marginHorizontal: 10
+    },
+    inputReason: {
+        fontSize: fontSize,
+        borderBottomWidth: 1, 
+        flex: 1,  
+        paddingHorizontal: 10, 
+        marginLeft: 10
+    },
+    dateText: {
+        fontSize: fontSize,
+        borderBottomWidth: 1, 
+        flex: 1, 
+        padding: 10, 
+        marginHorizontal: 10, 
+        textAlign: 'right'
+    }
 });

@@ -16,6 +16,9 @@ import AddMoney from "./sceens/AddMoney";
 import * as styles from "./components/Styles";
 import AddUser from "./sceens/AddUser";
 import Users from "./sceens/Users";
+import Money from './sceens/Money';
+import AddItems from './sceens/AddItems';
+import Items from './sceens/Items';
 
 const AppNavigator = createStackNavigator({
   Login: {
@@ -47,7 +50,8 @@ const AppNavigator = createStackNavigator({
     navigationOptions: {
       headerStyle: styles.Profile.header,
       headerTitleStyle: styles.Profile.headerText,
-      headerTintColor: 'white'
+      headerTintColor: 'white',
+      title: 'Add'
     },
   },
   Users: {
@@ -57,6 +61,33 @@ const AppNavigator = createStackNavigator({
       headerTitleStyle: styles.Profile.headerText,
       headerTintColor: 'white',
       title: 'Users'
+    },
+  },
+  Money: {
+    screen: Money,
+    navigationOptions: {
+      headerStyle: styles.Profile.header,
+      headerTitleStyle: styles.Profile.headerText,
+      headerTintColor: 'white',
+      title: 'Money'
+    },
+  },
+  AddItems: {
+    screen: AddItems,
+    navigationOptions: {
+      headerStyle: styles.Profile.header,
+      headerTitleStyle: styles.Profile.headerText,
+      headerTintColor: 'white',
+      title: 'Add'
+    },
+  },
+  Items: {
+    screen: Items,
+    navigationOptions: {
+      headerStyle: styles.Profile.header,
+      headerTitleStyle: styles.Profile.headerText,
+      headerTintColor: 'white',
+      title: 'Items'
     },
   }
 }, {
@@ -69,6 +100,9 @@ const Navigator = createAppContainer(AppNavigator);
 export default class App extends React.Component{
   constructor(props) {
     super(props);
+  }
+
+  componentDidMount() {
     Firebase.init();
   }
 

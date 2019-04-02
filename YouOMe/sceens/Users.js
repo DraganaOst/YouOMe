@@ -3,10 +3,13 @@ import {Text, View, TextInput, TouchableOpacity, Image, Button, Modal} from 'rea
 import {NavigationActions, StackActions} from "react-navigation";
 import Firebase from "../components/Firebase";
 import * as styles from "../components/Styles";
-
+import ImageAddUser from '../images/add-user.svg';
+import ImageCancel from '../images/error.svg';
+import ImageChecked from '../images/checked.svg';
+import ImageBin from '../images/rubbish-bin.svg';
 
 class User extends React.Component {
-    render(): React.ReactNode {
+    render() {
         return (
             <View style={styles.AddUserScreen.user}>
                 <Text style={{fontSize: 20}}>
@@ -14,7 +17,7 @@ class User extends React.Component {
                 </Text>
                 <View style={{flexDirection: 'row'}}>
                     <TouchableOpacity style={styles.Users.button} onPress={() => {}}>
-                        <Image source={require('../images/rubbish-bin.png')} />
+                        <ImageAddUser width={32} height={32} />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -40,7 +43,7 @@ class Request extends React.Component {
         Firebase.database.ref().update(update);
     };
 
-    render(): React.ReactNode {
+    render() {
         return (
             <View style={styles.AddUserScreen.user}>
                 <Text style={{fontSize: 20}}>
@@ -48,10 +51,10 @@ class Request extends React.Component {
                 </Text>
                 <View style={{flexDirection: 'row'}}>
                     <TouchableOpacity style={styles.Users.button} onPress={() => this.denyRequest(this.props.uid)}>
-                        <Image source={require('../images/error.png')} />
+                        <ImageCancel width={32} height={32} />
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.Users.button} onPress={() => this.acceptRequest(this.props.uid)}>
-                        <Image source={require('../images/checked.png')} />
+                        <ImageChecked width={32} height={32} />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -65,10 +68,13 @@ class CancelRequest extends React.Component {
             ['/connections/'+Firebase.uid+'/'+uid]: null,
             ['/connections/'+uid+'/'+Firebase.uid]: null,
         };
-        Firebase.database.ref().update(update);
     };
 
-    render(): React.ReactNode {
+    componentDidUpdate(){
+        Firebase.database.ref().update(update);
+    }
+
+    render() {
         return (
             <View style={styles.AddUserScreen.user}>
                 <Text style={{fontSize: 20}}>
@@ -76,7 +82,7 @@ class CancelRequest extends React.Component {
                 </Text>
                 <View style={{flexDirection: 'row'}}>
                     <TouchableOpacity style={styles.Users.button} onPress={() => this.cancelRequest(this.props.uid)}>
-                        <Image source={require('../images/error.png')} />
+                        <ImageBin width={24} height={24} />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -130,7 +136,7 @@ export default class Users extends React.Component {
         );
     };
 
-    render(): React.ReactNode {
+    render() {
         return (
             <View>
                 {this.state.array}

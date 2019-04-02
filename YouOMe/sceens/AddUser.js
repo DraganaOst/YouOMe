@@ -3,6 +3,7 @@ import {StyleSheet, Text, View, TextInput, TouchableOpacity, Image, Button, Moda
 import {NavigationActions, StackActions} from "react-navigation";
 import Firebase from "../components/Firebase";
 import * as styles from "../components/Styles";
+import ImageAddUser from '../images/add-user.svg';
 
 class User extends React.Component {
     constructor(){
@@ -21,14 +22,14 @@ class User extends React.Component {
         this.setState({opacity: 0.3});
     };
 
-    render(): React.ReactNode {
+    render() {
         return (
             <View style={[styles.AddUserScreen.user, {opacity: this.state.opacity}]}>
                 <Text style={{fontSize: 20}}>
                     {this.props.username}
                 </Text>
                 <TouchableOpacity style={styles.Profile.button} onPress={() => this.sendRequest(this.props.userUid)}>
-                    <Image source={require('../images/add-user.png')} />
+                    <ImageAddUser width={32} height={32}/>
                 </TouchableOpacity>
             </View>
         );
@@ -60,7 +61,6 @@ export default class AddUser extends React.Component{
                 }
             );
 
-
             let data = Firebase.database.ref('/users');
             data.once('value', (snapshot) => {
                 this.setState({array: []});
@@ -76,50 +76,13 @@ export default class AddUser extends React.Component{
                     }
                 })
             });
-
-            /*let ref = Firebase.database.ref('/');
-            ref.child('connections/' + Firebase.uid).on('value', (snapshot) => {
-                if (snapshot.exists()) {
-                    let data = Firebase.database.ref('/users');
-                    data.once('value', (snapshot2) => {
-                        this.setState({array: []});
-                        snapshot2.forEach((childSnapshot) =>{
-                            if(childSnapshot.val().username.toLowerCase().includes(this.state.search.toLowerCase())
-                                && childSnapshot.key !== Firebase.uid
-                                && !snapshot.find(x => x.key === childSnapshot.key)
-                            ){
-                                let code = (
-                                    <User key={childSnapshot.key} userUid={childSnapshot.key} username={childSnapshot.val().username}/>
-                                );
-                                this.setState((previousState) => ({'array': [...previousState.array, code]}));
-                            }
-                        })
-                    });
-                }
-                else{
-                    let data = Firebase.database.ref('/users');
-                    data.once('value', (snapshot2) => {
-                        this.setState({array: []});
-                        snapshot2.forEach((childSnapshot) =>{
-                            if(childSnapshot.val().username.toLowerCase().includes(this.state.search.toLowerCase())
-                                && childSnapshot.key !== Firebase.uid
-                            ){
-                                let code = (
-                                    <User key={childSnapshot.key} userUid={childSnapshot.key} username={childSnapshot.val().username}/>
-                                );
-                                this.setState((previousState) => ({'array': [...previousState.array, code]}));
-                            }
-                        })
-                    });
-                }
-            });*/
         }
         else{
             this.setState({array: []});
         }
     };
 
-    render(): React.ReactNode {
+    render() {
         return (
             <View>
                 <View style={{flexDirection: 'row'}}>
