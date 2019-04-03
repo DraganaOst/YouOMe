@@ -93,12 +93,6 @@ const AppNavigator = createStackNavigator({
   },
   History: {
     screen: History,
-    navigationOptions: {
-      headerStyle: styles.Profile.header,
-      headerTitleStyle: styles.Profile.headerText,
-      headerTintColor: 'white',
-      title: 'History'
-    },
   }
 }, {
   initialRouteName: 'Login'

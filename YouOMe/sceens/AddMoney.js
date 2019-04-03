@@ -132,7 +132,8 @@ export default class AddMoney extends React.Component {
                     'reason': this.state.reason,
                     'amount': this.state.amount,
                     'date_incured': this.state.dateIncured.toISOString(),
-                    'date_due': this.state.dateDue
+                    'date_due': this.state.dateDue,
+                    'returned': false
                 }
             );
 

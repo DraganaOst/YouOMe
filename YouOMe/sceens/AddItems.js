@@ -135,7 +135,8 @@ export default class AddItems extends React.Component {
                     'reason': this.state.reason,
                     'name': this.state.name,
                     'date_incured': this.state.dateIncured.toISOString(),
-                    'date_due': this.state.dateDue
+                    'date_due': this.state.dateDue,
+                    'returned': false
                 }
             );
             Firebase.database.ref('/transactions/users/'+Firebase.uid+'/items/'+uid).push(item.key);

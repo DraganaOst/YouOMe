@@ -225,7 +225,7 @@ export const AddMoneyItem = StyleSheet.create({
 
 export const Money = StyleSheet.create({
     button: {
-        backgroundColor:'#575761', 
+        backgroundColor: mainColorGrey, 
         marginBottom: 10
     },
     container: {
@@ -242,7 +242,7 @@ export const Money = StyleSheet.create({
         flex: 2
     },
     containerBalance: {
-        backgroundColor: '#648381', 
+        backgroundColor: mainColorBlue, 
         paddingHorizontal: 20, 
         paddingVertical: 5, 
         flex: 1,

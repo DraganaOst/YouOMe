@@ -10,7 +10,7 @@ class TransactionUser extends React.Component {
         let array = ['#8acb88','#648381','#575761','#ffbf46',"#E5E5E5"];
         let index = 0;
         return (
-            <TouchableOpacity style={styles.Money.button} onPress={() => alert('Pressed')}>
+            <TouchableOpacity style={styles.Money.button} onPress={() => this.props.navigator.navigate('History', {username: this.props.username, uid: this.props.uid})}>
                 <View style={styles.Money.container}>
                     <Text style={styles.Money.textUser}>{this.props.username}</Text>
                     {this.props.balance != 0 
@@ -38,6 +38,8 @@ export default class Money extends React.Component {
     }
 
     loadTransactions = () => {
+        const navigator = this.props.navigation;
+
         let data = Firebase.database.ref('balance/'+Firebase.uid+'/money');
         data.on('value', (snapshot) => {
             if(snapshot.exists()){
@@ -53,8 +55,10 @@ export default class Money extends React.Component {
                     else if(balace == 0)
                         balanceText = '';
                     
+
+
                     let code = (
-                        <TransactionUser key={userUid} username={username} balanceText={balanceText} balance={Math.abs(balace)}/>
+                        <TransactionUser key={userUid} uid={userUid} username={username} balanceText={balanceText} balance={Math.abs(balace)} navigator={navigator}/>
                     );
     
                     this.setState((previousState) => ({'array': [...previousState.array, code]}));
