@@ -32,17 +32,33 @@ export default class Profile extends React.Component {
     });
 
     loadBalance = () => {
-        let data = Firebase.database.ref('/');
-        data.child('users/' + Firebase.uid + '/balance').on('value', (snapshot) => {
-            if (snapshot.exists()){         
-                if(snapshot.child('money/owed_by_me').exists())
-                    this.setState({money_owed_by_me: Number(snapshot.val().money.owed_by_me)});
-                if(snapshot.child('money/owed_to_me').exists())
-                    this.setState({money_owed_to_me: Number(snapshot.val().money.owed_to_me)});
-                if(snapshot.child('items/owed_to_me').exists())
-                    this.setState({items_owed_to_me: Number(snapshot.val().items.owed_to_me)});
-                if(snapshot.child('items/owed_by_me').exists())
-                    this.setState({items_owed_by_me: Number(snapshot.val().items.owed_by_me)});
+        Firebase.database.ref('balance/'+Firebase.uid+'/items').on('value', (snapshot) => {
+            if(snapshot.exists()){
+                let owed_by_me = 0;
+                let owed_to_me = 0;
+                snapshot.forEach((childSnapshot) => {
+                    if(childSnapshot.child('owed_by_me').exists())
+                        owed_by_me += childSnapshot.val().owed_by_me;
+                    if(childSnapshot.child('owed_to_me').exists())
+                        owed_to_me += childSnapshot.val().owed_to_me;
+                });
+                this.setState({items_owed_by_me: owed_by_me});
+                this.setState({items_owed_to_me: owed_to_me});
+            }
+        });
+
+        Firebase.database.ref('balance/'+Firebase.uid+'/money').on('value', (snapshot) => {
+            if(snapshot.exists()){
+                let owed_by_me = 0;
+                let owed_to_me = 0;
+                snapshot.forEach((childSnapshot) => {
+                    if(childSnapshot.val() > 0)
+                        owed_by_me += Math.abs(Number(childSnapshot.val()));
+                    else
+                        owed_to_me += Math.abs(Number(childSnapshot.val()));
+                });
+                this.setState({money_owed_by_me: owed_by_me});
+                this.setState({money_owed_to_me: owed_to_me});
             }
         });
     };

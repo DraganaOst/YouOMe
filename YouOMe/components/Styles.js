@@ -6,6 +6,7 @@ const mainColorGreen = '#8acb88';
 const mainColorBlue = '#648381';
 const mainColorGrey = '#575761';
 const mainColorOrange = '#ffbf46';
+const mainColorLightGrey = "#E5E5E5";
 
 const fontSize = 18;
 const margin = 20;
@@ -20,7 +21,6 @@ export const LoginSignUp = StyleSheet.create({
     containerLogin: {
         flex: 0.8,
         justifyContent: 'center',
-        backgroundColor: 'white'
     },
     containerButton: {
         backgroundColor: 'black'
@@ -87,7 +87,7 @@ export const Profile = StyleSheet.create({
     },
     container: {
         flex: 1,
-        backgroundColor: 'white'
+        backgroundColor: mainColorLightGrey
     },
     subContainer: {
         flex: 1,
@@ -96,7 +96,8 @@ export const Profile = StyleSheet.create({
         //marginHorizontal: 10,
         borderRadius: 5,
         borderWidth: 1,
-        borderColor: 'white'
+        borderColor: 'white',
+        justifyContent: 'center'
     },
     text: {
         fontSize: 28,
@@ -219,5 +220,53 @@ export const AddMoneyItem = StyleSheet.create({
         padding: 10, 
         marginHorizontal: 10, 
         textAlign: 'right'
+    }
+});
+
+export const Money = StyleSheet.create({
+    button: {
+        backgroundColor:'#575761', 
+        marginBottom: 10
+    },
+    container: {
+        flexDirection: 'row', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        flex: 1
+    },
+    textUser: {
+        color: 'white', 
+        fontSize: 18, 
+        marginHorizontal: 20, 
+        marginVertical: 5, 
+        flex: 2
+    },
+    containerBalance: {
+        backgroundColor: '#648381', 
+        paddingHorizontal: 20, 
+        paddingVertical: 5, 
+        flex: 1,
+        alignItems: 'center'
+    },
+    balanceText: {
+        color: 'white', 
+        fontSize: 18
+    },
+    balance: {
+        color: 'white', 
+        fontSize: 20, 
+        fontWeight: 'bold'
+    }
+    
+});
+
+export const Items = StyleSheet.create({
+    containerBalance: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        backgroundColor: '#648381', 
+        paddingHorizontal: 20, 
+        paddingVertical: 5, 
+        flex: 1
     }
 });

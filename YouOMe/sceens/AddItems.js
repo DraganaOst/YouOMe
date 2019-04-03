@@ -99,38 +99,35 @@ export default class AddItems extends React.Component {
             let update = {};
             let ref = Firebase.database.ref('/transactions/items');
             let uid = this.state.array[this.state.userIndex].key;
-
+            
             let balance = { owed_by_me: 0, owed_to_me: 0};
             let balanceUser = {owed_by_me: 0, owed_to_me: 0};
-            
-            await Firebase.database.ref('/users/' + Firebase.uid + '/balance/items').once('value').then((snapshot) => {
-                if(snapshot.child('owed_by_me').exists())
-                    balance.owed_by_me = snapshot.val().owed_by_me;
-                if(snapshot.child('owed_to_me').exists())
-                    balance.owed_to_me = snapshot.val().owed_to_me;
-            });
 
-            await Firebase.database.ref('/users/' + uid + '/balance/items').once('value').then((snapshot) => {
-                if(snapshot.child('owed_by_me').exists())
-                    balanceUser.owed_by_me = snapshot.val().owed_by_me;
-                if(snapshot.child('owed_to_me').exists())
-                    balanceUser.owed_to_me = snapshot.val().owed_to_me;
+            await Firebase.database.ref('/balance/' + Firebase.uid + '/items/'+uid).once('value').then((snapshot) => {
+                if(snapshot.child('owed_by_me').exists()){
+                    balance.owed_by_me = snapshot.val().owed_by_me;
+                    balanceUser.owed_to_me = balance.owed_by_me;
+                }
+                if(snapshot.child('owed_to_me').exists()){
+                    balance.owed_to_me = snapshot.val().owed_to_me;
+                    balanceUser.owed_by_me = balance.owed_to_me;
+                }
             });
 
             let from = Firebase.uid;
             let to = uid;
-        
-            if(this.state.option !== 'i_gave'){
+
+            if(this.state.option === 'i_received'){
                 from = uid;
                 to = Firebase.uid;
-                update['/users/'+Firebase.uid+'/balance/items/owed_by_me'] = Number(balance.owed_by_me) + 1;
-                update['/users/'+uid+'/balance/items/owed_to_me'] = Number(balanceUser.owed_to_me) + 1;
+                update['balance/'+Firebase.uid+'/items/'+uid+'/owed_by_me'] = balance.owed_by_me + 1;
+                update['balance/'+uid+'/items/'+Firebase.uid+'/owed_to_me'] = balanceUser.owed_to_me + 1;
             }
             else{
-                update['/users/'+Firebase.uid+'/balance/items/owed_to_me'] = Number(balance.owed_to_me) + 1;
-                update['/users/'+uid+'/balance/items/owed_by_me'] = Number(balanceUser.owed_by_me) + 1;
+                update['balance/'+Firebase.uid+'/items/'+uid+'/owed_to_me'] = balance.owed_to_me + 1;
+                update['balance/'+uid+'/items/'+Firebase.uid+'/owed_by_me'] = balanceUser.owed_by_me + 1;
             }
-            
+
             let item = ref.push(
                 {
                     'from': from, 
@@ -151,7 +148,7 @@ export default class AddItems extends React.Component {
                 actions: [
                     NavigationActions.navigate({ routeName: 'Profile' })
                 ],
-            }))
+            }));
         }
     };
 

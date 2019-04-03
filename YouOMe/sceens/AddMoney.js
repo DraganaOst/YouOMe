@@ -100,35 +100,28 @@ export default class AddMoney extends React.Component {
             let ref = Firebase.database.ref('/transactions/money');
             let uid = this.state.array[this.state.userIndex].key;
 
-            let balance = { owed_by_me: 0, owed_to_me: 0};
-            let balanceUser = {owed_by_me: 0, owed_to_me: 0};
-            
-            await Firebase.database.ref('/users/' + Firebase.uid + '/balance/money').once('value').then((snapshot) => {
-                if(snapshot.child('owed_by_me').exists())
-                    balance.owed_by_me = snapshot.val().owed_by_me;
-                if(snapshot.child('owed_to_me').exists())
-                    balance.owed_to_me = snapshot.val().owed_to_me;
-            });
+            let balance = 0;
+            let balanceUser = 0;
 
-            await Firebase.database.ref('/users/' + uid + '/balance/money').once('value').then((snapshot) => {
-                if(snapshot.child('owed_by_me').exists())
-                    balanceUser.owed_by_me = snapshot.val().owed_by_me;
-                if(snapshot.child('owed_to_me').exists())
-                    balanceUser.owed_to_me = snapshot.val().owed_to_me;
+            await Firebase.database.ref('balance/'+Firebase.uid+'/money/'+uid).once('value').then((snapshot) => {
+                if(snapshot.exists()){
+                    balance = Number(snapshot.val());
+                    balanceUser = balance * -1;
+                }
             });
 
             let from = Firebase.uid;
             let to = uid;
         
-            if(this.state.option !== 'i_gave'){
+            if(this.state.option === 'i_received'){
                 from = uid;
                 to = Firebase.uid;
-                update['/users/'+Firebase.uid+'/balance/money/owed_by_me'] = Number(balance.owed_by_me) + this.state.amount;
-                update['/users/'+uid+'/balance/money/owed_to_me'] = Number(balanceUser.owed_to_me) + this.state.amount;
+                update['balance/'+Firebase.uid+'/money/'+uid] = balance + this.state.amount;
+                update['balance/'+uid+'/money/'+Firebase.uid] = balanceUser - this.state.amount;
             }
             else{
-                update['/users/'+Firebase.uid+'/balance/money/owed_to_me'] = Number(balance.owed_to_me) + this.state.amount;
-                update['/users/'+uid+'/balance/money/owed_by_me'] = Number(balanceUser.owed_by_me) + this.state.amount;
+                update['balance/'+Firebase.uid+'/money/'+uid] = balance - this.state.amount;
+                update['balance/'+uid+'/money/'+Firebase.uid] = balanceUser + this.state.amount;
             }
             Firebase.database.ref().update(update);
             

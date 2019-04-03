@@ -3,21 +3,24 @@ import {Platform, Text, View, TextInput, TouchableOpacity, Image, Button, Picker
 import {NavigationActions, StackActions} from "react-navigation";
 import Firebase from "../components/Firebase";
 import * as styles from "../components/Styles";
+import { ScrollView } from 'react-native-gesture-handler';
 
 class TransactionUser extends React.Component {
-    constructor(){
-        this.state = {
-            array: []
-        }
-    }
-
     render() {
+        let array = ['#8acb88','#648381','#575761','#ffbf46',"#E5E5E5"];
+        let index = 0;
         return (
-            <View>
-                <Text>{this.props.username}</Text>
-                <Text>{this.props.balance}</Text>
-                <Text>{this.props.balanceNumber}</Text>
-            </View>
+            <TouchableOpacity style={styles.Money.button} onPress={() => alert('Pressed')}>
+                <View style={styles.Money.container}>
+                    <Text style={styles.Money.textUser}>{this.props.username}</Text>
+                    {this.props.balance != 0 
+                        ? <View style={styles.Money.containerBalance}>
+                            <Text style={styles.Money.balanceText}>{this.props.balanceText}</Text>
+                            <Text style={styles.Money.balance}>{this.props.balance}€</Text>
+                          </View>
+                        : null}       
+                </View>
+            </TouchableOpacity>
         );
     }
 }
@@ -35,48 +38,36 @@ export default class Money extends React.Component {
     }
 
     loadTransactions = () => {
-        let data = Firebase.database.ref('/transactions/users/'+Firebase.uid+'/money');
+        let data = Firebase.database.ref('balance/'+Firebase.uid+'/money');
         data.on('value', (snapshot) => {
-            snapshot.forEach(async (childSnapshot) => {
-                let userUsername = "";
-                let userUid = childSnapshot.key;
-                let transactionId = childSnapshot.val();
-                await Firebase.database.ref('users/' + childSnapshot.key).once('value').then((userSnapshot) =>{ userUsername = userSnapshot.val().username; });
-                
-                let owed_by_me = 0;
-                let owed_to_me = 0;
-                alert(childSnapshot.lenght);  
-                childSnapshot.forEach(async (childUUserSnapshot) => {
-                    await Firebase.database.ref('transactions/money/'+childUUserSnapshot.val()).once('value').then((transactionSnapshot) => {
-                        //alert(transactionSnapshot.val().amount);
-                        if(transactionSnapshot.val().from === Firebase.uid)
-                            owed_to_me += transactionSnapshot.val().amount;
-                        else
-                            owed_by_me += transactionSnapshot.val().amount;
-                    });
+            if(snapshot.exists()){
+                snapshot.forEach(async (childSnapshot) => {
+                    let username = "";
+                    let userUid = childSnapshot.key;
+                    let balace = childSnapshot.val();
+                    await Firebase.database.ref('users/'+userUid).once('value').then((userSnapshot) => {username = userSnapshot.val().username});
+
+                    let balanceText = 'I Owe';
+                    if(balace < 0)
+                        balanceText = "Owe's";
+                    else if(balace == 0)
+                        balanceText = '';
                     
+                    let code = (
+                        <TransactionUser key={userUid} username={username} balanceText={balanceText} balance={Math.abs(balace)}/>
+                    );
+    
+                    this.setState((previousState) => ({'array': [...previousState.array, code]}));
                 });
-
-                let balance = owed_by_me > owed_to_me ? 'I owe' : "Owe's";
-                if(owed_by_me == owed_to_me)
-                    balance = "";
-
-
-                let code = (
-                    <TransactionUser key={userUid} username={userUsername} balance={balance} balanceNumber={Math.abs(owed_by_me-owed_to_me)}/>
-                );
-
-                this.setState((previousState) => {array: [...previousState.array, code]});
-                
-            });
+            }
         });
     };
 
     render() {
         return (
-            <View>
+            <ScrollView style={{backgroundColor: "#E5E5E5", flex: 1}}>
                 {this.state.array}
-            </View>
+            </ScrollView>
         );
     }
 }

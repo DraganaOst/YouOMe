@@ -19,6 +19,7 @@ import Users from "./sceens/Users";
 import Money from './sceens/Money';
 import AddItems from './sceens/AddItems';
 import Items from './sceens/Items';
+import History from './sceens/History';
 
 const AppNavigator = createStackNavigator({
   Login: {
@@ -88,6 +89,15 @@ const AppNavigator = createStackNavigator({
       headerTitleStyle: styles.Profile.headerText,
       headerTintColor: 'white',
       title: 'Items'
+    },
+  },
+  History: {
+    screen: History,
+    navigationOptions: {
+      headerStyle: styles.Profile.header,
+      headerTitleStyle: styles.Profile.headerText,
+      headerTintColor: 'white',
+      title: 'History'
     },
   }
 }, {
