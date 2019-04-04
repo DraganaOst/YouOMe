@@ -17,7 +17,7 @@ class User extends React.Component {
                 </Text>
                 <View style={{flexDirection: 'row'}}>
                     <TouchableOpacity style={styles.Users.button} onPress={() => {}}>
-                        <ImageAddUser width={32} height={32} />
+                        <ImageBin width={24} height={24} />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -82,7 +82,7 @@ class CancelRequest extends React.Component {
                 </Text>
                 <View style={{flexDirection: 'row'}}>
                     <TouchableOpacity style={styles.Users.button} onPress={() => this.cancelRequest(this.props.uid)}>
-                        <ImageBin width={24} height={24} />
+                        <ImageCancel width={24} height={24} />
                     </TouchableOpacity>
                 </View>
             </View>

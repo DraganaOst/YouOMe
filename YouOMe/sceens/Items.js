@@ -7,10 +7,8 @@ import { ScrollView } from 'react-native-gesture-handler';
 
 class TransactionUser extends React.Component {
     render() {
-        let array = ['#8acb88','#648381','#575761','#ffbf46',"#E5E5E5"];
-        let index = 0;
         return (
-            <TouchableOpacity style={styles.Money.button} onPress={() => alert('Pressed')}>
+            <TouchableOpacity style={styles.Money.button} onPress={() => this.props.navigator.navigate('HistoryItems', {username: this.props.username, uid: this.props.uid})}>
                 <View style={styles.Money.container}>
                     <Text style={styles.Money.textUser}>{this.props.username}</Text>
                     <View style={styles.Items.containerBalance}>
@@ -42,6 +40,7 @@ export default class Items extends React.Component {
     }
 
     loadTransactions = () => {
+        const navigator = this.props.navigation;
         let data = Firebase.database.ref('balance/'+Firebase.uid+'/items');
         data.on('value', (snapshot) => {
             if(snapshot.exists()){
@@ -52,13 +51,13 @@ export default class Items extends React.Component {
                     
                     let owed_by_me = 0;
                     let owed_to_me = 0;
-                    if(snapshot.child('owed_by_me').exists())
+                    if(childSnapshot.child('owed_by_me').exists())
                         owed_by_me = childSnapshot.val().owed_by_me;
-                    if(snapshot.child('owed_to_me').exists())
-                        owed_to_me = childSnapshot.val().owed_to_me
+                    if(childSnapshot.child('owed_to_me').exists())
+                        owed_to_me = childSnapshot.val().owed_to_me;
 
                     let code = (
-                        <TransactionUser key={userUid} username={username} balanceIOwe={owed_by_me} balanceOwes={owed_to_me}/>
+                        <TransactionUser key={userUid} uid={userUid} username={username} balanceIOwe={owed_by_me} balanceOwes={owed_to_me} navigator={navigator}/>
                     );
     
                     this.setState((previousState) => ({'array': [...previousState.array, code]}));

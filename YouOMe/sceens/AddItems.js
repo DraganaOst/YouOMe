@@ -135,7 +135,7 @@ export default class AddItems extends React.Component {
                     'reason': this.state.reason,
                     'name': this.state.name,
                     'date_incured': this.state.dateIncured.toISOString(),
-                    'date_due': this.state.dateDue,
+                    'date_due': this.state.dateDue.toISOString(),
                     'returned': false
                 }
             );
@@ -170,9 +170,6 @@ export default class AddItems extends React.Component {
 
         return (
             <View style={{flex: 1}}>
-                <View style={{alignItems: 'center', marginTop: 10}}>
-                    <Text style={styles.AddMoneyItem.textFont}>Select</Text>
-                </View>
                 <View style={styles.AddMoneyItem.containerButton}>
                     <TouchableOpacity style={{flex: 1}} onPress={() => (this.setState({option: 'i_gave'}))} underlayColor="white">
                         <View style={[styles.AddMoneyItem.button, {opacity: this.state.option === "i_gave" ? 1 : 0.5}]}>
@@ -184,6 +181,7 @@ export default class AddItems extends React.Component {
                             <Text style={styles.AddMoneyItem.buttonText}>I Received</Text>
                         </View>
                     </TouchableOpacity>
+                    
                 </View>
                 <View style={styles.AddMoneyItem.containerViewRow}>
                     <Text style={styles.AddMoneyItem.textFont}>{this.state.option === 'i_gave' ? "To" : "From"}</Text>
@@ -227,8 +225,8 @@ export default class AddItems extends React.Component {
                 </View>
                 {this.state.visibleDatePickerIOSDue ? datePickerIOSDue : null}
                 {this.state.visibleDatePickerIOSIncured ? datePickerIOSIncured : null}
-                <View style={[styles.AddMoneyItem.containerButton,{flex:1, alignItems: 'flex-end'}]}>
-                    <TouchableOpacity style={{flex: 1}}  underlayColor="white" onPress={() => this.props.navigation.dispatch(StackActions.reset({
+                <View style={{flexDirection: 'row', alignItems: 'stretch', flex:1, alignItems: 'flex-end'}}>
+                    {/*<TouchableOpacity style={{flex: 1}}  underlayColor="white" onPress={() => this.props.navigation.dispatch(StackActions.reset({
                             index: 0,
                             actions: [
                                 NavigationActions.navigate({ routeName: 'Profile' })
@@ -237,7 +235,7 @@ export default class AddItems extends React.Component {
                         <View style={[styles.AddMoneyItem.button2]}>
                             <Text style={styles.AddMoneyItem.buttonText}>Cancel</Text>
                         </View>
-                    </TouchableOpacity>
+                    </TouchableOpacity>*/}
                     <TouchableOpacity style={{flex: 1}} onPress={() => this.onPressAddMoney()} underlayColor="white">
                         <View style={[styles.AddMoneyItem.button2]}>
                             <Text style={styles.AddMoneyItem.buttonText}>OK</Text>

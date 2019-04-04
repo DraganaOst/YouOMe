@@ -10,7 +10,7 @@ class TransactionUser extends React.Component {
         let array = ['#8acb88','#648381','#575761','#ffbf46',"#E5E5E5"];
         let index = 0;
         return (
-            <TouchableOpacity style={styles.Money.button} onPress={() => this.props.navigator.navigate('History', {username: this.props.username, uid: this.props.uid})}>
+            <TouchableOpacity style={styles.Money.button} onPress={() => this.props.navigator.navigate('HistoryMoney', {username: this.props.username, uid: this.props.uid})}>
                 <View style={styles.Money.container}>
                     <Text style={styles.Money.textUser}>{this.props.username}</Text>
                     {this.props.balance != 0 

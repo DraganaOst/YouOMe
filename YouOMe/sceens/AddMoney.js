@@ -4,6 +4,7 @@ import {NavigationActions, StackActions} from "react-navigation";
 import Firebase from "../components/Firebase";
 import * as styles from "../components/Styles";
 import ImageCalendar from '../images/calendar.svg';
+import { ScrollView } from 'react-native-gesture-handler';
 
 export default class AddMoney extends React.Component {
     constructor(){
@@ -92,6 +93,8 @@ export default class AddMoney extends React.Component {
             alertMessange += " - choose a user\n";
         if(this.state.amount == 0)
             alertMessange += " - write the amount";
+        if(this.state.amount.toString() === "NaN")
+            alertMessange += " - written amount is not valide";
 
         if(alertMessange !== "Form wasn't filled in correctly: \n")
             alert(alertMessange);
@@ -132,7 +135,7 @@ export default class AddMoney extends React.Component {
                     'reason': this.state.reason,
                     'amount': this.state.amount,
                     'date_incured': this.state.dateIncured.toISOString(),
-                    'date_due': this.state.dateDue,
+                    'date_due': this.state.dateDue.toISOString(),
                     'returned': false
                 }
             );
@@ -165,66 +168,120 @@ export default class AddMoney extends React.Component {
         );
 
         return (
-            <View style={{flex: 1}}>
-                <View style={{alignItems: 'center', marginTop: 10}}>
-                    <Text style={styles.AddMoneyItem.textFont}>Select</Text>
-                </View>
+            <View style={{flex: 1, backgroundColor: this.state.option === 'i_gave' ? styles.mainColorGrey : styles.mainColorBlue}}>
                 <View style={styles.AddMoneyItem.containerButton}>
                     <TouchableOpacity style={{flex: 1}} onPress={() => (this.setState({option: 'i_gave'}))} underlayColor="white">
-                        <View style={[styles.AddMoneyItem.button, {opacity: this.state.option === "i_gave" ? 1 : 0.5}]}>
+                        <View style={[styles.AddMoneyItem.button, {backgroundColor: styles.mainColorGrey, opacity: this.state.option === "i_gave" ? 1 : 0.5}]}>
                             <Text style={styles.AddMoneyItem.buttonText}>I Gave</Text>
                         </View>
                     </TouchableOpacity>
                     <TouchableOpacity style={{flex: 1}} onPress={() => (this.setState({option: "i_received"}))} underlayColor="white">
-                        <View style={[styles.AddMoneyItem.button, {opacity: this.state.option === "i_received" ? 1 : 0.5}]}>
+                        <View style={[styles.AddMoneyItem.button, {backgroundColor: styles.mainColorBlue, opacity: this.state.option === "i_received" ? 1 : 0.5}]}>
                             <Text style={styles.AddMoneyItem.buttonText}>I Received</Text>
                         </View>
                     </TouchableOpacity>
                 </View>
-                <View style={styles.AddMoneyItem.containerViewRow}>
-                    <Text style={styles.AddMoneyItem.textFont}>{this.state.option === 'i_gave' ? "To" : "From"}</Text>
-                    <Text style={[styles.AddMoneyItem.textFont, {color: 'red'}]}>*</Text>
-                    <Text style={styles.AddMoneyItem.textFont}>: </Text>
-                    <Picker
-                        selectedValue={this.state.userValue}
-                        style={styles.AddMoneyItem.picker}
-                        onValueChange={(itemValue, itemIndex) =>(
-                            this.setState({userIndex: itemIndex}),
-                            this.setState({userValue: itemValue})
-                        )
-                        }>
-                        {this.state.array}
-                    </Picker>
-                </View>
-                <View style={styles.AddMoneyItem.containerViewRow}>
-                    <Text style={styles.AddMoneyItem.textFont}>Amount</Text>
-                    <Text style={[styles.AddMoneyItem.textFont, {color: 'red'}]}>*</Text>
-                    <Text style={styles.AddMoneyItem.textFont}>:</Text>
-                    <TextInput keyboardType={'numeric'} style={styles.AddMoneyItem.inputMoney} onChangeText={(number) => this.setState({amount: Number(number)})}></TextInput>
-                    <Text style={styles.AddMoneyItem.textFont}>€</Text>
-                </View>
-                <View style={styles.AddMoneyItem.containerViewRow}>
-                    <Text style={styles.AddMoneyItem.textFont}>Reason:</Text>
-                    <TextInput style={styles.AddMoneyItem.inputReason} onChangeText={(text) => this.setState({reason: text})}></TextInput>
-                </View>
-                <View style={styles.AddMoneyItem.containerViewRow}>
-                    <Text style={styles.AddMoneyItem.textFont}>Date incured:</Text>
-                    <Text style={styles.AddMoneyItem.dateText}>{this.state.dateIncured.toDateString()}</Text>
-                    <TouchableOpacity onPress={() => this.onPressCalendar('incured')}>
-                        <ImageCalendar width={24} height={24} />
-                    </TouchableOpacity>
-                </View>
-                <View style={styles.AddMoneyItem.containerViewRow}>
-                    <Text style={styles.AddMoneyItem.textFont}>Date due:</Text>
-                    <Text style={styles.AddMoneyItem.dateText}>{this.state.dateDue !== "" ? this.state.dateDue.toDateString(): ""}</Text>
-                    <TouchableOpacity onPress={() => this.onPressCalendar('due')}>
-                        <ImageCalendar width={24} height={24} />
-                    </TouchableOpacity>
-                </View>
+                <ScrollView style={{flex: 1}}>
+                    <View style={{flex:1, marginTop: 10, marginBottom: 5, borderBottomColor: styles.mainColorLightGrey, borderBottomWidth: 2}}>
+                        <View style={{flexDirection: 'row'}}>
+                            <Text style={{color: 'white', fontSize: 18, marginLeft: 20, fontWeight: 'bold'}}>{this.state.option === 'i_gave' ? "To" : "From"}</Text>
+                            <Text style={{color: 'red', fontSize: 18}}>*</Text>
+                        </View>
+                        <View style={{backgroundColor: styles.mainColorLightGrey, paddingLeft: 20, marginHorizontal: 10}}>
+                            <Picker
+                                    selectedValue={this.state.userValue}
+                                    style={{height: 50}}
+                                    onValueChange={(itemValue, itemIndex) =>(
+                                        this.setState({userIndex: itemIndex}),
+                                        this.setState({userValue: itemValue})
+                                    )
+                                    }>
+                                    {this.state.array}
+                            </Picker>
+                        </View>   
+                    </View>
+                    <View style={{flex:1, marginVertical: 5, borderBottomColor: styles.mainColorLightGrey, borderBottomWidth: 2}}>
+                        <View style={{flexDirection: 'row'}}>
+                            <Text style={{color: 'white', fontSize: 18, marginLeft: 20, fontWeight: 'bold'}}>Amount</Text>
+                            <Text style={{color: 'red', fontSize: 18}}>*</Text>
+                        </View>
+                        <View style={{flexDirection: 'row', backgroundColor: styles.mainColorLightGrey, alignItems: 'center', paddingHorizontal: 20, marginHorizontal: 10}}>
+                            <TextInput keyboardType={'numeric'} style={styles.AddMoneyItem.inputMoney} onChangeText={(number) => {this.setState({amount: Number(number)})}}></TextInput>
+                            <Text style={styles.AddMoneyItem.textFont}>€</Text>
+                        </View>   
+                    </View>
+                    <View style={{flex:1, marginVertical: 5, borderBottomColor: styles.mainColorLightGrey, borderBottomWidth: 2}}>
+                        <Text style={{color: 'white', fontSize: 18, marginLeft: 20, fontWeight: 'bold'}}>Reason</Text>
+                        <View style={{backgroundColor: styles.mainColorLightGrey, marginHorizontal: 10}}>
+                            <TextInput style={styles.AddMoneyItem.inputReason} onChangeText={(text) => this.setState({reason: text})}></TextInput>
+                        </View>       
+                    </View>
+                    <View style={{flex:1, marginVertical: 5, borderBottomColor: styles.mainColorLightGrey, borderBottomWidth: 2}}>
+                        <Text style={{color: 'white', fontSize: 18, marginLeft: 20, fontWeight: 'bold'}}>Date incured</Text>     
+                        <TouchableOpacity style={{backgroundColor: styles.mainColorLightGrey, paddingHorizontal: 20, marginHorizontal: 10}} onPress={() => this.onPressCalendar('incured')}>
+                            <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
+                                <Text style={styles.AddMoneyItem.dateText}>{this.state.dateIncured.toDateString()}</Text>
+                                <ImageCalendar width={24} height={24} />
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+                    <View style={{flex:1, marginVertical: 5, borderBottomColor: styles.mainColorLightGrey, borderBottomWidth: 2}}>
+                        <Text style={{color: 'white', fontSize: 18, marginLeft: 20, fontWeight: 'bold'}}>Date due</Text>     
+                        <TouchableOpacity style={{backgroundColor: styles.mainColorLightGrey, paddingHorizontal: 20, marginHorizontal: 10}} onPress={() => this.onPressCalendar('due')}>
+                            <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
+                                <Text style={styles.AddMoneyItem.dateText}>{this.state.dateDue !== "" ? this.state.dateDue.toDateString(): ""}</Text>
+                                <ImageCalendar width={24} height={24} />
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+                </ScrollView>
+                
+                {/*<View style={{backgroundColor: 'white', margin: 10}}>
+                    <View style={styles.AddMoneyItem.containerViewRow}>
+                        <Text style={styles.AddMoneyItem.textFont}>{this.state.option === 'i_gave' ? "To" : "From"}</Text>
+                        <Text style={[styles.AddMoneyItem.textFont, {color: 'red'}]}>*</Text>
+                        <Text style={styles.AddMoneyItem.textFont}>: </Text>
+                        <Picker
+                            selectedValue={this.state.userValue}
+                            style={styles.AddMoneyItem.picker}
+                            onValueChange={(itemValue, itemIndex) =>(
+                                this.setState({userIndex: itemIndex}),
+                                this.setState({userValue: itemValue})
+                            )
+                            }>
+                            {this.state.array}
+                        </Picker>
+                    </View>
+                    <View style={styles.AddMoneyItem.containerViewRow}>
+                        <Text style={styles.AddMoneyItem.textFont}>Amount</Text>
+                        <Text style={[styles.AddMoneyItem.textFont, {color: 'red'}]}>*</Text>
+                        <Text style={styles.AddMoneyItem.textFont}>:</Text>
+                        <TextInput keyboardType={'numeric'} style={styles.AddMoneyItem.inputMoney} onChangeText={(number) => this.setState({amount: Number(number)})}></TextInput>
+                        <Text style={styles.AddMoneyItem.textFont}>€</Text>
+                    </View>
+                    <View style={styles.AddMoneyItem.containerViewRow}>
+                        <Text style={styles.AddMoneyItem.textFont}>Reason:</Text>
+                        <TextInput style={styles.AddMoneyItem.inputReason} onChangeText={(text) => this.setState({reason: text})}></TextInput>
+                    </View>
+                    <View style={styles.AddMoneyItem.containerViewRow}>
+                        <Text style={styles.AddMoneyItem.textFont}>Date incured:</Text>
+                        <Text style={styles.AddMoneyItem.dateText}>{this.state.dateIncured.toDateString()}</Text>
+                        <TouchableOpacity onPress={() => this.onPressCalendar('incured')}>
+                            <ImageCalendar width={24} height={24} />
+                        </TouchableOpacity>
+                    </View>
+                    <View style={styles.AddMoneyItem.containerViewRow}>
+                        <Text style={styles.AddMoneyItem.textFont}>Date due:</Text>
+                        <Text style={styles.AddMoneyItem.dateText}>{this.state.dateDue !== "" ? this.state.dateDue.toDateString(): ""}</Text>
+                        <TouchableOpacity onPress={() => this.onPressCalendar('due')}>
+                            <ImageCalendar width={24} height={24} />
+                        </TouchableOpacity>
+                    </View>
+                </View>*/}
                 {this.state.visibleDatePickerIOSDue ? datePickerIOSDue : null}
                 {this.state.visibleDatePickerIOSIncured ? datePickerIOSIncured : null}
-                <View style={[styles.AddMoneyItem.containerButton,{flex:1, alignItems: 'flex-end'}]}>
-                    <TouchableOpacity style={{flex: 1}}  underlayColor="white" onPress={() => this.props.navigation.dispatch(StackActions.reset({
+                <View style={{flexDirection: 'row', alignItems: 'stretch'}}>
+                    {/*<TouchableOpacity style={{flex: 1}}  underlayColor="white" onPress={() => this.props.navigation.dispatch(StackActions.reset({
                             index: 0,
                             actions: [
                                 NavigationActions.navigate({ routeName: 'Profile' })
@@ -233,7 +290,8 @@ export default class AddMoney extends React.Component {
                         <View style={[styles.AddMoneyItem.button2]}>
                             <Text style={styles.AddMoneyItem.buttonText}>Cancel</Text>
                         </View>
-                    </TouchableOpacity>
+                    </TouchableOpacity>*/}
+                    
                     <TouchableOpacity style={{flex: 1}} onPress={() => this.onPressAddMoney()} underlayColor="white">
                         <View style={[styles.AddMoneyItem.button2]}>
                             <Text style={styles.AddMoneyItem.buttonText}>OK</Text>

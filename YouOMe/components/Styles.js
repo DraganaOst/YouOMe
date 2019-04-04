@@ -1,12 +1,15 @@
 import React from 'react';
 import {StyleSheet} from 'react-native';
 
-const mainColorLightGreen = '#E4FDE1';
-const mainColorGreen = '#8acb88';
-const mainColorBlue = '#648381';
-const mainColorGrey = '#575761';
-const mainColorOrange = '#ffbf46';
-const mainColorLightGrey = "#E5E5E5";
+export const mainColorLightGreen = '#E4FDE1';
+export const mainColorGreen = '#8acb88';
+export const mainColorBlue = '#648381';
+export const mainColorGrey = '#575761';
+export const mainColorOrange = '#ffbf46';
+export const mainColorLightGrey = "#E5E5E5";
+export const mainColorLihtGreen = '#709290';
+export const mainColorLightGrey2 = "#666671";
+export const mainColorLightOrange = "#ffca66";
 
 const fontSize = 18;
 const margin = 20;
@@ -166,27 +169,34 @@ export const AddMoneyItem = StyleSheet.create({
     containerViewRow: {
         flexDirection: 'row', 
         marginHorizontal: 20, 
-        alignItems: 'center'
+        alignItems: 'center',
+        //borderBottomWidth: 1
     },
     containerButton: {
         flexDirection: 'row',
-        alignItems: 'stretch', 
-        marginHorizontal: 10
+        alignItems: 'stretch',
+        //borderBottomWidth: 5,
+        //borderBottomColor: mainColorOrange,
+        backgroundColor: 'white'
+        //marginHorizontal: 10
     },
     button: {
-        margin: 10,
-        borderRadius: 5,
+        //margin: 10,
+        //borderRadius: 5,
         alignItems: 'stretch',
         backgroundColor: mainColorOrange,
     },
     button2: {
-        margin: 10,
-        borderRadius: 5,
+        marginHorizontal: 10,
+        elevation: 10,
+        //borderRadius: 5,
         alignItems: 'stretch',
         backgroundColor: mainColorGreen,
     },
     textFont: {
-        fontSize: fontSize
+        fontSize: fontSize,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     picker: {
         height: 50, 
@@ -196,30 +206,28 @@ export const AddMoneyItem = StyleSheet.create({
         fontSize: fontSize,
         padding: 10,
         color: 'white',
-        textAlign: 'center'
+        textAlign: 'center',
+        fontWeight: 'bold'
     },
     inputMoney: {
         fontSize: fontSize,
-        borderBottomWidth: 1, 
         flex: 1, 
         textAlign: 'right', 
-        paddingHorizontal: 20, 
+        paddingHorizontal: 10, 
         marginHorizontal: 10
     },
     inputReason: {
         fontSize: fontSize,
-        borderBottomWidth: 1, 
         flex: 1,  
         paddingHorizontal: 10, 
-        marginLeft: 10
+        marginHorizontal: 10
     },
     dateText: {
         fontSize: fontSize,
-        borderBottomWidth: 1, 
         flex: 1, 
-        padding: 10, 
-        marginHorizontal: 10, 
-        textAlign: 'right'
+        paddingVertical: 10, 
+        //marginHorizontal: 10, 
+        //textAlign: 'right'
     }
 });
 
@@ -268,5 +276,83 @@ export const Items = StyleSheet.create({
         paddingHorizontal: 20, 
         paddingVertical: 5, 
         flex: 1
+    }
+});
+
+export const History = StyleSheet.create({
+    container: {
+        backgroundColor: "#E5E5E5", 
+        flex: 1
+    },
+    containerBar: {
+        flexDirection: 'row', 
+        justifyContent: 'space-between', 
+        //borderBottomWidth: 2, 
+        paddingHorizontal: 20, 
+        paddingTop: 10, 
+        marginBottom: 10,
+        backgroundColor: mainColorLightGrey2
+    },
+    textBar: {
+        fontSize: 20, 
+        fontWeight: 'bold',
+        color: 'white'
+    },
+    containerTransaction: {
+        flexDirection: 'row', 
+        alignItems: 'center'
+    },
+    textYear: {
+        color: 'white', 
+        fontSize: 10
+    },
+    textDay: {
+        color: 'white', 
+        fontSize: 20, 
+        fontWeight: 'bold'
+    },
+    textMonth: {
+        color: 'white', 
+        fontSize: 15
+    },
+    containerReason: {
+        flex: 5, 
+        marginHorizontal: 20
+    },
+    textReason: {
+        color: 'white', 
+        fontSize: 18
+    },
+    containerMoney: {
+        flex: 4, 
+        alignItems: 'flex-end', 
+        paddingRight: 10, 
+        backgroundColor: mainColorOrange,
+        justifyContent: 'center'
+    },
+    containerMoney2: {
+        flex: 4,  
+        paddingLeft: 10, 
+        backgroundColor: mainColorGreen,
+        justifyContent: 'center'
+    },
+    textMoney: {
+        color: 'white', 
+        fontSize: 25, 
+        fontWeight: 'bold',
+    }
+});
+
+export const Shadow = StyleSheet.create({
+    shadowBox: {
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.23,
+        shadowRadius: 2.62,
+    
+        elevation: 4,
     }
 });

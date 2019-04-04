@@ -1,11 +1,15 @@
 import React from 'react';
-import {Text, View, TouchableOpacity, Image} from 'react-native';
+import {Text, View, TouchableOpacity, Image, ScrollView, RefreshControl} from 'react-native';
 import Firebase from "../components/Firebase";
 import * as styles from "../components/Styles";
 import AddUser from "./AddUser";
 import ImageList from '../images/list.svg';
 import ImagePlus from '../images/plus.svg';
 import ImageListNotification from '../images/list_notification2.svg';
+
+import ImageReturn from '../images/return.svg';
+import MyImageList from '../images/my_list.svg';
+import MyImagePlus from '../images/my_plus.svg';
 
 export default class Profile extends React.Component {
     constructor(){
@@ -79,7 +83,103 @@ export default class Profile extends React.Component {
 
     render() {
         return (
-            <View style={styles.Profile.container} >
+            <View style={{flex: 1}}>
+                <View style={[{flex: 4, backgroundColor: styles.mainColorBlue}]}>
+                    <View style={{alignItems: 'center', flex: 1, justifyContent: 'center'}}>
+                        <Text style={{color: 'white', fontSize: 30, fontWeight: 'bold'}}>Money</Text>
+                    </View>
+                    <View style={{flex: 1, flexDirection: 'row'}}>
+                        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+                            <Text style={{color: 'white', fontSize: 15, margin: -5}}>I Owe</Text>
+                            <Text style={{color: 'white', fontSize: 20, fontWeight: 'bold'}}>{this.state.money_owed_by_me}€</Text>
+                        </View>
+                        <View style={{flex: 1}}></View>
+                        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+                            <Text style={{color: 'white', fontSize: 15, margin: -5}}>Owe Me</Text>
+                            <Text style={{color: 'white', fontSize: 20, fontWeight: 'bold'}}>{this.state.money_owed_to_me}€</Text>
+                        </View>
+                    </View>
+                    <View style={{flex: 1}}>
+                        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+                            <Text style={{color: 'white', fontSize: 18, margin: -5}}>
+                                {this.state.money_owed_by_me > this.state.money_owed_to_me
+                                    ? "Owed by me"
+                                    : (this.state.money_owed_by_me === this.state.money_owed_to_me ? "" : "Owed to me")}
+                            </Text>
+                            <Text style={{color: 'white', fontSize: 30, fontWeight: 'bold', marginBottom: 10}}>{Math.abs(this.state.money_owed_by_me - this.state.money_owed_to_me)}€</Text>
+                        </View>
+                    </View>
+                    <View style={{flexDirection: 'row', alignItems: 'stretch', flex: 1}}>
+                        <TouchableOpacity style={{elevation: 10, flex: 1, backgroundColor: styles.mainColorLihtGreen, marginHorizontal: 10}} onPress={() =>{}} underlayColor="white">
+                            <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+                                <ImageReturn width={35} height={35} color={'black'}/>
+                            </View>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={{elevation: 10, flex: 1, backgroundColor: styles.mainColorLihtGreen, marginHorizontal: 10}} onPress={() => this.props.navigation.navigate('AddMoney')} underlayColor="white">
+                            <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+                                <MyImagePlus width={35} height={35} color={'black'}/>
+                            </View>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={{elevation: 10, flex: 1, backgroundColor: styles.mainColorLihtGreen, marginHorizontal: 10}} onPress={() => this.props.navigation.navigate('Money')} underlayColor="white">
+                            <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+                                <MyImageList width={35} height={35}/>
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+                <View style={{flex: 3, backgroundColor: styles.mainColorGrey}}>
+                    <View style={{alignItems: 'center', flex: 1, justifyContent: 'center'}}>
+                        <Text style={{color: 'white', fontSize: 30, fontWeight: 'bold'}}>Items</Text>
+                    </View>
+                    <View style={{flex: 1, flexDirection: 'row'}}>
+                        <View style={{flex: 1, alignItems: 'center', justifyContent: 'flex-end'}}>
+                            <Text style={{color: 'white', fontSize: 15, margin: -5}}>I Owe</Text>
+                            <Text style={{color: 'white', fontSize: 25, fontWeight: 'bold', marginBottom: 10}}>{this.state.items_owed_by_me}</Text>
+                        </View>
+                        <View style={{flex: 1}}></View>
+                        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+                            <Text style={{color: 'white', fontSize: 15, margin: -5}}>Owe Me</Text>
+                            <Text style={{color: 'white', fontSize: 25, fontWeight: 'bold', marginBottom: 10}}>{this.state.items_owed_to_me}</Text>
+                        </View>
+                    </View>
+                    <View style={{flexDirection: 'row', alignItems: 'stretch', flex: 1}}>
+                        <TouchableOpacity style={{elevation: 10, flex: 1, backgroundColor: styles.mainColorLightGrey2, marginHorizontal: 10}} onPress={() =>{}} underlayColor="white">
+                            <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+                                <ImageReturn width={35} height={35} color={'black'}/>
+                            </View>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={{elevation: 10, flex: 1, backgroundColor: styles.mainColorLightGrey2, marginHorizontal: 10}} onPress={() => this.props.navigation.navigate('AddItems')} underlayColor="white">
+                            <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+                                <MyImagePlus width={35} height={35} color={'black'}/>
+                            </View>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={{elevation: 10, flex: 1, backgroundColor: styles.mainColorLightGrey2, marginHorizontal: 10}} onPress={() => this.props.navigation.navigate('Items')} underlayColor="white">
+                            <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+                                <MyImageList width={35} height={35}/>
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+                <View style={{flex: 2, backgroundColor: styles.mainColorOrange}}>
+                    <View style={{justifyContent: 'center', alignItems: 'center', flex: 1}}>
+                        <View style={{flex: 1, alignSelf: 'center', alignItems: 'center', justifyContent: 'center'}}>
+                            <Text style={{color: 'white', fontSize: 30, fontWeight: 'bold'}}>Users</Text>
+                        </View>   
+                    </View>
+                    <View style={{flexDirection: 'row', alignItems: 'stretch', flex: 1}}>
+                        <TouchableOpacity style={{elevation: 10, flex: 1, backgroundColor: styles.mainColorLightOrange, marginHorizontal: 10}} onPress={() => this.props.navigation.navigate('AddUser')} underlayColor="white">
+                            <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+                                <MyImagePlus width={35} height={35} color={'black'}/>
+                            </View>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={{elevation: 10, flex: 1, backgroundColor: styles.mainColorLightOrange, marginHorizontal: 10}} onPress={() => this.props.navigation.navigate('Users')} underlayColor="white">
+                            <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+                                <MyImageList width={35} height={35}/>
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            {/*<View style={styles.Profile.container} >
                 <View style={[styles.Profile.subContainer, {flex: 2}]}>
                     <View style={styles.Profile.containerHeader}>
                         <View style={styles.Profile.containerText}>
@@ -158,6 +258,7 @@ export default class Profile extends React.Component {
                         </View>
                     </View>
                 </View>
+            </View>*/}
             </View>
         );
     }

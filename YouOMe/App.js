@@ -19,7 +19,8 @@ import Users from "./sceens/Users";
 import Money from './sceens/Money';
 import AddItems from './sceens/AddItems';
 import Items from './sceens/Items';
-import History from './sceens/History';
+import HistoryMoney from './sceens/HistoryMoney';
+import HistoryItems from './sceens/HistoryItems';
 
 const AppNavigator = createStackNavigator({
   Login: {
@@ -91,9 +92,12 @@ const AppNavigator = createStackNavigator({
       title: 'Items'
     },
   },
-  History: {
-    screen: History,
-  }
+  HistoryMoney: {
+    screen: HistoryMoney,
+  },
+  HistoryItems: {
+    screen: HistoryItems
+  },
 }, {
   initialRouteName: 'Login'
 });
