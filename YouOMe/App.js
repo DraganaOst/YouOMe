@@ -21,6 +21,7 @@ import AddItems from './sceens/AddItems';
 import Items from './sceens/Items';
 import HistoryMoney from './sceens/HistoryMoney';
 import HistoryItems from './sceens/HistoryItems';
+import ReturnItems from './sceens/ReturnItems';
 
 const AppNavigator = createStackNavigator({
   Login: {
@@ -98,6 +99,15 @@ const AppNavigator = createStackNavigator({
   HistoryItems: {
     screen: HistoryItems
   },
+  ReturnItems: {
+    screen: ReturnItems,
+    navigationOptions: {
+      headerStyle: styles.Profile.header,
+      headerTitleStyle: styles.Profile.headerText,
+      headerTintColor: 'white',
+      title: 'Return items'
+    },
+  }
 }, {
   initialRouteName: 'Login'
 });

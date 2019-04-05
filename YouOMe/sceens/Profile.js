@@ -110,17 +110,17 @@ export default class Profile extends React.Component {
                         </View>
                     </View>
                     <View style={{flexDirection: 'row', alignItems: 'stretch', flex: 1}}>
-                        <TouchableOpacity style={{elevation: 10, flex: 1, backgroundColor: styles.mainColorLihtGreen, marginHorizontal: 10}} onPress={() =>{}} underlayColor="white">
+                        <TouchableOpacity style={{elevation: 10, flex: 1, backgroundColor: styles.mainColorLightBlue, marginHorizontal: 10}} onPress={() =>{}} underlayColor="white">
                             <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
                                 <ImageReturn width={35} height={35} color={'black'}/>
                             </View>
                         </TouchableOpacity>
-                        <TouchableOpacity style={{elevation: 10, flex: 1, backgroundColor: styles.mainColorLihtGreen, marginHorizontal: 10}} onPress={() => this.props.navigation.navigate('AddMoney')} underlayColor="white">
+                        <TouchableOpacity style={{elevation: 10, flex: 1, backgroundColor: styles.mainColorLightBlue, marginHorizontal: 10}} onPress={() => this.props.navigation.navigate('AddMoney')} underlayColor="white">
                             <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
                                 <MyImagePlus width={35} height={35} color={'black'}/>
                             </View>
                         </TouchableOpacity>
-                        <TouchableOpacity style={{elevation: 10, flex: 1, backgroundColor: styles.mainColorLihtGreen, marginHorizontal: 10}} onPress={() => this.props.navigation.navigate('Money')} underlayColor="white">
+                        <TouchableOpacity style={{elevation: 10, flex: 1, backgroundColor: styles.mainColorLightBlue, marginHorizontal: 10}} onPress={() => this.props.navigation.navigate('Money')} underlayColor="white">
                             <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
                                 <MyImageList width={35} height={35}/>
                             </View>
@@ -143,7 +143,7 @@ export default class Profile extends React.Component {
                         </View>
                     </View>
                     <View style={{flexDirection: 'row', alignItems: 'stretch', flex: 1}}>
-                        <TouchableOpacity style={{elevation: 10, flex: 1, backgroundColor: styles.mainColorLightGrey2, marginHorizontal: 10}} onPress={() =>{}} underlayColor="white">
+                        <TouchableOpacity style={{elevation: 10, flex: 1, backgroundColor: styles.mainColorLightGrey2, marginHorizontal: 10}} onPress={() => this.props.navigation.navigate('ReturnItems')} underlayColor="white">
                             <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
                                 <ImageReturn width={35} height={35} color={'black'}/>
                             </View>

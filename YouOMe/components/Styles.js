@@ -7,7 +7,7 @@ export const mainColorBlue = '#648381';
 export const mainColorGrey = '#575761';
 export const mainColorOrange = '#ffbf46';
 export const mainColorLightGrey = "#E5E5E5";
-export const mainColorLihtGreen = '#709290';
+export const mainColorLightBlue = '#709290';
 export const mainColorLightGrey2 = "#666671";
 export const mainColorLightOrange = "#ffca66";
 
@@ -187,11 +187,11 @@ export const AddMoneyItem = StyleSheet.create({
         backgroundColor: mainColorOrange,
     },
     button2: {
-        marginHorizontal: 10,
+        marginHorizontal: 15,
         elevation: 10,
         //borderRadius: 5,
         alignItems: 'stretch',
-        backgroundColor: mainColorGreen,
+        backgroundColor: mainColorLightGrey2,
     },
     textFont: {
         fontSize: fontSize,
@@ -199,7 +199,7 @@ export const AddMoneyItem = StyleSheet.create({
         justifyContent: 'center',
     },
     picker: {
-        height: 50, 
+        height: 40, 
         flex: 1,
     },
     buttonText: {
@@ -214,13 +214,15 @@ export const AddMoneyItem = StyleSheet.create({
         flex: 1, 
         textAlign: 'right', 
         paddingHorizontal: 10, 
-        marginHorizontal: 10
+        marginHorizontal: 10,
+        height: 45
     },
     inputReason: {
         fontSize: fontSize,
         flex: 1,  
         paddingHorizontal: 10, 
-        marginHorizontal: 10
+        marginHorizontal: 10,
+        height: 45
     },
     dateText: {
         fontSize: fontSize,

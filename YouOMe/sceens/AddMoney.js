@@ -135,7 +135,7 @@ export default class AddMoney extends React.Component {
                     'reason': this.state.reason,
                     'amount': this.state.amount,
                     'date_incured': this.state.dateIncured.toISOString(),
-                    'date_due': this.state.dateDue.toISOString(),
+                    'date_due': this.state.dateDue !== "" ? this.state.dateDue.toISOString() : "",
                     'returned': false
                 }
             );
@@ -168,29 +168,29 @@ export default class AddMoney extends React.Component {
         );
 
         return (
-            <View style={{flex: 1, backgroundColor: this.state.option === 'i_gave' ? styles.mainColorGrey : styles.mainColorBlue}}>
+            <View style={{flex: 1, backgroundColor: styles.mainColorGrey}}>
                 <View style={styles.AddMoneyItem.containerButton}>
                     <TouchableOpacity style={{flex: 1}} onPress={() => (this.setState({option: 'i_gave'}))} underlayColor="white">
-                        <View style={[styles.AddMoneyItem.button, {backgroundColor: styles.mainColorGrey, opacity: this.state.option === "i_gave" ? 1 : 0.5}]}>
+                        <View style={[styles.AddMoneyItem.button, {backgroundColor: styles.mainColorOrange, opacity: this.state.option === "i_gave" ? 1 : 0.5}]}>
                             <Text style={styles.AddMoneyItem.buttonText}>I Gave</Text>
                         </View>
                     </TouchableOpacity>
                     <TouchableOpacity style={{flex: 1}} onPress={() => (this.setState({option: "i_received"}))} underlayColor="white">
-                        <View style={[styles.AddMoneyItem.button, {backgroundColor: styles.mainColorBlue, opacity: this.state.option === "i_received" ? 1 : 0.5}]}>
+                        <View style={[styles.AddMoneyItem.button, {backgroundColor: styles.mainColorOrange, opacity: this.state.option === "i_received" ? 1 : 0.5}]}>
                             <Text style={styles.AddMoneyItem.buttonText}>I Received</Text>
                         </View>
                     </TouchableOpacity>
                 </View>
                 <ScrollView style={{flex: 1}}>
-                    <View style={{flex:1, marginTop: 10, marginBottom: 5, borderBottomColor: styles.mainColorLightGrey, borderBottomWidth: 2}}>
+                    <View style={{flex:1, marginTop: 10, marginBottom: 5}}>
                         <View style={{flexDirection: 'row'}}>
                             <Text style={{color: 'white', fontSize: 18, marginLeft: 20, fontWeight: 'bold'}}>{this.state.option === 'i_gave' ? "To" : "From"}</Text>
                             <Text style={{color: 'red', fontSize: 18}}>*</Text>
                         </View>
-                        <View style={{backgroundColor: styles.mainColorLightGrey, paddingLeft: 20, marginHorizontal: 10}}>
+                        <View style={{backgroundColor: styles.mainColorLightGrey, paddingLeft: 15, marginHorizontal: 10}}>
                             <Picker
                                     selectedValue={this.state.userValue}
-                                    style={{height: 50}}
+                                    style={{height: 45}}
                                     onValueChange={(itemValue, itemIndex) =>(
                                         this.setState({userIndex: itemIndex}),
                                         this.setState({userValue: itemValue})
@@ -200,7 +200,7 @@ export default class AddMoney extends React.Component {
                             </Picker>
                         </View>   
                     </View>
-                    <View style={{flex:1, marginVertical: 5, borderBottomColor: styles.mainColorLightGrey, borderBottomWidth: 2}}>
+                    <View style={{flex:1, marginVertical: 5}}>
                         <View style={{flexDirection: 'row'}}>
                             <Text style={{color: 'white', fontSize: 18, marginLeft: 20, fontWeight: 'bold'}}>Amount</Text>
                             <Text style={{color: 'red', fontSize: 18}}>*</Text>
@@ -210,13 +210,13 @@ export default class AddMoney extends React.Component {
                             <Text style={styles.AddMoneyItem.textFont}>€</Text>
                         </View>   
                     </View>
-                    <View style={{flex:1, marginVertical: 5, borderBottomColor: styles.mainColorLightGrey, borderBottomWidth: 2}}>
+                    <View style={{flex:1, marginVertical: 5}}>
                         <Text style={{color: 'white', fontSize: 18, marginLeft: 20, fontWeight: 'bold'}}>Reason</Text>
                         <View style={{backgroundColor: styles.mainColorLightGrey, marginHorizontal: 10}}>
                             <TextInput style={styles.AddMoneyItem.inputReason} onChangeText={(text) => this.setState({reason: text})}></TextInput>
                         </View>       
                     </View>
-                    <View style={{flex:1, marginVertical: 5, borderBottomColor: styles.mainColorLightGrey, borderBottomWidth: 2}}>
+                    <View style={{flex:1, marginVertical: 5}}>
                         <Text style={{color: 'white', fontSize: 18, marginLeft: 20, fontWeight: 'bold'}}>Date incured</Text>     
                         <TouchableOpacity style={{backgroundColor: styles.mainColorLightGrey, paddingHorizontal: 20, marginHorizontal: 10}} onPress={() => this.onPressCalendar('incured')}>
                             <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
@@ -225,7 +225,7 @@ export default class AddMoney extends React.Component {
                             </View>
                         </TouchableOpacity>
                     </View>
-                    <View style={{flex:1, marginVertical: 5, borderBottomColor: styles.mainColorLightGrey, borderBottomWidth: 2}}>
+                    <View style={{flex:1, marginVertical: 5}}>
                         <Text style={{color: 'white', fontSize: 18, marginLeft: 20, fontWeight: 'bold'}}>Date due</Text>     
                         <TouchableOpacity style={{backgroundColor: styles.mainColorLightGrey, paddingHorizontal: 20, marginHorizontal: 10}} onPress={() => this.onPressCalendar('due')}>
                             <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
