@@ -3,12 +3,13 @@ import {Platform, Text, View, TextInput, TouchableOpacity, Image, Button, Picker
 import {NavigationActions, StackActions} from "react-navigation";
 import Firebase from "../components/Firebase";
 import * as styles from "../components/Styles";
-import { ScrollView } from 'react-native-gesture-handler';
+import { ScrollView, FlatList } from 'react-native-gesture-handler';
+import { whileStatement } from '@babel/types';
+import ImageCheck from '../images/checked_2.svg';
+import ImageCancel from '../images/cancel.svg';
 
 class TransactionUser extends React.Component {
     render() {
-        let array = ['#8acb88','#648381','#575761','#ffbf46',"#E5E5E5"];
-        let index = 0;
         return (
             <TouchableOpacity style={styles.Money.button} onPress={() => this.props.navigator.navigate('HistoryMoney', {username: this.props.username, uid: this.props.uid})}>
                 <View style={styles.Money.container}>
@@ -25,17 +26,100 @@ class TransactionUser extends React.Component {
     }
 }
 
+class Confirmation extends React.Component {
+    onDelete = props => {
+        let update = {};
+        update['confirmations/money/'+props.keyTransaction] = null;
+        Firebase.database.ref().update(update);
+
+        /*Firebase.database.ref('confirmations/users/'+props.transaction.from+'/money/'+props.transaction.to).once('value').then((snapshot) =>{
+            if(snapshot.exists()){
+                if(snapshot.val() == props.keyTransaction)
+                    snapshot.remove();
+            }
+        });*/
+        //update['confirmations/users/'+props.transaction.from+'/money/'+props.transaction.to+'/'+props.keyUser] = null;
+        //update['confirmations/users/'+props.transaction.to+'/money/'+props.transaction.from+'/'+props.keyUser] = null;
+
+        //
+    };
+
+    render() {
+        let style = this.props.transaction.request == Firebase.uid ? {alignItems: 'center'} : null;
+
+        return (
+            <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 5, backgroundColor: 'white'}}>
+                {this.props.transaction.request == Firebase.uid
+                ? 
+                    null
+                :
+                    <TouchableOpacity style={{backgroundColor: 'red', paddingHorizontal: 20, paddingVertical: 10}} >
+                        <ImageCancel width={20} height={20} />
+                    </TouchableOpacity>
+                }
+                <View style={{flexDirection: 'row', paddingHorizontal: 20, style}}>
+                    <Text style={{fontSize: 18, fontWeight: 'bold'}}>{this.props.transaction.amount}€</Text>
+                    <Text style={{fontSize: 18, fontWeight: 'bold'}}>{this.props.transaction.from == Firebase.uid ? " to " : ' from '}</Text>
+                    <Text style={{fontSize: 18, fontWeight: 'bold'}}>{this.props.user}</Text>
+                </View>
+                {this.props.transaction.request == Firebase.uid
+                ? 
+                    <TouchableOpacity style={{backgroundColor: 'red', paddingHorizontal: 20, paddingVertical: 10}} onPress={() => this.onDelete(this.props)}>
+                        <ImageCancel width={20} height={20} />
+                    </TouchableOpacity>
+                :
+                    <TouchableOpacity style={{backgroundColor: styles.mainColorGreen, paddingHorizontal: 20, paddingVertical: 10}}>
+                        <ImageCheck width={20} height={20} />
+                    </TouchableOpacity>
+                }  
+            </View>
+        );
+    }
+}
+
 export default class Money extends React.Component {
     constructor(){
         super();
         this.state = {
-            array: []
+            array: [],
+            confirmation: [],
+            confirmationVisible: false
         }
     }
 
     componentDidMount(){
         this.loadTransactions();
+        this.loadConfirmations();
     }
+
+    loadConfirmations = () => {
+        const navigator = this.props.navigation;
+        Firebase.database.ref('confirmations/users/' + Firebase.uid + '/money').on('value', (snapshot) => {
+            if(snapshot.exists()){
+                this.setState({confirmation: []});
+                snapshot.forEach(async (childSnapshot) => {
+                    let username = "";
+                    let userUid = childSnapshot.key;
+                    await Firebase.database.ref('users/'+userUid).once('value').then((userSnapshot) => {username = userSnapshot.val().username});
+
+                    childSnapshot.forEach((subChildSnapshot) => {
+                        Firebase.database.ref('confirmations/money/'+subChildSnapshot.val()).once('value').then((confirmation) => {
+                            let object = ({
+                                key: confirmation.key,
+                                keyUser: subChildSnapshot.key,
+                                keyTransaction: confirmation.key,
+                                username: username,
+                                userUid: userUid,
+                                transaction: confirmation.val()
+                            });
+                            this.setState((previousState) => ({confirmation: [...previousState.confirmation, object]}));
+                        })
+                    });
+                    
+                });
+            }
+        });
+    };
 
     loadTransactions = () => {
         const navigator = this.props.navigation;
@@ -55,8 +139,6 @@ export default class Money extends React.Component {
                     else if(balace == 0)
                         balanceText = '';
                     
-
-
                     let code = (
                         <TransactionUser key={userUid} uid={userUid} username={username} balanceText={balanceText} balance={Math.abs(balace)} navigator={navigator}/>
                     );
@@ -69,9 +151,40 @@ export default class Money extends React.Component {
 
     render() {
         return (
-            <ScrollView style={{backgroundColor: "#E5E5E5", flex: 1}}>
-                {this.state.array}
-            </ScrollView>
+            <View style={{flex: 1}}>
+                <ScrollView style={{backgroundColor: "#E5E5E5"}}>
+                    {this.state.array}
+                </ScrollView>
+                {this.state.confirmation.length > 0 
+                ?
+                    <View style={{backgroundColor: styles.mainColorOrange, maxHeight: '30%'}}>
+                        <TouchableOpacity onPress={() => this.setState({confirmationVisible: !this.state.confirmationVisible})}>
+                            <Text style={{color: 'white', fontSize: 20, paddingHorizontal: 20, paddingVertical: 5, fontWeight: 'bold'}}>Need confirmation</Text>
+                        </TouchableOpacity>
+                        {this.state.confirmationVisible 
+                        ?
+                            <FlatList 
+                                style={{backgroundColor: styles.mainColorLightOrange}}
+                                data={this.state.confirmation}  
+                                renderItem={({item}) => (
+                                    <Confirmation
+                                        key={item.key}
+                                        transaction={item.transaction}
+                                        user={item.username}
+                                        keyTransaction={item.keyTransaction}
+                                        keyUser={item.keyUser}
+                                    />
+                                )}         
+                            />
+                        : 
+                            null
+                        }
+                    </View>
+                :
+                    null
+                }               
+            </View>
+            
         );
     }
 }

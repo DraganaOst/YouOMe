@@ -340,7 +340,7 @@ export const History = StyleSheet.create({
     },
     textMoney: {
         color: 'white', 
-        fontSize: 25, 
+        fontSize: 20, 
         fontWeight: 'bold',
     }
 });

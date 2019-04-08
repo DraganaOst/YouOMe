@@ -100,10 +100,10 @@ export default class AddMoney extends React.Component {
             alert(alertMessange);
         else{
             let update = {};
-            let ref = Firebase.database.ref('/transactions/money');
+            let ref = Firebase.database.ref('/confirmations/money');
             let uid = this.state.array[this.state.userIndex].key;
 
-            let balance = 0;
+            /*let balance = 0;
             let balanceUser = 0;
 
             await Firebase.database.ref('balance/'+Firebase.uid+'/money/'+uid).once('value').then((snapshot) => {
@@ -111,7 +111,7 @@ export default class AddMoney extends React.Component {
                     balance = Number(snapshot.val());
                     balanceUser = balance * -1;
                 }
-            });
+            });*/
 
             let from = Firebase.uid;
             let to = uid;
@@ -119,14 +119,14 @@ export default class AddMoney extends React.Component {
             if(this.state.option === 'i_received'){
                 from = uid;
                 to = Firebase.uid;
-                update['balance/'+Firebase.uid+'/money/'+uid] = balance + this.state.amount;
-                update['balance/'+uid+'/money/'+Firebase.uid] = balanceUser - this.state.amount;
+                //update['balance/'+Firebase.uid+'/money/'+uid] = balance + this.state.amount;
+                //update['balance/'+uid+'/money/'+Firebase.uid] = balanceUser - this.state.amount;
             }
             else{
-                update['balance/'+Firebase.uid+'/money/'+uid] = balance - this.state.amount;
-                update['balance/'+uid+'/money/'+Firebase.uid] = balanceUser + this.state.amount;
+                //update['balance/'+Firebase.uid+'/money/'+uid] = balance - this.state.amount;
+                //update['balance/'+uid+'/money/'+Firebase.uid] = balanceUser + this.state.amount;
             }
-            Firebase.database.ref().update(update);
+            //Firebase.database.ref().update(update);
             
             let item = ref.push(
                 {
@@ -136,12 +136,13 @@ export default class AddMoney extends React.Component {
                     'amount': this.state.amount,
                     'date_incured': this.state.dateIncured.toISOString(),
                     'date_due': this.state.dateDue !== "" ? this.state.dateDue.toISOString() : "",
-                    'returned': false
+                    'returned': false,
+                    'request': Firebase.uid
                 }
             );
 
-            Firebase.database.ref('/transactions/users/'+Firebase.uid+'/money/'+uid).push(item.key);
-            Firebase.database.ref('/transactions/users/'+uid+'/money/'+Firebase.uid).push(item.key);
+            Firebase.database.ref('/confirmations/users/'+Firebase.uid+'/money/'+uid).push(item.key);
+            Firebase.database.ref('/confirmations/users/'+uid+'/money/'+Firebase.uid).push(item.key);
 
             this.props.navigation.dispatch(StackActions.reset({
                 index: 0,
