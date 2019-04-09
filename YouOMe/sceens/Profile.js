@@ -9,6 +9,7 @@ import ImageListNotification from '../images/list_notification2.svg';
 
 import ImageReturn from '../images/return.svg';
 import MyImageList from '../images/my_list.svg';
+import MyImageListNotifications from '../images/my_list_notifications.svg';
 import MyImagePlus from '../images/my_plus.svg';
 
 export default class Profile extends React.Component {
@@ -19,7 +20,9 @@ export default class Profile extends React.Component {
             money_owed_to_me: 0,
             items_owed_by_me: 0,
             items_owed_to_me: 0,
-            usersImage: (<ImageList width={48} height={48} />)
+            usersImage: (<MyImageList width={35} height={35} />),
+            moneyImage: (<MyImageList width={35} height={35} />),
+            itemsImage: (<MyImageList width={35} height={35} />)
         };
         
     }
@@ -27,6 +30,7 @@ export default class Profile extends React.Component {
     componentDidMount(){
         this.checkConnections();
         this.loadBalance();
+        this.checkConfirmations();
     }
 
     static navigationOptions = ({ navigation }) => ({
@@ -70,16 +74,31 @@ export default class Profile extends React.Component {
     checkConnections = () => {
         let data = Firebase.database.ref('/');
         data.child('connections/' + Firebase.uid).on('value', (snapshot) => {
-            this.setState({usersImage: (<ImageList width={48} height={48} />)});
+            this.setState({usersImage: (<MyImageList width={35} height={35} />)});
             if (snapshot.exists()) {
                 snapshot.forEach((child) => {
                     if(child.val() !== true && child.val() !== Firebase.uid){
-                        this.setState({usersImage: (<ImageListNotification width={48} height={48} />)})
+                        this.setState({usersImage: (<MyImageListNotifications width={35} height={35} />)})
                     }
                 })
             }
         });
     };
+
+    checkConfirmations = () => {
+        Firebase.database.ref('confirmations/users/'+Firebase.uid+'/money').on('value', (snapshot) => {
+            this.setState({moneyImage: (<MyImageList width={35} height={35} />)});
+            if(snapshot.exists()){
+                this.setState({moneyImage: (<MyImageListNotifications width={35} height={35} />)});
+            }
+        });
+        Firebase.database.ref('confirmations/users/'+Firebase.uid+'/items').on('value', (snapshot) => {
+            this.setState({itemsImage: (<MyImageList width={35} height={35} />)});
+            if(snapshot.exists()){
+                this.setState({itemsImage: (<MyImageListNotifications width={35} height={35} />)});
+            }
+        });
+    }
 
     render() {
         return (
@@ -122,7 +141,7 @@ export default class Profile extends React.Component {
                         </TouchableOpacity>
                         <TouchableOpacity style={{elevation: 10, flex: 1, backgroundColor: styles.mainColorLightBlue, marginHorizontal: 10}} onPress={() => this.props.navigation.navigate('Money')} underlayColor="white">
                             <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-                                <MyImageList width={35} height={35}/>
+                                {this.state.moneyImage}
                             </View>
                         </TouchableOpacity>
                     </View>
@@ -155,7 +174,7 @@ export default class Profile extends React.Component {
                         </TouchableOpacity>
                         <TouchableOpacity style={{elevation: 10, flex: 1, backgroundColor: styles.mainColorLightGrey2, marginHorizontal: 10}} onPress={() => this.props.navigation.navigate('Items')} underlayColor="white">
                             <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-                                <MyImageList width={35} height={35}/>
+                                {this.state.itemsImage}
                             </View>
                         </TouchableOpacity>
                     </View>
@@ -174,7 +193,7 @@ export default class Profile extends React.Component {
                         </TouchableOpacity>
                         <TouchableOpacity style={{elevation: 10, flex: 1, backgroundColor: styles.mainColorLightOrange, marginHorizontal: 10}} onPress={() => this.props.navigation.navigate('Users')} underlayColor="white">
                             <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-                                <MyImageList width={35} height={35}/>
+                                {this.state.usersImage}
                             </View>
                         </TouchableOpacity>
                     </View>

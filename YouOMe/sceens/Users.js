@@ -4,19 +4,20 @@ import {NavigationActions, StackActions} from "react-navigation";
 import Firebase from "../components/Firebase";
 import * as styles from "../components/Styles";
 import ImageAddUser from '../images/add-user.svg';
-import ImageCancel from '../images/error.svg';
-import ImageChecked from '../images/checked.svg';
+import ImageCancel from '../images/cancel.svg';
+import ImageChecked from '../images/checked_2.svg';
 import ImageBin from '../images/rubbish-bin.svg';
+import { ScrollView } from 'react-native-gesture-handler';
 
 class User extends React.Component {
     render() {
         return (
-            <View style={styles.AddUserScreen.user}>
-                <Text style={{fontSize: 20}}>
+            <View style={styles.Users.user}>
+                <Text style={[styles.Users.text, {flex: 4}]}>
                     {this.props.username}
                 </Text>
-                <View style={{flexDirection: 'row'}}>
-                    <TouchableOpacity style={styles.Users.button} onPress={() => {}}>
+                <View style={{flexDirection: 'row', flex: 2}}>
+                    <TouchableOpacity style={[styles.Users.button, {backgroundColor: 'red'}]} onPress={() => {}}>
                         <ImageBin width={24} height={24} />
                     </TouchableOpacity>
                 </View>
@@ -28,6 +29,7 @@ class User extends React.Component {
 
 class Request extends React.Component {
     denyRequest = (uid) => {
+        
         let update = {
             ['/connections/'+Firebase.uid+'/'+uid]: null,
             ['/connections/'+uid+'/'+Firebase.uid]: null,
@@ -45,16 +47,16 @@ class Request extends React.Component {
 
     render() {
         return (
-            <View style={styles.AddUserScreen.user}>
-                <Text style={{fontSize: 20}}>
+            <View style={styles.Users.user}>
+                <Text style={[styles.Users.text, {flex: 4}]}>
                     {this.props.username}
                 </Text>
-                <View style={{flexDirection: 'row'}}>
-                    <TouchableOpacity style={styles.Users.button} onPress={() => this.denyRequest(this.props.uid)}>
-                        <ImageCancel width={32} height={32} />
+                <View style={{flexDirection: 'row', flex: 2}}>
+                    <TouchableOpacity style={[styles.Users.button, {backgroundColor: 'red'}]} onPress={() => this.denyRequest(this.props.uid)}>
+                        <ImageCancel width={24} height={24} />
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.Users.button} onPress={() => this.acceptRequest(this.props.uid)}>
-                        <ImageChecked width={32} height={32} />
+                    <TouchableOpacity style={[styles.Users.button, {backgroundColor: styles.mainColorGreen}]} onPress={() => this.acceptRequest(this.props.uid)}>
+                        <ImageChecked width={24} height={24} />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -76,12 +78,12 @@ class CancelRequest extends React.Component {
 
     render() {
         return (
-            <View style={styles.AddUserScreen.user}>
-                <Text style={{fontSize: 20}}>
+            <View style={styles.Users.user}>
+                <Text style={[styles.Users.text, {flex: 4}]}>
                     {this.props.username}
                 </Text>
-                <View style={{flexDirection: 'row'}}>
-                    <TouchableOpacity style={styles.Users.button} onPress={() => this.cancelRequest(this.props.uid)}>
+                <View style={{flexDirection: 'row', flex: 2}}>
+                    <TouchableOpacity style={[styles.Users.button, {backgroundColor: 'red'}]} onPress={() => this.cancelRequest(this.props.uid)}>
                         <ImageCancel width={24} height={24} />
                     </TouchableOpacity>
                 </View>
@@ -138,9 +140,12 @@ export default class Users extends React.Component {
 
     render() {
         return (
-            <View>
-                {this.state.array}
+            <View style={{backgroundColor: styles.mainColorGrey, flex: 1}}>
+                <ScrollView>
+                    {this.state.array}
+                </ScrollView>
             </View>
+            
         );
     }
 }

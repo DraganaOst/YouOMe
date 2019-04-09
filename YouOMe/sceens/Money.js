@@ -1,5 +1,5 @@
 import React from 'react';
-import {Platform, Text, View, TextInput, TouchableOpacity, Image, Button, Picker, DatePickerAndroid, DatePickerIOS} from 'react-native';
+import {Platform, Text, View, TextInput, TouchableOpacity, Image, Button, Picker, DatePickerAndroid, DatePickerIOS, Alert} from 'react-native';
 import {NavigationActions, StackActions} from "react-navigation";
 import Firebase from "../components/Firebase";
 import * as styles from "../components/Styles";
@@ -27,40 +27,106 @@ class TransactionUser extends React.Component {
 }
 
 class Confirmation extends React.Component {
-    onDelete = props => {
+    onDelete = (props) => {
+        let option = props.transaction.from == Firebase.uid ? " to " : ' from ';
+        let message = props.transaction.amount + "€ " + option + props.user;
+        Alert.alert(
+            'Alert',
+            'Are you sure you want to delete: \n' + message,
+            [
+              {text: 'NO', onPress: () => {}},
+              {text: 'YES', onPress: () => {
+                let update = {};
+                update['confirmations/money/'+props.keyTransaction] = null;
+                Firebase.database.ref().update(update);
+        
+                let ref = Firebase.database.ref('confirmations/users/'+props.transaction.from+'/money/'+props.transaction.to);
+                ref.orderByValue().equalTo(props.keyTransaction).on('child_added', (snapshot) => {
+                    snapshot.ref.remove();
+                }); 
+        
+                let ref2 = Firebase.database.ref('confirmations/users/'+props.transaction.to+'/money/'+props.transaction.from);
+                ref2.orderByValue().equalTo(props.keyTransaction).on('child_added', (snapshot) => {
+                    snapshot.ref.remove();
+                }); 
+              }},
+            ],
+            {cancelable: false},
+          );
+    };
+
+    onAccept = async props => {
         let update = {};
+
+        let ref = Firebase.database.ref('/transactions/money');
+        let uid = props.userUid;
+
+        let balance = 0;
+        let balanceUser = 0;
+
+        await Firebase.database.ref('balance/'+Firebase.uid+'/money/'+uid).once('value').then((snapshot) => {
+            if(snapshot.exists()){
+                balance = Number(snapshot.val());
+                balanceUser = balance * -1;
+            }
+        });
+
+        let from = Firebase.uid;
+        let to = uid;
+    
+        if(props.transaction.from === uid){
+            from = uid;
+            to = Firebase.uid;
+            update['balance/'+Firebase.uid+'/money/'+uid] = balance + props.transaction.amount;
+            update['balance/'+uid+'/money/'+Firebase.uid] = balanceUser - props.transaction.amount;
+        }
+        else{
+            update['balance/'+Firebase.uid+'/money/'+uid] = balance - props.transaction.amount;
+            update['balance/'+uid+'/money/'+Firebase.uid] = balanceUser + props.transaction.amount;
+        }
+        
+        let item = ref.push(
+            {
+                'from': props.transaction.from, 
+                'to': props.transaction.to, 
+                'reason': props.transaction.reason,
+                'amount': props.transaction.amount,
+                'date_incured': props.transaction.date_incured,
+                'date_due': props.transaction.date_due
+            }
+        );
+
+        Firebase.database.ref('/transactions/users/'+Firebase.uid+'/money/'+uid).push(item.key);
+        Firebase.database.ref('/transactions/users/'+uid+'/money/'+Firebase.uid).push(item.key);
+
         update['confirmations/money/'+props.keyTransaction] = null;
         Firebase.database.ref().update(update);
 
-        /*Firebase.database.ref('confirmations/users/'+props.transaction.from+'/money/'+props.transaction.to).once('value').then((snapshot) =>{
-            if(snapshot.exists()){
-                if(snapshot.val() == props.keyTransaction)
-                    snapshot.remove();
-            }
-        });*/
-        //update['confirmations/users/'+props.transaction.from+'/money/'+props.transaction.to+'/'+props.keyUser] = null;
-        //update['confirmations/users/'+props.transaction.to+'/money/'+props.transaction.from+'/'+props.keyUser] = null;
+        Firebase.database.ref('confirmations/users/'+props.transaction.from+'/money/'+props.transaction.to).orderByValue().equalTo(props.keyTransaction).on('child_added', (snapshot) => {
+            snapshot.ref.remove();
+        }); 
 
-        //
+        Firebase.database.ref('confirmations/users/'+props.transaction.to+'/money/'+props.transaction.from).orderByValue().equalTo(props.keyTransaction).on('child_added', (snapshot) => {
+            snapshot.ref.remove();
+        }); 
     };
 
     render() {
         let style = this.props.transaction.request == Firebase.uid ? {alignItems: 'center'} : null;
-
         return (
-            <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 5, backgroundColor: 'white'}}>
+            <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 5, backgroundColor: styles.mainColorLightOrange, elevation: 10}}>
                 {this.props.transaction.request == Firebase.uid
                 ? 
                     null
                 :
-                    <TouchableOpacity style={{backgroundColor: 'red', paddingHorizontal: 20, paddingVertical: 10}} >
+                    <TouchableOpacity style={{backgroundColor: 'red', paddingHorizontal: 20, paddingVertical: 10}} onPress={() => this.onDelete(this.props)}>
                         <ImageCancel width={20} height={20} />
                     </TouchableOpacity>
                 }
                 <View style={{flexDirection: 'row', paddingHorizontal: 20, style}}>
-                    <Text style={{fontSize: 18, fontWeight: 'bold'}}>{this.props.transaction.amount}€</Text>
-                    <Text style={{fontSize: 18, fontWeight: 'bold'}}>{this.props.transaction.from == Firebase.uid ? " to " : ' from '}</Text>
-                    <Text style={{fontSize: 18, fontWeight: 'bold'}}>{this.props.user}</Text>
+                    <Text style={{color: 'white', fontSize: 18, fontWeight: 'bold'}}>{this.props.transaction.amount}€</Text>
+                    <Text style={{color: 'white', fontSize: 18, fontWeight: 'bold'}}>{this.props.transaction.from == Firebase.uid ? " to " : ' from '}</Text>
+                    <Text style={{color: 'white', fontSize: 18, fontWeight: 'bold'}}>{this.props.user}</Text>
                 </View>
                 {this.props.transaction.request == Firebase.uid
                 ? 
@@ -68,7 +134,7 @@ class Confirmation extends React.Component {
                         <ImageCancel width={20} height={20} />
                     </TouchableOpacity>
                 :
-                    <TouchableOpacity style={{backgroundColor: styles.mainColorGreen, paddingHorizontal: 20, paddingVertical: 10}}>
+                    <TouchableOpacity style={{backgroundColor: styles.mainColorGreen, paddingHorizontal: 20, paddingVertical: 10}} onPress={() => this.onAccept(this.props)}>
                         <ImageCheck width={20} height={20} />
                     </TouchableOpacity>
                 }  
@@ -106,7 +172,6 @@ export default class Money extends React.Component {
                         Firebase.database.ref('confirmations/money/'+subChildSnapshot.val()).once('value').then((confirmation) => {
                             let object = ({
                                 key: confirmation.key,
-                                keyUser: subChildSnapshot.key,
                                 keyTransaction: confirmation.key,
                                 username: username,
                                 userUid: userUid,
@@ -118,6 +183,9 @@ export default class Money extends React.Component {
                     
                 });
             }
+            else{
+                this.setState({confirmation: []});
+            }
         });
     };
 
@@ -127,6 +195,7 @@ export default class Money extends React.Component {
         let data = Firebase.database.ref('balance/'+Firebase.uid+'/money');
         data.on('value', (snapshot) => {
             if(snapshot.exists()){
+                this.setState(({'array': []}));
                 snapshot.forEach(async (childSnapshot) => {
                     let username = "";
                     let userUid = childSnapshot.key;
@@ -164,15 +233,15 @@ export default class Money extends React.Component {
                         {this.state.confirmationVisible 
                         ?
                             <FlatList 
-                                style={{backgroundColor: styles.mainColorLightOrange}}
+                                style={{backgroundColor: styles.mainColorOrange}}
                                 data={this.state.confirmation}  
                                 renderItem={({item}) => (
                                     <Confirmation
                                         key={item.key}
                                         transaction={item.transaction}
                                         user={item.username}
+                                        userUid={item.userUid}
                                         keyTransaction={item.keyTransaction}
-                                        keyUser={item.keyUser}
                                     />
                                 )}         
                             />

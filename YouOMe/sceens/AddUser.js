@@ -25,12 +25,15 @@ class User extends React.Component {
     render() {
         return (
             <View style={[styles.AddUserScreen.user, {opacity: this.state.opacity}]}>
-                <Text style={{fontSize: 20}}>
+                <Text style={[styles.AddUserScreen.text, {flex: 4}]}>
                     {this.props.username}
                 </Text>
-                <TouchableOpacity style={styles.Profile.button} onPress={() => this.sendRequest(this.props.userUid)}>
-                    <ImageAddUser width={32} height={32}/>
-                </TouchableOpacity>
+                <View style={{flexDirection: 'row', flex: 2}}>
+                    <TouchableOpacity style={[styles.AddUserScreen.button, {backgroundColor: styles.mainColorOrange}]} onPress={() => this.sendRequest(this.props.userUid)}>
+                        <ImageAddUser width={32} height={32}/>
+                    </TouchableOpacity>
+                </View>
+                
             </View>
         );
     }
@@ -45,11 +48,28 @@ export default class AddUser extends React.Component{
         }
     }
 
-    async onSearch() {
+    onSearch = async () => {
         if(this.state.search !== ""){
-            let connections = [];
+            let array = [];
+            await Firebase.database.ref('/users').once('value').then((snapshot) => {
+                snapshot.forEach((childSnapshot) => {
+                    let connected = false;
+                    Firebase.database.ref('/connections/'+Firebase.uid+'/'+childSnapshot.key).once('value').then((connection) => {
+                        if(!connection.exists() && childSnapshot.val().username.toLowerCase().includes(this.state.search.toLowerCase()) && childSnapshot.key !== Firebase.uid){
+                            let code = (
+                                <User key={childSnapshot.key} userUid={childSnapshot.key} username={childSnapshot.val().username}/>
+                            );
+                            array.push(code);
+                        }
+                    });
+                });
+            });
+            this.setState({array: array});
+
+
+            /*let connections = [];
             let exists = false;
-            await Firebase.database.ref('/').once('value').then(
+            Firebase.database.ref('/').once('value').then(
                 function(snapshot) {
                     if (snapshot.child('connections/' + Firebase.uid).exists())
                     {
@@ -75,7 +95,7 @@ export default class AddUser extends React.Component{
                         this.setState((previousState) => ({'array': [...previousState.array, code]}));
                     }
                 })
-            });
+            });*/
         }
         else{
             this.setState({array: []});
@@ -84,12 +104,12 @@ export default class AddUser extends React.Component{
 
     render() {
         return (
-            <View>
+            <View style={{backgroundColor: styles.mainColorGrey, flex: 1}}>
                 <View style={{flexDirection: 'row'}}>
                     <TextInput
                         style={[styles.AddUserScreen.search, {flex: 1}]}
                         placeholder={'Search'}
-                        onChangeText={(text) => (this.setState({search: text}, this.onSearch))}
+                        onChangeText={(text) => this.setState({search: text, array: []}, () => this.onSearch())}
                         defaultValue={this.state.search}
                     />
                     {this.state.search !== ""

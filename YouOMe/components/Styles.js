@@ -148,19 +148,46 @@ export const AddUserScreen = StyleSheet.create({
     user: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginHorizontal: 20,
-        marginVertical: 5,
-        alignItems: 'center'
-    }
+        marginTop: 5,
+        alignItems: 'center',
+        backgroundColor: mainColorLightGrey2
+    },
+    text: {
+        fontSize: 20, 
+        color: 'white', 
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        fontWeight: 'bold'
+    },
+    button: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 10,
+        flex: 1
+    },
 });
 
 export const Users = StyleSheet.create({
     button: {
         alignItems: 'center',
         justifyContent: 'center',
-        margin: 5,
-        marginLeft: 20,
+        padding: 10,
+        flex: 1
     },
+    user: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 5,
+        alignItems: 'center',
+        backgroundColor: mainColorLightGrey2
+    },
+    text: {
+        fontSize: 20, 
+        color: 'white', 
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        fontWeight: 'bold'
+    }
 });
 
 

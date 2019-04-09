@@ -47,8 +47,8 @@ export default class AddMoney extends React.Component {
                                         code = (
                                             <Picker.Item key={child.key} label={snapshotUser.val().username} value={child.key} />
                                         );
+                                        this.setState((previousState) => ({'array': [...previousState.array, code]}));
                                     }
-                                    this.setState((previousState) => ({'array': [...previousState.array, code]}));
                                 }
                             );
                         });
