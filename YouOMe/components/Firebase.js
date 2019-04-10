@@ -23,9 +23,23 @@ export default class Firebase {
         Firebase.database = _firebase.database();
     }
 
+    static async defaultLogin(){
+        if(Firebase.auth.currentUser.emailVerified){
+            Firebase.uid = Firebase.auth.currentUser.uid;
+            let data = Firebase.database.ref('/users/'+Firebase.uid);
+            await data.once('value').then((snapshot) => {
+                Firebase.username = snapshot.val().username
+            });
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+    
     static async login(email, password){
         try{
-            await Firebase.auth.signInWithEmailAndPassword(email, password);
+            await Firebase.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(() => Firebase.auth.signInWithEmailAndPassword(email, password));
             if(Firebase.auth.currentUser.emailVerified){
                 Firebase.uid = Firebase.auth.currentUser.uid;
                 let data = Firebase.database.ref('/users/'+Firebase.uid);

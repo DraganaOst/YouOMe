@@ -10,14 +10,15 @@ export default class Login extends React.Component{
         this.state = {
             email: "",
             password: "",
+            auth: false
         };
     };
 
     onPressLogin = async () => {
         try{
             let response = false;
-            //response = await Firebase.login(this.state.email, this.state.password);
-            response = await Firebase.login("ostoj.dragana@gmail.com", "testtest");
+            response = await Firebase.login(this.state.email, this.state.password);
+            //response = await Firebase.login("dragana.ost@gmail.com", "testtest");
             if(response === true){
                 this.props.navigation.dispatch(StackActions.reset({
                     index: 0,
@@ -48,14 +49,12 @@ export default class Login extends React.Component{
                         placeholder={'Email'}
                         onChangeText={(text) => this.setState({email: text})}
                         keyboardType={'email-address'}
-                        defaultValue={"dragana.ost@gmail.co"}
                     />
                     <TextInput
                         style={styles.LoginSignUp.input}
                         placeholder={'Password'}
                         secureTextEntry={true}
                         onChangeText={(text) => this.setState({password: text})}
-                        defaultValue={"testtes"}
                     />
                     <TouchableOpacity
                         onPress={this.onPressLogin}

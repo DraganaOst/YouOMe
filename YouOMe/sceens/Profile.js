@@ -1,20 +1,36 @@
 import React from 'react';
-import {Text, View, TouchableOpacity, Image, ScrollView, RefreshControl} from 'react-native';
+import {Text, View, TouchableOpacity, Image, ScrollView, RefreshControl, Button} from 'react-native';
 import Firebase from "../components/Firebase";
 import * as styles from "../components/Styles";
 import AddUser from "./AddUser";
 import ImageList from '../images/list.svg';
 import ImagePlus from '../images/plus.svg';
 import ImageListNotification from '../images/list_notification2.svg';
+import {NavigationActions, StackActions, DrawerNavigator, createDrawerNavigator, createAppContainer} from "react-navigation";
 
 import ImageReturn from '../images/return.svg';
 import MyImageList from '../images/my_list.svg';
 import MyImageListNotifications from '../images/my_list_notifications.svg';
 import MyImagePlus from '../images/my_plus.svg';
+import Settings from './Settings';
+
+class MenuButton extends React.Component {
+    render(){
+        return(
+            <View>
+                <TouchableOpacity onPress={() => {this.props.navigate('DrawerOpen')} }>
+                    <Text>More</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    }
+}
+	
+
 
 export default class Profile extends React.Component {
-    constructor(){
-        super();
+    constructor(props){
+        super(props);
         this.state = {
             money_owed_by_me: 0,
             money_owed_to_me: 0,
@@ -24,7 +40,6 @@ export default class Profile extends React.Component {
             moneyImage: (<MyImageList width={35} height={35} />),
             itemsImage: (<MyImageList width={35} height={35} />)
         };
-        
     }
 
     componentDidMount(){
@@ -36,10 +51,26 @@ export default class Profile extends React.Component {
     static navigationOptions = ({ navigation }) => ({
         title: Firebase.username,
         headerStyle: styles.Profile.header,
-        headerTitleStyle: styles.Profile.headerText
+        headerTitleStyle: styles.Profile.headerText,
+        headerRight: (
+            <Button
+              onPress={() => {
+                Firebase.auth.signOut().then(() => {
+
+                });  
+              }}
+              title="Sign Out"
+              color="#8acb88"
+            />
+        ),
+        headerLeft: (
+            <MenuButton navigate={navigation.navigate} />
+        )
     });
 
     loadBalance = () => {
+        let string = 'balance/'+Firebase.uid+'/items';
+        string;
         Firebase.database.ref('balance/'+Firebase.uid+'/items').on('value', (snapshot) => {
             if(snapshot.exists()){
                 let owed_by_me = 0;

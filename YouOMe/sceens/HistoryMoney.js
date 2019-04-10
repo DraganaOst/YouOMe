@@ -6,6 +6,7 @@ import * as styles from "../components/Styles";
 import { ScrollView } from 'react-native-gesture-handler';
 import ImageArrowRight from '../images/back-arrow (1).svg';
 import ImageArrowLeft from '../images/back-arrow.svg';
+import { snapshotToArray } from '../components/Functions';
 
 class Transaction extends React.Component {
     render() {
@@ -22,7 +23,7 @@ class Transaction extends React.Component {
                         <View style={styles.Money.container}>
                             <View style={styles.Money.containerBalance}>
                                 <Text style={styles.History.textYear}>{date.getFullYear()}</Text>
-                                <Text style={styles.History.textDay}>{date.getDay()}</Text>
+                                <Text style={styles.History.textDay}>{date.getDate()}</Text>
                                 <Text style={styles.History.textMonth}>{months[date.getMonth()]}</Text>
                             </View>
                             <View style={styles.History.containerReason}>
@@ -49,7 +50,7 @@ class Transaction extends React.Component {
                             </View>
                             <View style={styles.Money.containerBalance}>
                                 <Text style={styles.History.textYear}>{date.getFullYear()}</Text>
-                                <Text style={styles.History.textDay}>{date.getDay()}</Text>
+                                <Text style={styles.History.textDay}>{date.getDate()}</Text>
                                 <Text style={styles.History.textMonth}>{months[date.getMonth()]}</Text>
                             </View>    
                         </View>
@@ -82,15 +83,17 @@ export default class History extends React.Component {
         headerTintColor: 'white',
     });
 
+    
+
     loadTransactions = () => {
         let uid = this.props.navigation.state.params.uid;
         Firebase.database.ref('/transactions/users/'+Firebase.uid+'/money/'+uid).on('value', (snapshot) => {
             if(snapshot.exists()){
-                this.setState((previousState) => ({'array': []}));
-                snapshot.forEach((childSnapshot) => {
+                this.setState({'array': []});        
+                snapshotToArray(snapshot).reverse().forEach((childSnapshot) => {
                     let transactionID = childSnapshot.val();
 
-                    Firebase.database.ref('/transactions/money/' + transactionID).once('value').then((transactionSnapshot) => {
+                    Firebase.database.ref('/transactions/money/' + transactionID).once("value", (transactionSnapshot) => {
                         let code = (
                             <Transaction 
                                 key={transactionID} 

@@ -7,6 +7,7 @@ import { ScrollView, FlatList } from 'react-native-gesture-handler';
 import { whileStatement } from '@babel/types';
 import ImageCheck from '../images/checked_2.svg';
 import ImageCancel from '../images/cancel.svg';
+import { snapshotToArray } from '../components/Functions';
 
 class TransactionUser extends React.Component {
     render() {
@@ -163,7 +164,7 @@ export default class Money extends React.Component {
         Firebase.database.ref('confirmations/users/' + Firebase.uid + '/money').on('value', (snapshot) => {
             if(snapshot.exists()){
                 this.setState({confirmation: []});
-                snapshot.forEach(async (childSnapshot) => {
+                snapshotToArray(snapshot).reverse().forEach(async (childSnapshot) => {
                     let username = "";
                     let userUid = childSnapshot.key;
                     await Firebase.database.ref('users/'+userUid).once('value').then((userSnapshot) => {username = userSnapshot.val().username});

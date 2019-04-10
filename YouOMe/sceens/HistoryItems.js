@@ -9,6 +9,7 @@ import ImageArrowLeft from '../images/back-arrow.svg';
 import ImageArrowReturnLeft from '../images/curved-returing-arrow.svg';
 import ImageArrowReturnRight from '../images/left-return-arrow.svg';
 import { whileStatement } from '@babel/types';
+import { snapshotToArray } from '../components/Functions';
 
 class Transaction extends React.Component {
     render() {
@@ -32,7 +33,7 @@ class Transaction extends React.Component {
                         <View style={styles.Money.container}>
                             <View style={styles.Money.containerBalance}>
                                 <Text style={styles.History.textYear}>{date.getFullYear()}</Text>
-                                <Text style={styles.History.textDay}>{date.getDay()}</Text>
+                                <Text style={styles.History.textDay}>{date.getDate()}</Text>
                                 <Text style={styles.History.textMonth}>{months[date.getMonth()]}</Text>
                             </View>
 
@@ -74,7 +75,7 @@ class Transaction extends React.Component {
                             }
                             <View style={styles.Money.containerBalance}>
                                 <Text style={styles.History.textYear}>{date.getFullYear()}</Text>
-                                <Text style={styles.History.textDay}>{date.getDay()}</Text>
+                                <Text style={styles.History.textDay}>{date.getDate()}</Text>
                                 <Text style={styles.History.textMonth}>{months[date.getMonth()]}</Text>
                             </View>    
                         </View>
@@ -101,7 +102,7 @@ class Item extends React.Component {
                 <View style={[styles.Money.container, {flex: 1}]}>
                     <View style={[styles.Money.containerBalance, {paddingHorizontal: 5}]}>
                         <Text style={styles.History.textYear}>{date.getFullYear()}</Text>
-                        <Text style={styles.History.textDay}>{date.getDay()}</Text>
+                        <Text style={styles.History.textDay}>{date.getDate()}</Text>
                         <Text style={styles.History.textMonth}>{months[date.getMonth()]}</Text>
                     </View>
                     <View style={{flex: 3}}>
@@ -147,7 +148,7 @@ export default class HistoryItems extends React.Component {
         Firebase.database.ref('/transactions/users/'+Firebase.uid+'/items/'+uid).on('value', (snapshot) => {
             if(snapshot.exists()){
                 this.setState((previousState) => ({'array': []}));
-                snapshot.forEach((childSnapshot) => {
+                snapshotToArray(snapshot).reverse().forEach((childSnapshot) => {
                     let transactionID = childSnapshot.val();
 
                     Firebase.database.ref('/transactions/items/' + transactionID).once('value').then((transactionSnapshot) => {
@@ -164,9 +165,9 @@ export default class HistoryItems extends React.Component {
                             );
 
                             if(transactionSnapshot.val().from == Firebase.uid)
-                                this.setState((previousState) => ({'arrayUser': [...previousState.arrayUser, code]}));   
+                                this.setState((previousState) => ({'arrayUser': [code, ...previousState.arrayUser]}));   
                             else
-                                this.setState((previousState) => ({'arrayMe': [...previousState.arrayMe, code]}));
+                                this.setState((previousState) => ({'arrayMe': [code, ...previousState.arrayMe]}));
                         }
 
                         let code = (
@@ -181,7 +182,7 @@ export default class HistoryItems extends React.Component {
                             />
                         );
 
-                        this.setState((previousState) => ({'array': [...previousState.array, code]}));
+                        this.setState((previousState) => ({'array': [code,...previousState.array]}));
                         
                         if(transactionSnapshot.val().returned != false){
                             let codeReturn = (
@@ -195,19 +196,19 @@ export default class HistoryItems extends React.Component {
                                     returned={transactionSnapshot.val().returned}
                                 />
                             );
-                            this.setState((previousState) => ({'array': [...previousState.array, codeReturn]}));
+                            this.setState((previousState) => ({'array': [codeReturn, ...previousState.array]}));
                         }
 
                         let arrayCopy = this.state.array;
                         arrayCopy.sort((a,b) => 
                             a.props.returned == false 
                                 ? (b.props.returned == false 
-                                    ? (new Date(a.props.date).getTime() > new Date(b.props.date).getTime() ? 1 : -1) 
-                                    : (new Date(a.props.date).getTime() > new Date(b.props.returned).getTime() ? 1 : -1)
+                                    ? (new Date(a.props.date).getTime() < new Date(b.props.date).getTime() ? 1 : -1) 
+                                    : (new Date(a.props.date).getTime() < new Date(b.props.returned).getTime() ? 1 : -1)
                                 ) 
                                 : (b.props.returned == false 
-                                    ? (new Date(a.props.returned).getTime() > new Date(b.props.date).getTime() ? 1 : -1) 
-                                    : (new Date(a.props.returned).getTime() > new Date(b.props.returned).getTime() ? 1 : -1)
+                                    ? (new Date(a.props.returned).getTime() < new Date(b.props.date).getTime() ? 1 : -1) 
+                                    : (new Date(a.props.returned).getTime() < new Date(b.props.returned).getTime() ? 1 : -1)
                                 )
                         );
                         this.setState({array: arrayCopy});

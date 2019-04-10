@@ -22,6 +22,8 @@ import Items from './sceens/Items';
 import HistoryMoney from './sceens/HistoryMoney';
 import HistoryItems from './sceens/HistoryItems';
 import ReturnItems from './sceens/ReturnItems';
+import Loading from './sceens/Loading';
+import AppTest from './sceens/Test';
 
 const AppNavigator = createStackNavigator({
   Login: {
@@ -107,26 +109,37 @@ const AppNavigator = createStackNavigator({
       headerTintColor: 'white',
       title: 'Return items'
     },
-  }
+  },
+  Loading: {
+    screen: Loading,
+    navigationOptions: {
+      header: null,
+    }
+  },
 }, {
-  initialRouteName: 'Login'
+  initialRouteName: 'Loading'
 });
 
-//export default createAppContainer(AppNavigator);
 const Navigator = createAppContainer(AppNavigator);
+
 
 export default class App extends React.Component{
   constructor(props) {
     super(props);
-  }
-
-  componentDidMount() {
+    this.state = {
+      loading: true,
+      auth: false
+    }
     Firebase.init();
   }
 
   render() {
-    return (
-        <Navigator/>
-    );
+    /*if (this.state.loading) return null;
+
+    if (this.state.auth == true) {
+      return <Navigator />;
+    }*/
+
+    return <Navigator />;
   }
 }
