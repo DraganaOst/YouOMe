@@ -8,6 +8,7 @@
 import React from 'react';
 import Login from './sceens/Login';
 import {createStackNavigator, createAppContainer, createBottomTabNavigator} from 'react-navigation';
+import {Text, View, TouchableOpacity, Image, ScrollView, RefreshControl, Button} from 'react-native';
 import Firebase from "./components/Firebase";
 import SignUp from "./sceens/SignUp";
 import Profile from "./sceens/Profile";
@@ -23,7 +24,7 @@ import HistoryMoney from './sceens/HistoryMoney';
 import HistoryItems from './sceens/HistoryItems';
 import ReturnItems from './sceens/ReturnItems';
 import Loading from './sceens/Loading';
-import AppTest from './sceens/Test';
+import Settings from './sceens/Settings';
 
 const AppNavigator = createStackNavigator({
   Login: {
@@ -116,6 +117,9 @@ const AppNavigator = createStackNavigator({
       header: null,
     }
   },
+  Settings: {
+    screen: Settings
+  }
 }, {
   initialRouteName: 'Loading'
 });
@@ -140,6 +144,8 @@ export default class App extends React.Component{
       return <Navigator />;
     }*/
 
-    return <Navigator />;
+    return (
+        <Navigator />
+    );
   }
 }

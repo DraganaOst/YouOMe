@@ -1,31 +1,19 @@
 import React from 'react';
-import {Text, View, TouchableOpacity, Image, ScrollView, RefreshControl, Button} from 'react-native';
+import {Text, View, TouchableOpacity, Image, ScrollView, RefreshControl, Button, Modal, TouchableWithoutFeedback} from 'react-native';
 import Firebase from "../components/Firebase";
 import * as styles from "../components/Styles";
 import AddUser from "./AddUser";
 import ImageList from '../images/list.svg';
 import ImagePlus from '../images/plus.svg';
 import ImageListNotification from '../images/list_notification2.svg';
-import {NavigationActions, StackActions, DrawerNavigator, createDrawerNavigator, createAppContainer} from "react-navigation";
+import {NavigationActions, StackActions} from "react-navigation";
 
 import ImageReturn from '../images/return.svg';
 import MyImageList from '../images/my_list.svg';
 import MyImageListNotifications from '../images/my_list_notifications.svg';
 import MyImagePlus from '../images/my_plus.svg';
 import Settings from './Settings';
-
-class MenuButton extends React.Component {
-    render(){
-        return(
-            <View>
-                <TouchableOpacity onPress={() => {this.props.navigate('DrawerOpen')} }>
-                    <Text>More</Text>
-                </TouchableOpacity>
-            </View>
-        );
-    }
-}
-	
+import ImageMoreMenu from '../images/more-menu.svg';
 
 
 export default class Profile extends React.Component {
@@ -38,7 +26,8 @@ export default class Profile extends React.Component {
             items_owed_to_me: 0,
             usersImage: (<MyImageList width={35} height={35} />),
             moneyImage: (<MyImageList width={35} height={35} />),
-            itemsImage: (<MyImageList width={35} height={35} />)
+            itemsImage: (<MyImageList width={35} height={35} />),
+            modalVisible: false,
         };
     }
 
@@ -46,13 +35,20 @@ export default class Profile extends React.Component {
         this.checkConnections();
         this.loadBalance();
         this.checkConfirmations();
+        this.props.navigation.setParams({
+            setModalVisible: this.setModalVisible,
+        })
+    }
+
+    setModalVisible = (visible) => {
+        this.setState({modalVisible: visible});
     }
 
     static navigationOptions = ({ navigation }) => ({
         title: Firebase.username,
         headerStyle: styles.Profile.header,
         headerTitleStyle: styles.Profile.headerText,
-        headerRight: (
+        /*headerLeft: (
             <Button
               onPress={() => {
                 Firebase.auth.signOut().then(() => {
@@ -62,11 +58,19 @@ export default class Profile extends React.Component {
               title="Sign Out"
               color="#8acb88"
             />
-        ),
-        headerLeft: (
-            <MenuButton navigate={navigation.navigate} />
+        ),*/
+        headerRight: (
+            <TouchableOpacity onPress={() =>  navigation.getParam('setModalVisible')(true)}>
+                <ImageMoreMenu height={20} width={50}/>
+            </TouchableOpacity>
         )
     });
+
+    onPressMenuPopup = () => {
+        this.setState({menuPopupVisible: !this.state.menuPopupVisible});
+    };
+
+    
 
     loadBalance = () => {
         let string = 'balance/'+Firebase.uid+'/items';
@@ -131,9 +135,45 @@ export default class Profile extends React.Component {
         });
     }
 
+    onPressMenu = (screen) => {
+        this.setModalVisible(false); 
+        this.props.navigation.navigate(screen); 
+    };
+
     render() {
         return (
             <View style={{flex: 1}}>
+                <View>
+                    <Modal
+                    animationType="fade"
+                    transparent={true}
+                    visible={this.state.modalVisible}
+                    onRequestClose={() => {
+                        Alert.alert('Modal has been closed.');
+                    }}>
+                        <TouchableOpacity onPressIn={() => this.setModalVisible(false)} style={{ flexDirection: 'row', justifyContent: 'flex-end'}}>
+                            <TouchableWithoutFeedback onPress={() => {}}>
+                                <View style={{width: 200, marginTop: 40, marginHorizontal: 10, backgroundColor: 'white', borderRadius: 5, elevation: 10}}>
+                                    <View style={{marginHorizontal: 10}}>
+                                        <TouchableOpacity onPress={() => this.onPressMenu('Statistic')}>
+                                            <Text style={{marginHorizontal: 20, paddingVertical: 10, fontSize: 18}}>Statistic</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                    <View style={{borderColor: 'grey', borderTopWidth: 1, marginHorizontal: 10}}>
+                                        <TouchableOpacity onPress={() => this.onPressMenu('Settings')}>
+                                            <Text style={{marginHorizontal: 20, paddingVertical: 10, fontSize: 18}}>Settings</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                    <View style={{borderColor: 'grey', borderTopWidth: 2, marginHorizontal: 10}}>
+                                        <TouchableOpacity onPress={() => Firebase.auth.signOut().then(() => {})}>
+                                            <Text style={{marginHorizontal: 20, paddingVertical: 10, fontSize: 18}}>Sign Out</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            </TouchableWithoutFeedback>
+                        </TouchableOpacity>
+                    </Modal>
+                </View>
                 <View style={[{flex: 4, backgroundColor: styles.mainColorBlue}]}>
                     <View style={{alignItems: 'center', flex: 1, justifyContent: 'center'}}>
                         <Text style={{color: 'white', fontSize: 30, fontWeight: 'bold'}}>Money</Text>

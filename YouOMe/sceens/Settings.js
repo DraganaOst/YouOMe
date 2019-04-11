@@ -10,17 +10,6 @@ export default class Settings extends React.Component{
     super(props);
   }
 
-  static navigationOptions = {
-    drawerLabel: 'Settings',
-    /*drawerIcon: ({ tintColor }) => (
-      <Image
-        source={require('./notif-icon.png')}
-        style={[styles.icon, {tintColor: tintColor}]}
-      />
-    ),*/
-  };
-
-
 
   render() {
     return <Text>Haaj</Text>;
