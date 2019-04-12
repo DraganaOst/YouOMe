@@ -144,8 +144,23 @@ export default class ReturnItems extends React.Component {
           })();;
     };
 
-    onPressReturn = async () => {
-        let update = {};
+    onPressReturn = () => {
+        let uid = this.state.array[this.state.userIndex].key;
+
+        for(let i=0; i<this.state.arrayItemsChecked.length; i++){
+            if(this.state.arrayItemsChecked[i].checked === true){
+                let object = {
+                    transactionsKey: this.state.arrayItemsChecked[i].id,
+                    request: Firebase.uid
+                };
+                //let item = Firebase.database.ref('/confirmations/items_returned').push();
+                Firebase.database.ref('/confirmations/users/'+Firebase.uid+'/items_returned/'+uid).push(object);
+                Firebase.database.ref('/confirmations/users/'+uid+'/items_returned/'+Firebase.uid).push(object);
+            }    
+        }
+        
+
+        /*let update = {};
 
         let balance = { owed_by_me: 0, owed_to_me: 0};
         let balanceUser = {owed_by_me: 0, owed_to_me: 0};
@@ -187,7 +202,7 @@ export default class ReturnItems extends React.Component {
             update['balance/'+uid+'/items/'+Firebase.uid+'/owed_by_me'] = balanceUser.owed_by_me;
         }
 
-        Firebase.database.ref().update(update);
+        Firebase.database.ref().update(update);*/
 
         this.loadItems(this.state.array[this.state.userIndex].key);
     };

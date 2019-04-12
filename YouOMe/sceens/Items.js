@@ -6,6 +6,7 @@ import * as styles from "../components/Styles";
 import { ScrollView, FlatList } from 'react-native-gesture-handler';
 import ImageCheck from '../images/checked_2.svg';
 import ImageCancel from '../images/cancel.svg';
+import ImageBin from '../images/rubbish-bin.svg';
 import { snapshotToArray } from '../components/Functions';
 
 class TransactionUser extends React.Component {
@@ -45,12 +46,12 @@ class Confirmation extends React.Component {
                 Firebase.database.ref().update(update);
 
                 let ref = Firebase.database.ref('confirmations/users/'+props.transaction.from+'/items/'+props.transaction.to);
-                ref.orderByValue().equalTo(props.keyTransaction).on('child_added', (snapshot) => {
+                ref.orderByValue().equalTo(props.keyTransaction).once('child_added', (snapshot) => {
                     snapshot.ref.remove();
                 }); 
 
                 let ref2 = Firebase.database.ref('confirmations/users/'+props.transaction.to+'/items/'+props.transaction.from);
-                ref2.orderByValue().equalTo(props.keyTransaction).on('child_added', (snapshot) => {
+                ref2.orderByValue().equalTo(props.keyTransaction).once('child_added', (snapshot) => {
                     snapshot.ref.remove();
                 }); 
               }},
@@ -123,30 +124,28 @@ class Confirmation extends React.Component {
     };
 
     render() {
-        let style = this.props.transaction.request == Firebase.uid ? {alignItems: 'center'} : null;
-
         return (
             <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 5, backgroundColor: styles.mainColorLightOrange}}>
                 {this.props.transaction.request == Firebase.uid
                 ? 
                     null
                 :
-                    <TouchableOpacity style={{backgroundColor: 'red', paddingHorizontal: 20, paddingVertical: 10}} onPress={() => this.onDelete(this.props)}>
+                    <TouchableOpacity style={{flex: 0.5, backgroundColor: 'red', paddingHorizontal: 20, paddingVertical: 10}} onPress={() => this.onDelete(this.props)}>
                         <ImageCancel width={20} height={20} />
                     </TouchableOpacity>
                 }
-                <View style={{flexDirection: 'row', paddingHorizontal: 20, style}}>
+                <View style={{flex: 5, flexDirection: 'row', justifyContent: 'center'}}>
                     <Text style={{color: 'white', fontSize: 18, fontWeight: 'bold'}}>{this.props.transaction.name}</Text>
                     <Text style={{color: 'white', fontSize: 18, fontWeight: 'bold'}}>{this.props.transaction.from == Firebase.uid ? " to " : ' from '}</Text>
                     <Text style={{color: 'white', fontSize: 18, fontWeight: 'bold'}}>{this.props.user}</Text>
                 </View>
                 {this.props.transaction.request == Firebase.uid
                 ? 
-                    <TouchableOpacity style={{backgroundColor: 'red', paddingHorizontal: 20, paddingVertical: 10}} onPress={() => this.onDelete(this.props)}>
-                        <ImageCancel width={20} height={20} />
+                    <TouchableOpacity style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'red', paddingHorizontal: 40, paddingVertical: 10}} onPress={() => this.onDelete(this.props)}>
+                        <ImageBin width={20} height={20} />
                     </TouchableOpacity>
                 :
-                    <TouchableOpacity style={{backgroundColor: styles.mainColorGreen, paddingHorizontal: 20, paddingVertical: 10}} onPress={() => this.onAccept(this.props)}>
+                    <TouchableOpacity style={{flex: 0.5, backgroundColor: styles.mainColorGreen, paddingHorizontal: 20, paddingVertical: 10}} onPress={() => this.onAccept(this.props)}>
                         <ImageCheck width={20} height={20} />
                     </TouchableOpacity>
                 }  
@@ -156,13 +155,116 @@ class Confirmation extends React.Component {
 }
 
 
+class ConfirmationReturn extends React.Component {
+    onDelete = props => {
+        let option = props.from == Firebase.uid ? " returned " : ' got back ';
+        let message = props.user + option + props.name;
+        Alert.alert(
+            'Alert',
+            'Are you sure you want to delete: \n' + message,
+            [
+              {text: 'NO', onPress: () => {}},
+              {text: 'YES', onPress: () => {
+                let ref = Firebase.database.ref('confirmations/users/'+props.from+'/items_returned/'+props.to);
+                ref.orderByChild('transactionsKey').equalTo(props.keyTransaction).once('child_added', (snapshot) => {
+                    snapshot.ref.remove();
+                }); 
+
+                let ref2 = Firebase.database.ref('confirmations/users/'+props.to+'/items_returned/'+props.from);
+                ref2.orderByChild('transactionsKey').equalTo(props.keyTransaction).once('child_added', (snapshot) => {
+                    snapshot.ref.remove();
+                }); 
+              }},
+            ],
+            {cancelable: false},
+          );
+
+        
+    };
+
+    onAccept = async props => {
+        let update = {};
+
+        let balance = { owed_by_me: 0, owed_to_me: 0};
+        let balanceUser = {owed_by_me: 0, owed_to_me: 0};
+
+        let uid = this.props.from == Firebase.uid ? this.props.to : this.props.from;
+
+        await Firebase.database.ref('/balance/' + Firebase.uid + '/items/'+uid).once('value').then((snapshot) => {
+            if(snapshot.child('owed_by_me').exists()){
+                balance.owed_by_me = snapshot.val().owed_by_me;
+                balanceUser.owed_to_me = balance.owed_by_me;
+            }
+            if(snapshot.child('owed_to_me').exists()){
+                balance.owed_to_me = snapshot.val().owed_to_me;
+                balanceUser.owed_by_me = balance.owed_to_me;
+            }
+        });
+
+        update['transactions/items/'+ this.props.keyTransaction + '/returned'] = new Date().toISOString();
+
+        if(this.props.to === Firebase.uid){
+            balance.owed_by_me -= 1;
+            balanceUser.owed_to_me -=1
+        }
+        else{
+            balance.owed_to_me -= 1;
+            balanceUser.owed_by_me -= 1;
+        }
+
+        if(this.props.to === Firebase.uid){
+            update['balance/'+Firebase.uid+'/items/'+uid+'/owed_by_me'] = balance.owed_by_me;
+            update['balance/'+uid+'/items/'+Firebase.uid+'/owed_to_me'] = balanceUser.owed_to_me;
+        }
+        else{
+            update['balance/'+Firebase.uid+'/items/'+uid+'/owed_to_me'] = balance.owed_to_me;
+            update['balance/'+uid+'/items/'+Firebase.uid+'/owed_by_me'] = balanceUser.owed_by_me;
+        }
+
+        Firebase.database.ref().update(update);
+        this.onDelete(this.props);
+    };
+
+    render() {
+        return (
+            <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 5, backgroundColor: styles.mainColorLightOrange}}>
+                {this.props.request == Firebase.uid
+                ? 
+                    null
+                :
+                    <TouchableOpacity style={{flex: 0.5, backgroundColor: 'red', paddingHorizontal: 20, paddingVertical: 10}} onPress={() => this.onDelete(this.props)}>
+                        <ImageCancel width={20} height={20} />
+                    </TouchableOpacity>
+                }
+                <View style={{flex: 5, flexDirection: 'row', justifyContent: 'center'}}>
+                    <Text style={{color: 'white', fontSize: 18, fontWeight: 'bold'}}>{this.props.user}</Text>
+                    <Text style={{color: 'white', fontSize: 18, fontWeight: 'bold'}}>{this.props.from == Firebase.uid ? " returned " : ' got back '}</Text>
+                    <Text style={{color: 'white', fontSize: 18, fontWeight: 'bold'}}>{this.props.name}</Text>
+                </View>
+                {this.props.request == Firebase.uid
+                ? 
+                    <TouchableOpacity style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'red', paddingHorizontal: 40, paddingVertical: 10}} onPress={() => this.onDelete(this.props)}>
+                        <ImageBin width={20} height={20} />
+                    </TouchableOpacity>
+                :
+                    <TouchableOpacity style={{flex: 0.5, backgroundColor: styles.mainColorGreen, paddingHorizontal: 20, paddingVertical: 10}} onPress={() => this.onAccept(this.props)}>
+                        <ImageCheck width={20} height={20} />
+                    </TouchableOpacity>
+                }  
+            </View>
+        );
+    }
+}
+
 export default class Items extends React.Component {
     constructor(){
         super();
         this.state = {
             array: [],
             confirmation: [],
-            confirmationVisible: false
+            confirmationReturned: [],
+            confirmationVisible: false,
+            confirmationReturnedVisible: false,
         }
     }
 
@@ -200,6 +302,47 @@ export default class Items extends React.Component {
                 this.setState({confirmation: []});
             }
         });
+
+        Firebase.database.ref('confirmations/users/' + Firebase.uid + '/items_returned').on('value', (snapshot) => {
+            if(snapshot.exists()){
+                this.setState({confirmationReturned: []});
+                snapshotToArray(snapshot).reverse().forEach(async (childSnapshot) => {
+                    let username = "";
+                    let userUid = childSnapshot.key;
+                    await Firebase.database.ref('users/'+userUid).once('value').then((userSnapshot) => {username = userSnapshot.val().username});
+
+                    childSnapshot.forEach((subChildSnapshot) => {
+                        let itemName = "";
+                        let from = "";
+                        let to = "";
+                        let request = subChildSnapshot.val().request;
+                        Firebase.database.ref('transactions/items/'+subChildSnapshot.val().transactionsKey).once('value').then((transactionSnapshot) => {
+                            itemName = transactionSnapshot.val().name;
+                            from = transactionSnapshot.val().from;
+                            to = transactionSnapshot.val().to;
+
+                            let object = ({
+                                key: subChildSnapshot.val().transactionsKey,
+                                keyTransaction: subChildSnapshot.val().transactionsKey,
+                                username: username,
+                                userUid: userUid,
+                                name: itemName,
+                                request: request,
+                                from: from,
+                                to: to
+                            });
+                            this.setState((previousState) => ({confirmationReturned: [...previousState.confirmationReturned, object]}));
+                        });
+                    });
+                    
+                });
+            }
+            else{
+                this.setState({confirmationReturned: []});
+            }
+        });
+
+        
     };
 
     loadTransactions = () => {
@@ -236,16 +379,17 @@ export default class Items extends React.Component {
                 <ScrollView style={{backgroundColor: "#E5E5E5"}}>
                     {this.state.array}
                 </ScrollView>
-                {this.state.confirmation.length > 0 
+                {this.state.confirmation.length > 0 || this.state.confirmationReturned.length > 0
                 ?
-                    <View style={{backgroundColor: styles.mainColorOrange, maxHeight: '30%'}}>
+                    <View style={{backgroundColor: styles.mainColorOrange, maxHeight: '50%'}}>
                         <TouchableOpacity onPress={() => this.setState({confirmationVisible: !this.state.confirmationVisible})}>
                             <Text style={{color: 'white', fontSize: 20, paddingHorizontal: 20, paddingVertical: 5, fontWeight: 'bold'}}>Need confirmation</Text>
                         </TouchableOpacity>
+                        {this.state.confirmation.length > 0 && this.state.confirmationVisible ? <Text>Add Items</Text> : null}
                         {this.state.confirmationVisible 
                         ?
                             <FlatList 
-                                style={{backgroundColor: styles.mainColorOrange}}
+                                style={{backgroundColor: styles.mainColorOrange, maxHeight: '50%'}}
                                 data={this.state.confirmation}  
                                 renderItem={({item}) => (
                                     <Confirmation
@@ -254,6 +398,29 @@ export default class Items extends React.Component {
                                         user={item.username}
                                         userUid={item.userUid}
                                         keyTransaction={item.keyTransaction}
+                                    />
+                                )}         
+                            />
+                            
+                        : 
+                            null
+                        }
+                        {this.state.confirmationReturned.length > 0 && this.state.confirmationVisible ? <Text>Return Items</Text> : null}
+                        {this.state.confirmationVisible 
+                        ?
+                            <FlatList 
+                                style={{backgroundColor: styles.mainColorOrange, maxHeight: '50%'}}
+                                data={this.state.confirmationReturned}  
+                                renderItem={({item}) => (
+                                    <ConfirmationReturn
+                                        key={item.key}
+                                        keyTransaction={item.keyTransaction}
+                                        user={item.username}
+                                        userUid={item.userUid}
+                                        name={item.name}
+                                        request={item.request}
+                                        from={item.from}
+                                        to={item.to}
                                     />
                                 )}         
                             />

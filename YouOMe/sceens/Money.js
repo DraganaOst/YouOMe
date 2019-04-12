@@ -42,12 +42,12 @@ class Confirmation extends React.Component {
                 Firebase.database.ref().update(update);
         
                 let ref = Firebase.database.ref('confirmations/users/'+props.transaction.from+'/money/'+props.transaction.to);
-                ref.orderByValue().equalTo(props.keyTransaction).on('child_added', (snapshot) => {
+                ref.orderByValue().equalTo(props.keyTransaction).once('child_added', (snapshot) => {
                     snapshot.ref.remove();
                 }); 
         
                 let ref2 = Firebase.database.ref('confirmations/users/'+props.transaction.to+'/money/'+props.transaction.from);
-                ref2.orderByValue().equalTo(props.keyTransaction).on('child_added', (snapshot) => {
+                ref2.orderByValue().equalTo(props.keyTransaction).once('child_added', (snapshot) => {
                     snapshot.ref.remove();
                 }); 
               }},
@@ -115,7 +115,7 @@ class Confirmation extends React.Component {
     render() {
         let style = this.props.transaction.request == Firebase.uid ? {alignItems: 'center'} : null;
         return (
-            <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 5, backgroundColor: styles.mainColorLightOrange, elevation: 10}}>
+            <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 5, backgroundColor: styles.mainColorLightOrange, elevation: 4}}>
                 {this.props.transaction.request == Firebase.uid
                 ? 
                     null

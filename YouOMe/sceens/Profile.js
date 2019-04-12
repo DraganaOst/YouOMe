@@ -60,8 +60,8 @@ export default class Profile extends React.Component {
             />
         ),*/
         headerRight: (
-            <TouchableOpacity onPress={() =>  navigation.getParam('setModalVisible')(true)}>
-                <ImageMoreMenu height={20} width={50}/>
+            <TouchableOpacity style={{paddingVertical: 20, paddingLeft: 30, paddingRight: 20}} onPress={() => navigation.getParam('setModalVisible')(true)}>
+                <ImageMoreMenu height={20} width={20}/>
             </TouchableOpacity>
         )
     });
@@ -151,26 +151,28 @@ export default class Profile extends React.Component {
                     onRequestClose={() => {
                         Alert.alert('Modal has been closed.');
                     }}>
-                        <TouchableOpacity onPressIn={() => this.setModalVisible(false)} style={{ flexDirection: 'row', justifyContent: 'flex-end'}}>
-                            <TouchableWithoutFeedback onPress={() => {}}>
-                                <View style={{width: 200, marginTop: 40, marginHorizontal: 10, backgroundColor: 'white', borderRadius: 5, elevation: 10}}>
-                                    <View style={{marginHorizontal: 10}}>
-                                        <TouchableOpacity onPress={() => this.onPressMenu('Statistic')}>
-                                            <Text style={{marginHorizontal: 20, paddingVertical: 10, fontSize: 18}}>Statistic</Text>
-                                        </TouchableOpacity>
+                        <TouchableOpacity onPressIn={() => this.setModalVisible(false)} style={{flex: 1}}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'flex-end'}}>
+                                <TouchableWithoutFeedback onPress={() => {}}>
+                                    <View style={{width: 200, marginTop: 40, marginHorizontal: 10, backgroundColor: 'white', borderRadius: 5, elevation: 10}}>
+                                        <View style={{marginHorizontal: 10}}>
+                                            <TouchableOpacity onPress={() => this.onPressMenu('Statistic')}>
+                                                <Text style={{marginHorizontal: 20, paddingVertical: 10, fontSize: 18}}>Statistic</Text>
+                                            </TouchableOpacity>
+                                        </View>
+                                        <View style={{borderColor: 'grey', borderTopWidth: 1, marginHorizontal: 10}}>
+                                            <TouchableOpacity onPress={() => this.onPressMenu('Settings')}>
+                                                <Text style={{marginHorizontal: 20, paddingVertical: 10, fontSize: 18}}>Settings</Text>
+                                            </TouchableOpacity>
+                                        </View>
+                                        <View style={{borderColor: 'grey', borderTopWidth: 2, marginHorizontal: 10}}>
+                                            <TouchableOpacity onPress={() => Firebase.auth.signOut().then(() => {})}>
+                                                <Text style={{marginHorizontal: 20, paddingVertical: 10, fontSize: 18}}>Sign Out</Text>
+                                            </TouchableOpacity>
+                                        </View>
                                     </View>
-                                    <View style={{borderColor: 'grey', borderTopWidth: 1, marginHorizontal: 10}}>
-                                        <TouchableOpacity onPress={() => this.onPressMenu('Settings')}>
-                                            <Text style={{marginHorizontal: 20, paddingVertical: 10, fontSize: 18}}>Settings</Text>
-                                        </TouchableOpacity>
-                                    </View>
-                                    <View style={{borderColor: 'grey', borderTopWidth: 2, marginHorizontal: 10}}>
-                                        <TouchableOpacity onPress={() => Firebase.auth.signOut().then(() => {})}>
-                                            <Text style={{marginHorizontal: 20, paddingVertical: 10, fontSize: 18}}>Sign Out</Text>
-                                        </TouchableOpacity>
-                                    </View>
-                                </View>
-                            </TouchableWithoutFeedback>
+                                </TouchableWithoutFeedback>
+                            </View>
                         </TouchableOpacity>
                     </Modal>
                 </View>
