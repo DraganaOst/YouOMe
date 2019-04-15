@@ -385,7 +385,7 @@ export default class Items extends React.Component {
                         <TouchableOpacity onPress={() => this.setState({confirmationVisible: !this.state.confirmationVisible})}>
                             <Text style={{color: 'white', fontSize: 20, paddingHorizontal: 20, paddingVertical: 5, fontWeight: 'bold'}}>Need confirmation</Text>
                         </TouchableOpacity>
-                        {this.state.confirmation.length > 0 && this.state.confirmationVisible ? <Text>Add Items</Text> : null}
+                        {this.state.confirmation.length > 0 && this.state.confirmationVisible ? <Text style={{paddingHorizontal: 20, color: 'white'}}>Add Items</Text> : null}
                         {this.state.confirmationVisible 
                         ?
                             <FlatList 
@@ -405,7 +405,7 @@ export default class Items extends React.Component {
                         : 
                             null
                         }
-                        {this.state.confirmationReturned.length > 0 && this.state.confirmationVisible ? <Text>Return Items</Text> : null}
+                        {this.state.confirmationReturned.length > 0 && this.state.confirmationVisible ? <Text style={{paddingHorizontal: 20, color: 'white'}}>Return Items</Text> : null}
                         {this.state.confirmationVisible 
                         ?
                             <FlatList 

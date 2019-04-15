@@ -5,6 +5,7 @@ import Firebase from "../components/Firebase";
 import * as styles from "../components/Styles";
 import ImageCalendar from '../images/calendar.svg';
 import { ScrollView } from 'react-native-gesture-handler';
+import { snapshotToArray } from '../components/Functions';
 
 
 class Item extends React.Component {
@@ -99,13 +100,20 @@ export default class ReturnItems extends React.Component {
         let from = userId;
         if(this.state.option == 'i_received')
             from = Firebase.uid;
+        
+        let confirmations = [];
+        Firebase.database.ref('confirmations/users/'+Firebase.uid+'/items_returned/'+userId).once('value', (confimationsSnapshot) => {
+            if(confimationsSnapshot.exists()){
+                confirmations = snapshotToArray(confimationsSnapshot);
+            }
+        });
 
         this.setState({arrayItems: []});
         Firebase.database.ref('transactions/users/' + Firebase.uid + '/items/' + userId).once('value', (snapshot) => {
-            if(snapshot.exists()){
+            if(snapshot.exists()){ 
                 snapshot.forEach((childSnapshot) => {
-                    Firebase.database.ref('transactions/items/' + childSnapshot.val()).once('value', (transactionSnapshot) => {
-                        if(transactionSnapshot.val().returned === false && transactionSnapshot.val().from === from){
+                    Firebase.database.ref('transactions/items/' + childSnapshot.val()).once('value', (transactionSnapshot) => {    
+                        if(transactionSnapshot.val().returned === false && transactionSnapshot.val().from === from && !confirmations.find((x) => x.val().transactionsKey == transactionSnapshot.key)){
                             this.setState((previousState) => ({arrayItemsChecked: [...previousState.arrayItemsChecked, {id: transactionSnapshot.key, checked: false}]}));
                             let code = (
                                 <Item
@@ -114,8 +122,8 @@ export default class ReturnItems extends React.Component {
                                     onPress={() => this.isChecked(transactionSnapshot.key)}
                                 />
                             );
-                            this.setState((previousState) => ({arrayItems: [...previousState.arrayItems, code]}));                       
-                        }
+                            this.setState((previousState) => ({arrayItems: [...previousState.arrayItems, code]}));
+                        }                        
                     });
                 });
             }

@@ -1,5 +1,5 @@
 import React from 'react';
-import {Text, View, TextInput, TouchableOpacity, Image, Button, Modal} from 'react-native';
+import {Text, View, TextInput, TouchableOpacity, Image, Button, Modal, Alert} from 'react-native';
 import {NavigationActions, StackActions} from "react-navigation";
 import Firebase from "../components/Firebase";
 import * as styles from "../components/Styles";
@@ -10,6 +10,64 @@ import ImageBin from '../images/rubbish-bin.svg';
 import { ScrollView } from 'react-native-gesture-handler';
 
 class User extends React.Component {
+    onDeleteUser = (userUid, username) => {
+        //check if money and item balance is 0
+        Alert.alert(
+            'Alert',
+            'Are you sure you want to delete: ' + username,
+            [
+              {text: 'NO', onPress: () => {}},
+              {text: 'YES', onPress: async () => {
+                let money_balance = 1;
+                let items_balance_by = 1;
+                let items_balance_to = 1;
+                await Firebase.database.ref('balance/'+Firebase.uid).once('value').then((snapshot) => {
+                    if(snapshot.child("/money/"+userUid).exists())
+                        money_balance = snapshot.child("/money/"+userUid).val();
+                    else
+                        money_balance = 0;
+                    
+                    if(snapshot.child("/items/"+userUid).exists()){
+                        items_balance_by = snapshot.child("/items/"+userUid).val().owed_by_me;
+                        items_balance_to = snapshot.child("/items/"+userUid).val().owed_to_me;
+                    }
+                    else{
+                        items_balance_by = 0;
+                        items_balance_to = 0;
+                    }
+                });
+        
+                let error = "";
+                if(money_balance != 0)
+                    error += "- money balance isn't 0 \n";
+                if(items_balance_by != 0)
+                    error += "- you haven't returned all items \n";
+                if(items_balance_to != 0)
+                    error += "- user hasn't returned all items";
+
+                if(error != ""){
+                    Alert.alert(
+                        'Alert',
+                        'Not all transactions are done: \n' + error,
+                        [
+                          {text: 'Cancel', onPress: () => {}},
+                          {text: 'Delete anyway', onPress: () => {
+                            //delete user
+                          }},
+                        ],
+                        {cancelable: false},
+                    );
+                }
+                else{
+                    
+                }
+              }},
+            ],
+            {cancelable: false},
+        );
+        
+    };
+
     render() {
         return (
             <View style={styles.Users.user}>
@@ -17,7 +75,7 @@ class User extends React.Component {
                     {this.props.username}
                 </Text>
                 <View style={{flexDirection: 'row', flex: 2}}>
-                    <TouchableOpacity style={[styles.Users.button, {backgroundColor: 'red'}]} onPress={() => {}}>
+                    <TouchableOpacity style={[styles.Users.button, {backgroundColor: 'red'}]} onPress={() => this.onDeleteUser(this.props.uid, this.props.username)}>
                         <ImageBin width={24} height={24} />
                     </TouchableOpacity>
                 </View>

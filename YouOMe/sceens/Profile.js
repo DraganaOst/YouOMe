@@ -14,6 +14,8 @@ import MyImageListNotifications from '../images/my_list_notifications.svg';
 import MyImagePlus from '../images/my_plus.svg';
 import Settings from './Settings';
 import ImageMoreMenu from '../images/more-menu.svg';
+import ImageNotification from '../images/bell.svg';
+import { snapshotToArray } from '../components/Functions';
 
 
 export default class Profile extends React.Component {
@@ -28,6 +30,8 @@ export default class Profile extends React.Component {
             moneyImage: (<MyImageList width={35} height={35} />),
             itemsImage: (<MyImageList width={35} height={35} />),
             modalVisible: false,
+            modalVisibleNotifications: false,
+            numberNotifications: 0
         };
     }
 
@@ -35,8 +39,11 @@ export default class Profile extends React.Component {
         this.checkConnections();
         this.loadBalance();
         this.checkConfirmations();
+        this.loadNotifications();
         this.props.navigation.setParams({
             setModalVisible: this.setModalVisible,
+            setModalVisibleNotifications: this.setModalVisibleNotifications,
+            notificationsNumber: 0
         })
     }
 
@@ -44,33 +51,63 @@ export default class Profile extends React.Component {
         this.setState({modalVisible: visible});
     }
 
+    setModalVisibleNotifications = (visible) => {
+        this.setState({modalVisibleNotifications: visible});
+    }
+
+    loadNotifications = () => {
+        Firebase.database.ref('confirmations/users/'+Firebase.uid).on('value', (snapshot) => {
+            let number = 0;
+            if(snapshot.child('/money').exists()){
+                snapshot.child('/money').forEach((child) => number += child.numChildren());
+            }
+            if(snapshot.child('/money').exists()){
+                snapshot.child('/items').forEach((child) => number += child.numChildren());
+            }
+            if(snapshot.child('/items_returned').exists()){
+                snapshot.child('/items_returned').forEach((child) => number += child.numChildren());
+            }
+
+            this.props.navigation.setParams({
+                notificationsNumber: number
+            })
+        })
+    };
+
     static navigationOptions = ({ navigation }) => ({
         title: Firebase.username,
         headerStyle: styles.Profile.header,
         headerTitleStyle: styles.Profile.headerText,
-        /*headerLeft: (
-            <Button
-              onPress={() => {
-                Firebase.auth.signOut().then(() => {
-
-                });  
-              }}
-              title="Sign Out"
-              color="#8acb88"
-            />
-        ),*/
         headerRight: (
-            <TouchableOpacity style={{paddingVertical: 20, paddingLeft: 30, paddingRight: 20}} onPress={() => navigation.getParam('setModalVisible')(true)}>
-                <ImageMoreMenu height={20} width={20}/>
-            </TouchableOpacity>
+            <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
+                {navigation.getParam('notificationsNumber') > 0
+                    ?
+                        <View style={{paddingTop: 25, paddingBottom: 25, marginBottom: 0, elevation: 10, paddingLeft: 20, paddingRight: 20, backgroundColor: styles.mainColorGreen2}}>
+                            <TouchableOpacity onPress={() => navigation.getParam('setModalVisibleNotifications')(true)}>
+                                <ImageNotification height={20} width={20}/>
+                                <View style={{position: 'absolute', right: -5, top: -5}}>
+                                    <Text style={{backgroundColor: 'red', borderRadius: 6, textAlign: 'center', minWidth: 12, height: 12, color: 'white', fontSize: 9}}>
+                                        {navigation.getParam('notificationsNumber')}
+                                    </Text>
+                                </View>
+                            </TouchableOpacity>
+                        </View>     
+                    :
+                        <TouchableOpacity style={{paddingTop: 25, paddingBottom: 25, marginBottom: 0, paddingLeft: 20, paddingRight: 20}} onPress={() => alert('No notifications')}>
+                            <ImageNotification height={20} width={20}/>
+                        </TouchableOpacity>
+                }
+                     
+                <TouchableOpacity style={{paddingVertical: 20, paddingLeft: 20, paddingRight: 20}} onPress={() => navigation.getParam('setModalVisible')(true)}>
+                    <ImageMoreMenu height={20} width={20}/>
+                </TouchableOpacity>
+            </View>
         )
     });
 
     onPressMenuPopup = () => {
         this.setState({menuPopupVisible: !this.state.menuPopupVisible});
     };
-
-    
 
     loadBalance = () => {
         let string = 'balance/'+Firebase.uid+'/items';
@@ -148,9 +185,7 @@ export default class Profile extends React.Component {
                     animationType="fade"
                     transparent={true}
                     visible={this.state.modalVisible}
-                    onRequestClose={() => {
-                        Alert.alert('Modal has been closed.');
-                    }}>
+                    >
                         <TouchableOpacity onPressIn={() => this.setModalVisible(false)} style={{flex: 1}}>
                             <View style={{ flexDirection: 'row', justifyContent: 'flex-end'}}>
                                 <TouchableWithoutFeedback onPress={() => {}}>
@@ -174,6 +209,19 @@ export default class Profile extends React.Component {
                                 </TouchableWithoutFeedback>
                             </View>
                         </TouchableOpacity>
+                    </Modal>
+                </View>
+                <View>
+                    <Modal
+                    animationType="fade"
+                    transparent={true}
+                    visible={this.state.modalVisibleNotifications}
+                    >
+                        <TouchableOpacity onPressIn={() => this.setModalVisibleNotifications(false)} style={{flex: 1}}>
+                            <View style={{flex: 1, marginTop: 60, backgroundColor: styles.mainColorGreen, borderTopColor: styles.mainColorGreen2, borderTopWidth: 10}}>
+                                <Text>Halo</Text>
+                            </View>
+                        </TouchableOpacity>       
                     </Modal>
                 </View>
                 <View style={[{flex: 4, backgroundColor: styles.mainColorBlue}]}>
@@ -202,11 +250,11 @@ export default class Profile extends React.Component {
                         </View>
                     </View>
                     <View style={{flexDirection: 'row', alignItems: 'stretch', flex: 1}}>
-                        <TouchableOpacity style={{elevation: 10, flex: 1, backgroundColor: styles.mainColorLightBlue, marginHorizontal: 10}} onPress={() =>{}} underlayColor="white">
+                        {/*<TouchableOpacity style={{elevation: 10, flex: 1, backgroundColor: styles.mainColorLightBlue, marginHorizontal: 10}} onPress={() =>{}} underlayColor="white">
                             <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
                                 <ImageReturn width={35} height={35} color={'black'}/>
                             </View>
-                        </TouchableOpacity>
+                        </TouchableOpacity>*/}
                         <TouchableOpacity style={{elevation: 10, flex: 1, backgroundColor: styles.mainColorLightBlue, marginHorizontal: 10}} onPress={() => this.props.navigation.navigate('AddMoney')} underlayColor="white">
                             <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
                                 <MyImagePlus width={35} height={35} color={'black'}/>

@@ -25,6 +25,7 @@ import HistoryItems from './sceens/HistoryItems';
 import ReturnItems from './sceens/ReturnItems';
 import Loading from './sceens/Loading';
 import Settings from './sceens/Settings';
+import { Notifications } from './sceens/Notifications';
 
 const AppNavigator = createStackNavigator({
   Login: {
@@ -119,6 +120,9 @@ const AppNavigator = createStackNavigator({
   },
   Settings: {
     screen: Settings
+  },
+  Notifications: {
+    screen: Notifications
   }
 }, {
   initialRouteName: 'Loading'
