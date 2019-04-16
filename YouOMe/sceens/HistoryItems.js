@@ -128,12 +128,18 @@ export default class HistoryItems extends React.Component {
             arrayMe: [],
             arrayUser: [],
             option: 'now',
+            data: "",
+            offRef: ""
         }
     }
 
     componentDidMount(){
         this.props.navigation.setParams({ title: this.props.navigation.state.params.username });
         this.loadTransactions();
+    }
+
+    componentWillUnmount(){
+        this.data.off('value', this.offRef);
     }
 
     static navigationOptions = ({ navigation }) => ({
@@ -145,7 +151,8 @@ export default class HistoryItems extends React.Component {
 
     loadTransactions = () => {
         let uid = this.props.navigation.state.params.uid;
-        Firebase.database.ref('/transactions/users/'+Firebase.uid+'/items/'+uid).on('value', (snapshot) => {
+        this.data = Firebase.database.ref('/transactions/users/'+Firebase.uid+'/items/'+uid);
+        this.offRef = this.data.on('value', (snapshot) => {
             if(snapshot.exists()){
                 this.setState((previousState) => ({'array': []}));
                 snapshotToArray(snapshot).reverse().forEach((childSnapshot) => {

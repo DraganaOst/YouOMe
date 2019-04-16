@@ -16,6 +16,8 @@ import Settings from './Settings';
 import ImageMoreMenu from '../images/more-menu.svg';
 import ImageNotification from '../images/bell.svg';
 import { snapshotToArray } from '../components/Functions';
+import PopupMenu from '../components/PopupMenu';
+import Notifications from './Notifications';
 
 
 export default class Profile extends React.Component {
@@ -36,9 +38,7 @@ export default class Profile extends React.Component {
     }
 
     componentDidMount(){
-        this.checkConnections();
         this.loadBalance();
-        this.checkConfirmations();
         this.loadNotifications();
         this.props.navigation.setParams({
             setModalVisible: this.setModalVisible,
@@ -47,32 +47,12 @@ export default class Profile extends React.Component {
         })
     }
 
-    setModalVisible = (visible) => {
-        this.setState({modalVisible: visible});
+    componentWillUnmount(){
+        this.data.child('confirmations/users/'+Firebase.uid).off('value', this.offRefChild);
+        this.data.child('connections/' + Firebase.uid).off('value', this.offRefChild2);
+        this.data2.child('/items').off('value', this.offRef2Child);
+        this.data2.child('/money').off('value', this.offRef2Child2);
     }
-
-    setModalVisibleNotifications = (visible) => {
-        this.setState({modalVisibleNotifications: visible});
-    }
-
-    loadNotifications = () => {
-        Firebase.database.ref('confirmations/users/'+Firebase.uid).on('value', (snapshot) => {
-            let number = 0;
-            if(snapshot.child('/money').exists()){
-                snapshot.child('/money').forEach((child) => number += child.numChildren());
-            }
-            if(snapshot.child('/money').exists()){
-                snapshot.child('/items').forEach((child) => number += child.numChildren());
-            }
-            if(snapshot.child('/items_returned').exists()){
-                snapshot.child('/items_returned').forEach((child) => number += child.numChildren());
-            }
-
-            this.props.navigation.setParams({
-                notificationsNumber: number
-            })
-        })
-    };
 
     static navigationOptions = ({ navigation }) => ({
         title: Firebase.username,
@@ -82,13 +62,15 @@ export default class Profile extends React.Component {
             <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
                 {navigation.getParam('notificationsNumber') > 0
                     ?
-                        <View style={{paddingTop: 25, paddingBottom: 25, marginBottom: 0, elevation: 10, paddingLeft: 20, paddingRight: 20, backgroundColor: styles.mainColorGreen2}}>
-                            <TouchableOpacity onPress={() => navigation.getParam('setModalVisibleNotifications')(true)}>
-                                <ImageNotification height={20} width={20}/>
-                                <View style={{position: 'absolute', right: -5, top: -5}}>
-                                    <Text style={{backgroundColor: 'red', borderRadius: 6, textAlign: 'center', minWidth: 12, height: 12, color: 'white', fontSize: 9}}>
-                                        {navigation.getParam('notificationsNumber')}
-                                    </Text>
+                        <View style={{backgroundColor: styles.mainColorGreen2}}>
+                            <TouchableOpacity style={{paddingTop: 25, paddingBottom: 25, marginBottom: 0, elevation: 10, paddingLeft: 20, paddingRight: 20, backgroundColor: styles.mainColorGreen2}} onPress={() => navigation.getParam('setModalVisibleNotifications')(true)}>
+                                <View>
+                                    <ImageNotification style={{flex: 1}} height={20} width={20}/>
+                                    <View style={{position: 'absolute', right: -5, top: -5}}>
+                                        <Text style={{backgroundColor: 'red', borderRadius: 6, textAlign: 'center', minWidth: 12, height: 12, color: 'white', fontSize: 9}}>
+                                            {navigation.getParam('notificationsNumber')}
+                                        </Text>
+                                    </View>
                                 </View>
                             </TouchableOpacity>
                         </View>     
@@ -105,14 +87,61 @@ export default class Profile extends React.Component {
         )
     });
 
-    onPressMenuPopup = () => {
-        this.setState({menuPopupVisible: !this.state.menuPopupVisible});
+    setModalVisible = (visible) => {
+        this.setState({modalVisible: visible});
+    }
+
+    setModalVisibleNotifications = (visible) => {
+        this.setState({modalVisibleNotifications: visible});
+    }
+
+    loadNotifications = async () => {
+        this.setState({moneyImage: (<MyImageList width={35} height={35} />)});
+        this.setState({itemsImage: (<MyImageList width={35} height={35} />)});
+        this.setState({usersImage: (<MyImageList width={35} height={35} />)});
+
+        this.data = Firebase.database.ref('/');
+        let number = 0;
+
+        this.offRefChild = this.data.child('confirmations/users/'+Firebase.uid).on('value', (snapshot) => {        
+            if(snapshot.child('/money').exists()){
+                snapshot.child('/money').forEach((child) => number += child.numChildren());
+                //this.setState({moneyImage: (<MyImageListNotifications width={35} height={35} />)});
+            }
+            if(snapshot.child('/items').exists()){
+                snapshot.child('/items').forEach((child) => number += child.numChildren());
+                //this.setState({itemsImage: (<MyImageListNotifications width={35} height={35} />)});
+            }
+            if(snapshot.child('/items_returned').exists()){
+                snapshot.child('/items_returned').forEach((child) => number += child.numChildren());
+            }
+            this.props.navigation.setParams({
+                notificationsNumber: number
+            })
+        })
+
+        this.offRefChild2 = this.data.child('connections/' + Firebase.uid).on('value', (snapshot) => {
+            if (snapshot.exists()) {
+                snapshot.forEach((child) => {
+                    if(child.val() !== true && child.val() !== Firebase.uid){
+                        this.setState({usersImage: (<MyImageListNotifications width={35} height={35} />)})
+                        number++;
+                    }
+                })
+            }
+            this.props.navigation.setParams({
+                notificationsNumber: number
+            })
+        });
     };
 
+    
     loadBalance = () => {
         let string = 'balance/'+Firebase.uid+'/items';
         string;
-        Firebase.database.ref('balance/'+Firebase.uid+'/items').on('value', (snapshot) => {
+
+        this.data2 = Firebase.database.ref('balance/'+Firebase.uid);
+        this.offRef2Child = this.data2.child('/items').on('value', (snapshot) => {
             if(snapshot.exists()){
                 let owed_by_me = 0;
                 let owed_to_me = 0;
@@ -127,7 +156,7 @@ export default class Profile extends React.Component {
             }
         });
 
-        Firebase.database.ref('balance/'+Firebase.uid+'/money').on('value', (snapshot) => {
+        this.offRef2Child2 = this.data2.child('/money').on('value', (snapshot) => {
             if(snapshot.exists()){
                 let owed_by_me = 0;
                 let owed_to_me = 0;
@@ -142,87 +171,15 @@ export default class Profile extends React.Component {
             }
         });
     };
-    
-    checkConnections = () => {
-        let data = Firebase.database.ref('/');
-        data.child('connections/' + Firebase.uid).on('value', (snapshot) => {
-            this.setState({usersImage: (<MyImageList width={35} height={35} />)});
-            if (snapshot.exists()) {
-                snapshot.forEach((child) => {
-                    if(child.val() !== true && child.val() !== Firebase.uid){
-                        this.setState({usersImage: (<MyImageListNotifications width={35} height={35} />)})
-                    }
-                })
-            }
-        });
-    };
-
-    checkConfirmations = () => {
-        Firebase.database.ref('confirmations/users/'+Firebase.uid+'/money').on('value', (snapshot) => {
-            this.setState({moneyImage: (<MyImageList width={35} height={35} />)});
-            if(snapshot.exists()){
-                this.setState({moneyImage: (<MyImageListNotifications width={35} height={35} />)});
-            }
-        });
-        Firebase.database.ref('confirmations/users/'+Firebase.uid+'/items').on('value', (snapshot) => {
-            this.setState({itemsImage: (<MyImageList width={35} height={35} />)});
-            if(snapshot.exists()){
-                this.setState({itemsImage: (<MyImageListNotifications width={35} height={35} />)});
-            }
-        });
-    }
-
-    onPressMenu = (screen) => {
-        this.setModalVisible(false); 
-        this.props.navigation.navigate(screen); 
-    };
 
     render() {
         return (
             <View style={{flex: 1}}>
                 <View>
-                    <Modal
-                    animationType="fade"
-                    transparent={true}
-                    visible={this.state.modalVisible}
-                    >
-                        <TouchableOpacity onPressIn={() => this.setModalVisible(false)} style={{flex: 1}}>
-                            <View style={{ flexDirection: 'row', justifyContent: 'flex-end'}}>
-                                <TouchableWithoutFeedback onPress={() => {}}>
-                                    <View style={{width: 200, marginTop: 40, marginHorizontal: 10, backgroundColor: 'white', borderRadius: 5, elevation: 10}}>
-                                        <View style={{marginHorizontal: 10}}>
-                                            <TouchableOpacity onPress={() => this.onPressMenu('Statistic')}>
-                                                <Text style={{marginHorizontal: 20, paddingVertical: 10, fontSize: 18}}>Statistic</Text>
-                                            </TouchableOpacity>
-                                        </View>
-                                        <View style={{borderColor: 'grey', borderTopWidth: 1, marginHorizontal: 10}}>
-                                            <TouchableOpacity onPress={() => this.onPressMenu('Settings')}>
-                                                <Text style={{marginHorizontal: 20, paddingVertical: 10, fontSize: 18}}>Settings</Text>
-                                            </TouchableOpacity>
-                                        </View>
-                                        <View style={{borderColor: 'grey', borderTopWidth: 2, marginHorizontal: 10}}>
-                                            <TouchableOpacity onPress={() => Firebase.auth.signOut().then(() => {})}>
-                                                <Text style={{marginHorizontal: 20, paddingVertical: 10, fontSize: 18}}>Sign Out</Text>
-                                            </TouchableOpacity>
-                                        </View>
-                                    </View>
-                                </TouchableWithoutFeedback>
-                            </View>
-                        </TouchableOpacity>
-                    </Modal>
+                    <PopupMenu modalVisible={this.state.modalVisible} setModalVisible={() => this.setModalVisible(false)} navigation={this.props.navigation} />
                 </View>
                 <View>
-                    <Modal
-                    animationType="fade"
-                    transparent={true}
-                    visible={this.state.modalVisibleNotifications}
-                    >
-                        <TouchableOpacity onPressIn={() => this.setModalVisibleNotifications(false)} style={{flex: 1}}>
-                            <View style={{flex: 1, marginTop: 60, backgroundColor: styles.mainColorGreen, borderTopColor: styles.mainColorGreen2, borderTopWidth: 10}}>
-                                <Text>Halo</Text>
-                            </View>
-                        </TouchableOpacity>       
-                    </Modal>
+                    <Notifications modalVisibleNotifications={this.state.modalVisibleNotifications} setModalVisibleNotifications={() => this.setModalVisibleNotifications(false)}/>
                 </View>
                 <View style={[{flex: 4, backgroundColor: styles.mainColorBlue}]}>
                     <View style={{alignItems: 'center', flex: 1, justifyContent: 'center'}}>

@@ -103,11 +103,11 @@ class Confirmation extends React.Component {
         update['confirmations/money/'+props.keyTransaction] = null;
         Firebase.database.ref().update(update);
 
-        Firebase.database.ref('confirmations/users/'+props.transaction.from+'/money/'+props.transaction.to).orderByValue().equalTo(props.keyTransaction).on('child_added', (snapshot) => {
+        Firebase.database.ref('confirmations/users/'+props.transaction.from+'/money/'+props.transaction.to).orderByValue().equalTo(props.keyTransaction).once('child_added', (snapshot) => {
             snapshot.ref.remove();
         }); 
 
-        Firebase.database.ref('confirmations/users/'+props.transaction.to+'/money/'+props.transaction.from).orderByValue().equalTo(props.keyTransaction).on('child_added', (snapshot) => {
+        Firebase.database.ref('confirmations/users/'+props.transaction.to+'/money/'+props.transaction.from).orderByValue().equalTo(props.keyTransaction).once('child_added', (snapshot) => {
             snapshot.ref.remove();
         }); 
     };
@@ -159,9 +159,15 @@ export default class Money extends React.Component {
         this.loadConfirmations();
     }
 
+    componentWillUnmount(){
+        this.data.off('value', this.offRef);
+        this.data2.off('value', this.offRef2);
+    }
+
     loadConfirmations = () => {
         const navigator = this.props.navigation;
-        Firebase.database.ref('confirmations/users/' + Firebase.uid + '/money').on('value', (snapshot) => {
+        this.data = Firebase.database.ref('confirmations/users/' + Firebase.uid + '/money');
+        this.offRef = this.data.on('value', (snapshot) => {
             if(snapshot.exists()){
                 this.setState({confirmation: []});
                 snapshotToArray(snapshot).reverse().forEach(async (childSnapshot) => {
@@ -193,8 +199,8 @@ export default class Money extends React.Component {
     loadTransactions = () => {
         const navigator = this.props.navigation;
 
-        let data = Firebase.database.ref('balance/'+Firebase.uid+'/money');
-        data.on('value', (snapshot) => {
+        this.data2 = Firebase.database.ref('balance/'+Firebase.uid+'/money');
+        this.offRef2 = this.data2.on('value', (snapshot) => {
             if(snapshot.exists()){
                 this.setState(({'array': []}));
                 snapshot.forEach(async (childSnapshot) => {
@@ -205,7 +211,7 @@ export default class Money extends React.Component {
 
                     let balanceText = 'I Owe';
                     if(balace < 0)
-                        balanceText = "Owe's";
+                        balanceText = "Owes";
                     else if(balace == 0)
                         balanceText = '';
                     

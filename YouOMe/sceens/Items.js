@@ -18,7 +18,7 @@ class TransactionUser extends React.Component {
                     <View style={styles.Items.containerBalance}>
                         <View >
                             <Text style={styles.Money.balanceText}>I Owe</Text>
-                            <Text style={styles.Money.balanceText}>Owe's</Text>
+                            <Text style={styles.Money.balanceText}>Owes</Text>
                         </View>
                         <View>
                             <Text style={styles.Money.balance}>{this.props.balanceIOwe}</Text>
@@ -114,11 +114,11 @@ class Confirmation extends React.Component {
         update['confirmations/items/'+props.keyTransaction] = null;
         Firebase.database.ref().update(update);
 
-        Firebase.database.ref('confirmations/users/'+props.transaction.from+'/items/'+props.transaction.to).orderByValue().equalTo(props.keyTransaction).on('child_added', (snapshot) => {
+        Firebase.database.ref('confirmations/users/'+props.transaction.from+'/items/'+props.transaction.to).orderByValue().equalTo(props.keyTransaction).once('child_added', (snapshot) => {
             snapshot.ref.remove();
         }); 
 
-        Firebase.database.ref('confirmations/users/'+props.transaction.to+'/items/'+props.transaction.from).orderByValue().equalTo(props.keyTransaction).on('child_added', (snapshot) => {
+        Firebase.database.ref('confirmations/users/'+props.transaction.to+'/items/'+props.transaction.from).orderByValue().equalTo(props.keyTransaction).once('child_added', (snapshot) => {
             snapshot.ref.remove();
         }); 
     };
@@ -273,9 +273,16 @@ export default class Items extends React.Component {
         this.loadConfirmations();
     }
 
+    componentWillUnmount(){
+        this.data.off('value', this.offRef);
+        this.data2.child('/items').off('value',this.offRefChild);
+        this.data2.child('items_returned').off('value', this.offRefChild2);
+    }
+
     loadConfirmations = () => {
         const navigator = this.props.navigation;
-        Firebase.database.ref('confirmations/users/' + Firebase.uid + '/items').on('value', (snapshot) => {
+        this.data2 = Firebase.database.ref('confirmations/users/' + Firebase.uid);
+        this.offRefChild = this.data2.child('/items').on('value', (snapshot) => {
             if(snapshot.exists()){
                 this.setState({confirmation: []});
                 snapshotToArray(snapshot).reverse().forEach(async (childSnapshot) => {
@@ -303,7 +310,7 @@ export default class Items extends React.Component {
             }
         });
 
-        Firebase.database.ref('confirmations/users/' + Firebase.uid + '/items_returned').on('value', (snapshot) => {
+        this.offRefChild2 = this.data2.child('/items_returned').on('value', (snapshot) => {
             if(snapshot.exists()){
                 this.setState({confirmationReturned: []});
                 snapshotToArray(snapshot).reverse().forEach(async (childSnapshot) => {
@@ -341,14 +348,12 @@ export default class Items extends React.Component {
                 this.setState({confirmationReturned: []});
             }
         });
-
-        
     };
 
     loadTransactions = () => {
         const navigator = this.props.navigation;
-        let data = Firebase.database.ref('balance/'+Firebase.uid+'/items');
-        data.on('value', (snapshot) => {
+        this.data = Firebase.database.ref('balance/'+Firebase.uid+'/items');
+        this.offRef = this.data.on('value', (snapshot) => {
             if(snapshot.exists()){
                 this.setState({'array': []});
                 snapshot.forEach(async (childSnapshot) => {

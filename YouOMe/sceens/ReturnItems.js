@@ -63,7 +63,7 @@ export default class ReturnItems extends React.Component {
                 if (snapshot.child('connections/' + Firebase.uid).exists())
                 {
                     let data = Firebase.database.ref('/connections/' + Firebase.uid);
-                    data.on('value', (snapshot) => {
+                    data.once('value', (snapshot) => {
                         this.setState({array: []});
                         let codeDefault = (
                             <Picker.Item key={"default"} label={""} value={'default'} />

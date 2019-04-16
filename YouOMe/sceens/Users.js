@@ -48,18 +48,50 @@ class User extends React.Component {
                 if(error != ""){
                     Alert.alert(
                         'Alert',
-                        'Not all transactions are done: \n' + error,
+                        'Not all transactions are done (other user will need to confirm): \n' + error,
                         [
                           {text: 'Cancel', onPress: () => {}},
                           {text: 'Delete anyway', onPress: () => {
-                            //delete user
+                                this.data = Firebase.database.ref('/confirmations/connections');
+                                let item = ref.push(
+                                    {
+                                        'request': Firebase.uid, 
+                                        'to': userUid
+                                    }
+                                );
+                                Firebase.database.ref('/confirmations/users/'+Firebase.uid+'/connections/'+uid).push(item.key);
+                                Firebase.database.ref('/confirmations/users/'+uid+'/connections/'+Firebase.uid).push(item.key);
+
+                                Firebase.database.ref().update(update);
                           }},
                         ],
                         {cancelable: false},
                     );
                 }
                 else{
-                    
+                    if(error != ""){
+                        Alert.alert(
+                            'Alert',
+                            'Do you want to keep histroy: \n' + error,
+                            [
+                              {text: 'No', onPress: () => {
+                                let update = {
+                                    ['/connections/'+Firebase.uid+'/'+userUid]: null,
+                                    ['/connections/'+userUid+'/'+Firebase.uid]: "deleted_"+Firebase.uid,
+                                };
+                                Firebase.database.ref().update(update);
+                              }},
+                              {text: 'Yes', onPress: () => {
+                                let update = {
+                                    ['/connections/'+Firebase.uid+'/'+userUid]: "deleted",
+                                    ['/connections/'+userUid+'/'+Firebase.uid]: "deleted_"+Firebase.uid,
+                                };
+                                Firebase.database.ref().update(update);
+                              }},
+                            ],
+                            {cancelable: false},
+                        );
+                    }
                 }
               }},
             ],
@@ -87,7 +119,6 @@ class User extends React.Component {
 
 class Request extends React.Component {
     denyRequest = (uid) => {
-        
         let update = {
             ['/connections/'+Firebase.uid+'/'+uid]: null,
             ['/connections/'+uid+'/'+Firebase.uid]: null,
@@ -156,7 +187,14 @@ export default class Users extends React.Component {
         this.state = {
             array: []
         };
+    }
+
+    componentDidMount(){
         this.getUsers();
+    }
+
+    componentWillUnmount(){
+        this.data.off('value', this.offRef);
     }
 
     getUsers = () => {
@@ -164,8 +202,8 @@ export default class Users extends React.Component {
             (snapshot) => {
                 if (snapshot.child('connections/' + Firebase.uid).exists())
                 {
-                    let data = Firebase.database.ref('/connections/' + Firebase.uid);
-                    data.on('value', (snapshot) => {
+                    this.data = Firebase.database.ref('/connections/' + Firebase.uid);
+                    this.offRef = this.data.on('value', (snapshot) => {
                         this.setState({array: []});
                         snapshot.forEach((child) => {
                             let ref = Firebase.database.ref('/users/' + child.key).once('value').then(
