@@ -2,21 +2,16 @@ import React from 'react';
 import {Text, View, TouchableOpacity, Image, ScrollView, RefreshControl, Button, Modal, TouchableWithoutFeedback} from 'react-native';
 import Firebase from "../components/Firebase";
 import * as styles from "../components/Styles";
-import AddUser from "./AddUser";
-import ImageList from '../images/list.svg';
-import ImagePlus from '../images/plus.svg';
-import ImageListNotification from '../images/list_notification2.svg';
-import {NavigationActions, StackActions} from "react-navigation";
+import { snapshotToArray } from '../components/Functions';
+import PopupMenu from '../components/PopupMenu';
 
 import ImageReturn from '../images/return.svg';
 import MyImageList from '../images/my_list.svg';
 import MyImageListNotifications from '../images/my_list_notifications.svg';
 import MyImagePlus from '../images/my_plus.svg';
-import Settings from './Settings';
 import ImageMoreMenu from '../images/more-menu.svg';
 import ImageNotification from '../images/bell.svg';
-import { snapshotToArray } from '../components/Functions';
-import PopupMenu from '../components/PopupMenu';
+
 import Notifications from './Notifications';
 
 
@@ -60,7 +55,7 @@ export default class Profile extends React.Component {
         headerTitleStyle: styles.Profile.headerText,
         headerRight: (
             <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
-                {navigation.getParam('notificationsNumber') > 0
+                {navigation.getParam('notificationsNumber') + navigation.getParam('notificationsNumberUsers') > 0
                     ?
                         <View style={{backgroundColor: styles.mainColorGreen2}}>
                             <TouchableOpacity style={{paddingTop: 25, paddingBottom: 25, marginBottom: 0, elevation: 10, paddingLeft: 20, paddingRight: 20, backgroundColor: styles.mainColorGreen2}} onPress={() => navigation.getParam('setModalVisibleNotifications')(true)}>
@@ -68,7 +63,7 @@ export default class Profile extends React.Component {
                                     <ImageNotification style={{flex: 1}} height={20} width={20}/>
                                     <View style={{position: 'absolute', right: -5, top: -5}}>
                                         <Text style={{backgroundColor: 'red', borderRadius: 6, textAlign: 'center', minWidth: 12, height: 12, color: 'white', fontSize: 9}}>
-                                            {navigation.getParam('notificationsNumber')}
+                                            {navigation.getParam('notificationsNumber') + navigation.getParam('notificationsNumberUsers')}
                                         </Text>
                                     </View>
                                 </View>
@@ -95,15 +90,15 @@ export default class Profile extends React.Component {
         this.setState({modalVisibleNotifications: visible});
     }
 
-    loadNotifications = async () => {
+    loadNotifications = () => {
         this.setState({moneyImage: (<MyImageList width={35} height={35} />)});
         this.setState({itemsImage: (<MyImageList width={35} height={35} />)});
         this.setState({usersImage: (<MyImageList width={35} height={35} />)});
 
         this.data = Firebase.database.ref('/');
-        let number = 0;
 
-        this.offRefChild = this.data.child('confirmations/users/'+Firebase.uid).on('value', (snapshot) => {        
+        this.offRefChild = this.data.child('confirmations/users/'+Firebase.uid).on('value', (snapshot) => {
+            let number = 0;       
             if(snapshot.child('/money').exists()){
                 snapshot.child('/money').forEach((child) => number += child.numChildren());
                 //this.setState({moneyImage: (<MyImageListNotifications width={35} height={35} />)});
@@ -121,6 +116,7 @@ export default class Profile extends React.Component {
         })
 
         this.offRefChild2 = this.data.child('connections/' + Firebase.uid).on('value', (snapshot) => {
+            let number = 0;
             if (snapshot.exists()) {
                 snapshot.forEach((child) => {
                     if(child.val() !== true && child.val() !== Firebase.uid){
@@ -130,7 +126,7 @@ export default class Profile extends React.Component {
                 })
             }
             this.props.navigation.setParams({
-                notificationsNumber: number
+                notificationsNumberUsers: number
             })
         });
     };

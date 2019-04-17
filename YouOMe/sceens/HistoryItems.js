@@ -1,6 +1,5 @@
 import React from 'react';
-import {Platform, Text, View, TextInput, TouchableOpacity, Image, Button, Picker, DatePickerAndroid, DatePickerIOS} from 'react-native';
-import {NavigationActions, StackActions} from "react-navigation";
+import {Text, View, TouchableOpacity} from 'react-native';
 import Firebase from "../components/Firebase";
 import * as styles from "../components/Styles";
 import { ScrollView, FlatList } from 'react-native-gesture-handler';
@@ -8,7 +7,6 @@ import ImageArrowRight from '../images/back-arrow (1).svg';
 import ImageArrowLeft from '../images/back-arrow.svg';
 import ImageArrowReturnLeft from '../images/curved-returing-arrow.svg';
 import ImageArrowReturnRight from '../images/left-return-arrow.svg';
-import { whileStatement } from '@babel/types';
 import { snapshotToArray } from '../components/Functions';
 
 class Transaction extends React.Component {

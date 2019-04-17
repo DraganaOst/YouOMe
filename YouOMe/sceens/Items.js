@@ -1,6 +1,5 @@
 import React from 'react';
-import {Platform, Text, View, TextInput, TouchableOpacity, Image, Button, Picker, DatePickerAndroid, DatePickerIOS, Alert} from 'react-native';
-import {NavigationActions, StackActions} from "react-navigation";
+import {Text, View, TouchableOpacity, Alert} from 'react-native';
 import Firebase from "../components/Firebase";
 import * as styles from "../components/Styles";
 import { ScrollView, FlatList } from 'react-native-gesture-handler';

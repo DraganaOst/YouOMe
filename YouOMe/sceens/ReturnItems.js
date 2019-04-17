@@ -1,9 +1,7 @@
 import React from 'react';
-import {Platform, Text, View, TextInput, TouchableOpacity, Image, Button, Picker, DatePickerAndroid, DatePickerIOS} from 'react-native';
-import {NavigationActions, StackActions} from "react-navigation";
+import {Platform, Text, View, TouchableOpacity, Picker, DatePickerAndroid, DatePickerIOS} from 'react-native';
 import Firebase from "../components/Firebase";
 import * as styles from "../components/Styles";
-import ImageCalendar from '../images/calendar.svg';
 import { ScrollView } from 'react-native-gesture-handler';
 import { snapshotToArray } from '../components/Functions';
 
@@ -159,7 +157,8 @@ export default class ReturnItems extends React.Component {
             if(this.state.arrayItemsChecked[i].checked === true){
                 let object = {
                     transactionsKey: this.state.arrayItemsChecked[i].id,
-                    request: Firebase.uid
+                    request: Firebase.uid,
+                    date: new Date().toISOString()
                 };
                 //let item = Firebase.database.ref('/confirmations/items_returned').push();
                 Firebase.database.ref('/confirmations/users/'+Firebase.uid+'/items_returned/'+uid).push(object);

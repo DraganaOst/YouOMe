@@ -7,14 +7,13 @@
  */
 import React from 'react';
 import Login from './sceens/Login';
-import {createStackNavigator, createAppContainer, createBottomTabNavigator} from 'react-navigation';
-import {Text, View, TouchableOpacity, Image, ScrollView, RefreshControl, Button} from 'react-native';
+import {createStackNavigator, createAppContainer} from 'react-navigation';
+import './components/SettingTimerError';
 import Firebase from "./components/Firebase";
+import * as styles from "./components/Styles";
 import SignUp from "./sceens/SignUp";
 import Profile from "./sceens/Profile";
-import './components/SettingTimerError';
 import AddMoney from "./sceens/AddMoney";
-import * as styles from "./components/Styles";
 import AddUser from "./sceens/AddUser";
 import Users from "./sceens/Users";
 import Money from './sceens/Money';

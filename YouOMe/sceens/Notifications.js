@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text, Modal, TouchableOpacity, FlatList, ScrollView, TouchableWithoutFeedback} from 'react-native';
+import {View, Text, Modal, TouchableOpacity, FlatList, Alert, TouchableWithoutFeedback} from 'react-native';
 import * as styles from '../components/Styles';
 import Firebase from '../components/Firebase';
 import { snapshotToArray } from '../components/Functions';
@@ -232,98 +232,211 @@ class ConfirmationReturn extends React.Component {
     }
 }
 
+class Notification extends React.Component {
+    constructor(){
+        super();
+    }
+
+    onDelete = props => {
+        Alert.alert(
+            'Alert',
+            'Are you sure you want to delete: \n' + '"' + props.object + " " + props.text + " " + props.username + '"',
+            [
+              {text: 'NO', onPress: () => {}},
+              {text: 'YES', onPress: () => {
+                let update = {};
+
+                if(props.path == 'items' || props.path == 'money'){
+                    update['confirmations/'+props.path+'/'+props.keyTransaction] = null;
+                    Firebase.database.ref().update(update);
+    
+                    let ref = Firebase.database.ref('confirmations/users/'+props.userUid+'/'+props.path+'/'+Firebase.uid);
+                    ref.orderByValue().equalTo(props.keyTransaction).once('child_added', (snapshot) => {
+                        snapshot.ref.remove();
+                    }); 
+    
+                    let ref2 = Firebase.database.ref('confirmations/users/'+Firebase.uid+'/'+props.path+'/'+props.userUid);
+                    ref2.orderByValue().equalTo(props.keyTransaction).once('child_added', (snapshot) => {
+                        snapshot.ref.remove();
+                    }); 
+                }
+                else if(props.path == 'items_returned'){
+                    let ref = Firebase.database.ref('confirmations/users/'+props.userUid+'/items_returned/'+Firebase.uid);
+                    ref.orderByChild('transactionsKey').equalTo(props.keyTransaction).once('child_added', (snapshot) => {
+                        snapshot.ref.remove();
+                    }); 
+
+                    let ref2 = Firebase.database.ref('confirmations/users/'+Firebase.uid+'/items_returned/'+props.userUid);
+                    ref2.orderByChild('transactionsKey').equalTo(props.keyTransaction).once('child_added', (snapshot) => {
+                        snapshot.ref.remove();
+                    });
+                }
+              }},
+            ],
+            {cancelable: false},
+          );
+    };
+
+    render() {
+        return (
+            <View style={{backgroundColor: styles.mainColorLightGrey2, margin: 5, elevation: 4}}>
+                <Text style={{color: 'white', fontWeight: 'bold', backgroundColor: styles.mainColorLightGrey2, textAlign: 'center'}}>
+                    {this.props.text}
+                </Text>
+                <View style={{flexDirection: 'row', alignItems: 'center', padding: 1}}>
+                    <Text style={{flex: 2, color: 'white', marginHorizontal: 5, textAlign: 'center'}}>
+                        {this.props.object}
+                    </Text>
+                    <Text  style={{flex: 2, color: 'white',marginHorizontal: 5, textAlign: 'center'}}>
+                        {this.props.username}
+                    </Text>                              
+                </View>
+                {this.props.cancelRequest 
+                    ?
+                        <TouchableOpacity onPress={() => this.onDelete(this.props)} style={{flex: 1, padding: 5, justifyContent: 'center', alignItems: 'center', backgroundColor: styles.mainColorLightBlue}}>
+                            <Text style={{fontSize: 15, color: 'white'}}>Cancel request</Text>
+                        </TouchableOpacity>
+                    :
+                        <View style={{flexDirection: 'row'}}>
+                            <TouchableOpacity onPress={() => this.onDelete(this.props)} style={{flex: 1, padding: 5, justifyContent: 'center', alignItems: 'center', backgroundColor: styles.mainColorLightBlue}}>
+                                <ImageCancel height={15} width={15} />
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => {}} style={{flex: 1, padding: 5, justifyContent: 'center', alignItems: 'center', backgroundColor: styles.mainColorGreen, borderStyle: 'solid'}}>
+                                <ImageCheck height={15} width={15} />
+                            </TouchableOpacity>       
+                        </View>
+                }
+            </View>
+        )
+    };
+}
+
 export default class Notifications extends React.Component {
     constructor(){
         super();
         this.state = {
             option: 'money',
-            moneyAdd: [],
-            itemsAdd: [],
-            itemsReturn: [],
-            users: [],
+            subOption: 'requests',
+            moneyRequests: [],
+            moneyMyRequests: [],
+            itemsMyRequests: [],
+            itemsRequests: [],
+            usersRequests: [],
+            usersMyRequests: []
         }
     }
 
     componentDidMount(){
-        this.loadConfirmations();
+        this.loadNotifications();
     }
 
     componentWillUnmount(){
-        this.data.child('/items').off('value',this.offRefChild);
-        this.data.child('items_returned').off('value', this.offRefChild2);
+        this.data.child('/money').off('value', this.offRefMoney);
+        this.data.child('/items').off('value', this.offRefItems);
+        this.data.child('/items_returned').off('value', this.offRefItemsReturned);
     }
 
-    loadConfirmations = () => {
-        //items
+    loadNotifications = () => {
         const navigator = this.props.navigation;
-        this.data = Firebase.database.ref('confirmations/users/' + Firebase.uid);
-        this.offRefChild = this.data.child('/items').on('value', (snapshot) => {
-            if(snapshot.exists()){
-                this.setState({itemsAdd: []});
-                snapshotToArray(snapshot).reverse().forEach(async (childSnapshot) => {
-                    let username = "";
-                    let userUid = childSnapshot.key;
-                    await Firebase.database.ref('users/'+userUid).once('value').then((userSnapshot) => {username = userSnapshot.val().username});
+        this.data = Firebase.database.ref('confirmations/users/'+Firebase.uid);
 
-                    childSnapshot.forEach((subChildSnapshot) => {
-                        Firebase.database.ref('confirmations/items/'+subChildSnapshot.val()).once('value').then((confirmation) => {
-                            let object = ({
-                                key: confirmation.key,
-                                keyTransaction: confirmation.key,
-                                username: username,
-                                userUid: userUid,
-                                transaction: confirmation.val()
-                            });
-                            this.setState((previousState) => ({itemsAdd: [...previousState.itemsAdd, object]}));
-                        })
-                    });
-                    
-                });
-            }
-            else{
-                this.setState({itemsAdd: []});
-            }
-        });
+        this.offRefItems = this.data.child('/items').on('value', (snapshot) => {
+            this.setState({itemsMyRequests: []});
+            this.setState({itemsRequests: []});
+            snapshot.forEach(async (child) => {
+                let username = "";
+                let userUid = child.key;
+                await Firebase.database.ref('users/'+userUid).once('value').then((userSnapshot) => {username = userSnapshot.val().username});
 
-        this.offRefChild2 = this.data.child('/items_returned').on('value', (snapshot) => {
-            if(snapshot.exists()){
-                this.setState({itemsReturn: []});
-                snapshotToArray(snapshot).reverse().forEach(async (childSnapshot) => {
-                    let username = "";
-                    let userUid = childSnapshot.key;
-                    await Firebase.database.ref('users/'+userUid).once('value').then((userSnapshot) => {username = userSnapshot.val().username});
-
-                    childSnapshot.forEach((subChildSnapshot) => {
-                        let itemName = "";
-                        let from = "";
-                        let to = "";
-                        let request = subChildSnapshot.val().request;
-                        Firebase.database.ref('transactions/items/'+subChildSnapshot.val().transactionsKey).once('value').then((transactionSnapshot) => {
-                            itemName = transactionSnapshot.val().name;
-                            from = transactionSnapshot.val().from;
-                            to = transactionSnapshot.val().to;
-
-                            let object = ({
-                                key: subChildSnapshot.val().transactionsKey,
-                                keyTransaction: subChildSnapshot.val().transactionsKey,
-                                username: username,
-                                userUid: userUid,
-                                name: itemName,
-                                request: request,
-                                from: from,
-                                to: to
-                            });
-                            this.setState((previousState) => ({itemsReturn: [...previousState.itemsReturn, object]}));
+                child.forEach((subChild) => {
+                    Firebase.database.ref('confirmations/items/'+subChild.val()).once('value', (confirmation) => {
+                        let object = ({
+                            key: subChild.key,
+                            keyTransaction: confirmation.key,
+                            username: username,
+                            userUid: userUid,
+                            object: confirmation.val().name,
+                            cancelRequest: false,
+                            text: confirmation.val().from == Firebase.uid ? 'TO' : 'FROM',
+                            date: new Date(confirmation.val().date_incured),
+                            path: 'items'
                         });
-                    });
-                    
+
+                        if(confirmation.val().request == Firebase.uid){
+                            object.cancelRequest = true;
+                            this.setState((previousState) => ({itemsMyRequests: [...previousState.itemsMyRequests, object]}));
+                        }
+                        else
+                            this.setState((previousState) => ({itemsRequests: [...previousState.itemsRequests, object]}));
+                    })
                 });
-            }
-            else{
-                this.setState({itemsReturn: []});
-            }
+            });
         });
-    };
+            
+        this.offRefMoney = this.data.child('/money').on('value', (snapshot) => {
+            this.setState({moneyMyRequests: []});
+            this.setState({moneyRequests: []});
+            snapshot.forEach(async (child) => {
+                let username = "";
+                let userUid = child.key;
+                await Firebase.database.ref('users/'+userUid).once('value').then((userSnapshot) => {username = userSnapshot.val().username});
+                child.forEach((subChild) => {
+                    Firebase.database.ref('confirmations/money/'+subChild.val()).once('value', (confirmation) => {
+                        let object = ({
+                            key: subChild.key,
+                            keyTransaction: confirmation.key,
+                            username: username,
+                            userUid: userUid,
+                            object: confirmation.val().amount + "€",
+                            cancelRequest: false,
+                            text: confirmation.val().from == Firebase.uid ? 'TO' : 'FROM',
+                            date: new Date(confirmation.val().date_incured),
+                            path: 'money'
+                        });
+
+                        if(confirmation.val().request == Firebase.uid){
+                            object.cancelRequest = true;
+                            this.setState((previousState) => ({moneyMyRequests: [...previousState.moneyMyRequests, object]}));
+                        }
+                        else
+                            this.setState((previousState) => ({moneyRequests: [...previousState.moneyRequests, object]}));
+                    })
+                });
+            });
+        });
+    
+        this.offRefItemsReturned = this.data.child('/items_returned').on('value', (snapshot) => {
+            this.setState({usersMyRequests: []});
+            this.setState({usersRequests: []});
+            snapshot.forEach(async (child) => {
+                let username = "";
+                let userUid = child.key;
+                await Firebase.database.ref('users/'+userUid).once('value').then((userSnapshot) => {username = userSnapshot.val().username});
+                child.forEach((subChild) => {
+                    Firebase.database.ref('transactions/items/'+subChild.val().transactionsKey).once('value', (transaction) => {
+                        let object = ({
+                            key: subChild.key,
+                            keyTransaction: transaction.key,
+                            username: username,
+                            userUid: userUid,
+                            object: transaction.val().name,
+                            cancelRequest: false,
+                            text: transaction.val().from == Firebase.uid ? 'RETURNED FROM' : 'RETURNED TO',
+                            date: new Date(subChild.val().date),
+                            path: 'items_returned'
+                        });
+
+                        if(subChild.val().request == Firebase.uid){
+                            object.cancelRequest = true;
+                            this.setState((previousState) => ({usersMyRequests: [...previousState.usersMyRequests, object]}));
+                        }
+                        else
+                            this.setState((previousState) => ({usersRequests: [...previousState.usersRequests, object]}));
+                    })
+                });
+            });
+        });
+    }
 
     render() {
       return (
@@ -332,13 +445,22 @@ export default class Notifications extends React.Component {
             transparent={true}
             visible={this.props.modalVisibleNotifications}
         >
-            <TouchableOpacity onPressIn={this.props.setModalVisibleNotifications} style={{flex: 1}}>
-                <TouchableWithoutFeedback>
-                    <View style={{flex: 1, marginTop: 55, backgroundColor: styles.mainColorLightGrey, borderTopColor: styles.mainColorGreen2, borderTopWidth: 10}}>
-                        <View style={styles.AddMoneyItem.containerButton}>
+            <View style={{flex: 1}}>
+                    <TouchableWithoutFeedback onPress={this.props.setModalVisibleNotifications}>
+                        <View style={{height: 55, backgroundColor: 'transparent'}}></View>
+                    </TouchableWithoutFeedback>
+                    <View style={{flex: 1, backgroundColor: styles.mainColorLightGrey, borderTopColor: styles.mainColorGreen2, borderTopWidth: 10}}>
+                        {/*<View style={styles.AddMoneyItem.containerButton}>
                             <TouchableOpacity style={{flex: 1}} onPress={() => (this.setState({option: 'money'}))} underlayColor="white">
                                 <View style={[styles.AddMoneyItem.button, {backgroundColor: styles.mainColorOrange, opacity: this.state.option === "money" ? 1 : 0.5}]}>
-                                    <Text style={styles.AddMoneyItem.buttonText}>Money</Text>
+                                    <View style={{position: 'absolute', right: 10, top: 10}}>
+                                        <Text style={{backgroundColor: 'red', borderRadius: 6, textAlign: 'center', minWidth: 12, height: 12, color: 'white', fontSize: 9}}>
+                                            {this.state.moneyRequests.length + this.state.moneyMyRequests.length}
+                                        </Text>
+                                    </View>
+                                    <Text style={styles.AddMoneyItem.buttonText}>
+                                        Money
+                                    </Text>
                                 </View>
                             </TouchableOpacity>
                             <TouchableOpacity style={{flex: 1}} onPress={() => (this.setState({option: "items"}))} underlayColor="white">
@@ -351,75 +473,48 @@ export default class Notifications extends React.Component {
                                     <Text style={styles.AddMoneyItem.buttonText}>Users</Text>
                                 </View>
                             </TouchableOpacity>
-                        </View>
-                        {/*<View style={{flex: 1}}>
-                            <View style={{flex: 1, backgroundColor: styles.mainColorGrey, flexDirection: 'row'}}>
-                                <View style={{width: 50, backgroundColor: styles.mainColorLightGrey2, justifyContent: 'center', alignItems: 'center'}}>
-                                    <Text style={{color: 'white', fontWeight: 'bold', fontSize: 18, transform: [{ rotate: '-90deg'}]}}>Add</Text>
-                                </View>
-                                <View>
-                                    <Text>Content</Text>
-                                </View>
-                            </View>
-                            <View style={{flex: 1, backgroundColor: styles.mainColorGrey, flexDirection: 'row', borderTopColor: styles.mainColorLightGrey2, borderTopWidth: 3}}>
-                                <View style={{width: 50, backgroundColor: styles.mainColorLightGrey2, justifyContent: 'center', alignItems: 'center'}}>
-                                    <Text style={{width: 110, color: 'white', fontWeight: 'bold', fontSize: 18, transform: [{ rotate: '-90deg'}]}}>My requests</Text>
-                                </View>
-                                <View>
-                                    <Text>Content</Text>
-                                </View>
-                            </View>
                         </View>*/}
-                        <View style={{flex: 1, backgroundColor: styles.mainColorGrey}}>
-                            <View style={{flex: 1}}>
-                                <View style={{backgroundColor: styles.mainColorLightGrey2}}>
-                                    <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: 10}}>
-                                        <Text style={{flex: 1, color: 'white', marginHorizontal: 10, textAlign: 'center'}}>
-                                            Item
-                                        </Text>
-                                        <Text style={{flex: 1, color: 'white', fontWeight: 'bold', marginHorizontal: 10, textAlign: 'center'}}>
-                                            FROM
-                                        </Text>
-                                        <Text  style={{flex: 1, color: 'white',marginHorizontal: 10, textAlign: 'center'}}>
-                                            User
-                                        </Text>
-                                    </View>
-                                    <View style={{flexDirection: 'row'}}>
-                                        <TouchableOpacity style={{elevation: 4, flex: 1, backgroundColor: '#BC1A1A', marginHorizontal: 10}} onPress={() => {}} underlayColor="white">
-                                            <Text style={{textAlign: 'center', color: 'white', padding: 5, fontWeight: 'bold'}}>Deny</Text>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity style={{elevation: 4, flex: 1, backgroundColor: styles.mainColorGreen, marginHorizontal: 10}} onPress={() => {}} underlayColor="white">
-                                            <Text style={{textAlign: 'center', color: 'white', padding: 5, fontWeight: 'bold'}}>Accept</Text>
-                                        </TouchableOpacity>
-                                    </View>
+                        <View style={styles.AddMoneyItem.containerButton}>
+                            <TouchableOpacity style={{flex: 1}} onPress={() => (this.setState({subOption: 'requests'}))} underlayColor="white">
+                                <View style={[styles.AddMoneyItem.button, {backgroundColor: styles.mainColorGrey, opacity: this.state.subOption === "requests" ? 1 : 0.5}]}>
+                                    <Text style={styles.AddMoneyItem.buttonText}>Requests</Text>
                                 </View>
-                            </View>
-                            <View style={{flex: 1, borderTopColor: styles.mainColorLightGrey2, borderTopWidth: 3}}>
-
-                            </View>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={{flex: 1}} onPress={() => (this.setState({subOption: "cancel_requests"}))} underlayColor="white">
+                                <View style={[styles.AddMoneyItem.button, {backgroundColor: styles.mainColorGrey, opacity: this.state.subOption === "cancel_requests" ? 1 : 0.5}]}>
+                                    <Text style={styles.AddMoneyItem.buttonText}>Cancel requests</Text>
+                                </View>
+                            </TouchableOpacity>
                         </View>
-                    </View>
-                </TouchableWithoutFeedback>
-                
-                {this.state.itemsAdd.length < 0  
-                    ?
                         <FlatList 
-                            style={{backgroundColor: styles.mainColorOrange, maxHeight: '50%'}}
-                            data={this.state.itemsAdd}  
+                            style={{backgroundColor: styles.mainColorGrey}}
+                            data={
+                                /*this.state.option == 'money' 
+                                    ? (this.state.subOption == 'requests' ? this.state.moneyRequests : this.state.moneyMyRequests) 
+                                    : (this.state.option == 'items' 
+                                        ? (this.state.subOption == 'requests' ? this.state.itemsRequests : this.state.itemsMyRequests) 
+                                        : (this.state.subOption == 'requests' ? this.state.usersRequests : this.state.itemsMyRequests))*/
+                                    this.state.subOption == 'requests' 
+                                        ? [].concat(this.state.moneyRequests, this.state.usersRequests, this.state.itemsRequests).sort((a,b) => a.date < b.date ? 1 : -1)
+                                        : [].concat(this.state.moneyMyRequests, this.state.usersMyRequests, this.state.itemsMyRequests).sort((a,b) => a.date < b.date ? 1 : -1)
+                                }  
                             renderItem={({item}) => (
-                                <Confirmation
+                                <Notification
                                     key={item.key}
-                                    transaction={item.transaction}
-                                    user={item.username}
-                                    userUid={item.userUid}
+                                    path={item.path}
                                     keyTransaction={item.keyTransaction}
+                                    cancelRequest={item.cancelRequest}
+                                    username={item.username}
+                                    userUid={item.userUid}
+                                    object={item.object}
+                                    cancelRequest={item.cancelRequest}
+                                    text={item.text}
+                                    date={item.date}
                                 />
                             )}         
                         />
-                    : 
-                        null
-                }
-            </TouchableOpacity>       
+                    </View>
+            </View>       
         </Modal>
       )
     };

@@ -1,9 +1,7 @@
 import React from 'react';
-import {Text, View, TextInput, TouchableOpacity, Image, Button, Modal, Alert} from 'react-native';
-import {NavigationActions, StackActions} from "react-navigation";
+import {Text, View, TouchableOpacity, Alert} from 'react-native';
 import Firebase from "../components/Firebase";
 import * as styles from "../components/Styles";
-import ImageAddUser from '../images/add-user.svg';
 import ImageCancel from '../images/cancel.svg';
 import ImageChecked from '../images/checked_2.svg';
 import ImageBin from '../images/rubbish-bin.svg';
