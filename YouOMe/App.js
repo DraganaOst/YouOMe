@@ -24,6 +24,7 @@ import HistoryItems from './sceens/HistoryItems';
 import ReturnItems from './sceens/ReturnItems';
 import Loading from './sceens/Loading';
 import Settings from './sceens/Settings';
+import Statistic from './sceens/Statistic';
 
 const AppNavigator = createStackNavigator({
   Login: {
@@ -118,9 +119,18 @@ const AppNavigator = createStackNavigator({
   },
   Settings: {
     screen: Settings
+  },
+  Statistic: {
+    screen: Statistic,
+    navigationOptions: {
+      headerStyle: styles.Profile.header,
+      headerTitleStyle: styles.Profile.headerText,
+      headerTintColor: 'white',
+      title: 'Statistic'
+    },
   }
 }, {
-  initialRouteName: 'Loading'
+  initialRouteName: 'Statistic'
 });
 
 const Navigator = createAppContainer(AppNavigator);

@@ -61,6 +61,16 @@ export default class AddUser extends React.Component{
                             );
                             array.push(code);
                         }
+                        else{
+                            if(connection.exists()){
+                                if(connection.val().toString().includes('deleted') && childSnapshot.val().username.toLowerCase().includes(this.state.search.toLowerCase()) && childSnapshot.key !== Firebase.uid){
+                                    let code = (
+                                        <User key={childSnapshot.key} userUid={childSnapshot.key} username={childSnapshot.val().username}/>
+                                    );
+                                    array.push(code);
+                                }
+                            }
+                        }
                     });
                 });
             });

@@ -201,23 +201,21 @@ export default class Money extends React.Component {
         this.offRef2 = this.data2.on('value', (snapshot) => {
             if(snapshot.exists()){
                 this.setState(({'array': []}));
-                snapshot.forEach(async (childSnapshot) => {
-                    let username = "";
+                snapshot.forEach((childSnapshot) => {
                     let userUid = childSnapshot.key;
                     let balace = childSnapshot.val();
-                    await Firebase.database.ref('users/'+userUid).once('value').then((userSnapshot) => {username = userSnapshot.val().username});
-
-                    let balanceText = 'I Owe';
-                    if(balace < 0)
-                        balanceText = "Owes";
-                    else if(balace == 0)
-                        balanceText = '';
-                    
-                    let code = (
-                        <TransactionUser key={userUid} uid={userUid} username={username} balanceText={balanceText} balance={Math.abs(balace)} navigator={navigator}/>
-                    );
-    
-                    this.setState((previousState) => ({'array': [...previousState.array, code]}));
+                    Firebase.database.ref('users/'+userUid).once('value').then((userSnapshot) => {
+                        let balanceText = 'I Owe';
+                        if(balace < 0)
+                            balanceText = "Owes";
+                        else if(balace == 0)
+                            balanceText = '';
+                        
+                        let code = (
+                            <TransactionUser key={userUid} uid={userUid} username={userSnapshot.val().username} balanceText={balanceText} balance={Math.abs(balace.toFixed(2))} navigator={navigator}/>
+                        );
+                        this.setState((previousState) => ({'array': [...previousState.array, code]}));
+                    });
                 });
             }
         });

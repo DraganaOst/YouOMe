@@ -49,17 +49,19 @@ class User extends React.Component {
                         'Not all transactions are done (other user will need to confirm): \n' + error,
                         [
                           {text: 'Cancel', onPress: () => {}},
-                          {text: 'Delete anyway', onPress: () => {
-                                this.data = Firebase.database.ref('/confirmations/connections');
-                                let item = ref.push(
+                          {text: 'Send request', onPress: () => {
+                                this.data = Firebase.database.ref('/confirmations/delete_connections');
+                                let item = this.data.push(
                                     {
                                         'request': Firebase.uid, 
                                         'to': userUid
                                     }
                                 );
-                                Firebase.database.ref('/confirmations/users/'+Firebase.uid+'/connections/'+uid).push(item.key);
-                                Firebase.database.ref('/confirmations/users/'+uid+'/connections/'+Firebase.uid).push(item.key);
 
+                                let update = {
+                                    ['/confirmations/users/'+Firebase.uid+'/delete_connections/'+userUid]: item.key,
+                                    ['/confirmations/users/'+userUid+'/delete_connections/'+Firebase.uid]: item.key,
+                                };
                                 Firebase.database.ref().update(update);
                           }},
                         ],
@@ -67,29 +69,27 @@ class User extends React.Component {
                     );
                 }
                 else{
-                    if(error != ""){
-                        Alert.alert(
-                            'Alert',
-                            'Do you want to keep histroy: \n' + error,
-                            [
-                              {text: 'No', onPress: () => {
-                                let update = {
-                                    ['/connections/'+Firebase.uid+'/'+userUid]: null,
-                                    ['/connections/'+userUid+'/'+Firebase.uid]: "deleted_"+Firebase.uid,
-                                };
-                                Firebase.database.ref().update(update);
-                              }},
-                              {text: 'Yes', onPress: () => {
-                                let update = {
-                                    ['/connections/'+Firebase.uid+'/'+userUid]: "deleted",
-                                    ['/connections/'+userUid+'/'+Firebase.uid]: "deleted_"+Firebase.uid,
-                                };
-                                Firebase.database.ref().update(update);
-                              }},
-                            ],
-                            {cancelable: false},
-                        );
-                    }
+                    Alert.alert(
+                        'Alert',
+                        'Do you want to keep histroy?',
+                        [
+                            {text: 'No', onPress: () => {
+                            let update = {
+                                ['/connections/'+Firebase.uid+'/'+userUid]: null,
+                                ['/connections/'+userUid+'/'+Firebase.uid]: "deleted_"+Firebase.uid,
+                            };
+                            Firebase.database.ref().update(update);
+                            }},
+                            {text: 'Yes', onPress: () => {
+                            let update = {
+                                ['/connections/'+Firebase.uid+'/'+userUid]: "deleted",
+                                ['/connections/'+userUid+'/'+Firebase.uid]: "deleted_"+Firebase.uid,
+                            };
+                            Firebase.database.ref().update(update);
+                            }},
+                        ],
+                        {cancelable: false},
+                    );
                 }
               }},
             ],
@@ -157,10 +157,11 @@ class CancelRequest extends React.Component {
             ['/connections/'+Firebase.uid+'/'+uid]: null,
             ['/connections/'+uid+'/'+Firebase.uid]: null,
         };
+        Firebase.database.ref().update(update);
     };
 
     componentDidUpdate(){
-        Firebase.database.ref().update(update);
+        
     }
 
     render() {
@@ -192,7 +193,7 @@ export default class Users extends React.Component {
     }
 
     componentWillUnmount(){
-        this.data.off('value', this.offRef);
+        //this.data.off('value', this.offRef);
     }
 
     getUsers = () => {
@@ -212,7 +213,7 @@ export default class Users extends React.Component {
                                             <User key={child.key} uid={child.key} state={child.val()} username={snapshotUser.val().username}/>
                                         );
                                     }
-                                    else if(child.val() !== Firebase.uid){
+                                    else if(child.val() !== Firebase.uid && !child.val().toString().includes('deleted')){
                                         code = (
                                             <Request key={child.key} uid={child.key} state={child.val()} username={snapshotUser.val().username}/>
                                         );
@@ -222,7 +223,8 @@ export default class Users extends React.Component {
                                             <CancelRequest key={child.key} uid={child.key} state={child.val()} username={snapshotUser.val().username}/>
                                         );
                                     }
-                                    this.setState((previousState) => ({'array': [...previousState.array, code]}));
+                                    if(code !== "")
+                                        this.setState((previousState) => ({'array': [...previousState.array, code]}));
                                 }
                             );
                         });

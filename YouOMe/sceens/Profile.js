@@ -91,7 +91,7 @@ export default class Profile extends React.Component {
     }
 
     loadNotifications = () => {
-        this.setState({moneyImage: (<MyImageList width={35} height={35} />)});
+        this.setState({moneyImage: (<Image style={{height: 35, width: 35}} source={require('../images/my_list.png')}/>)});
         this.setState({itemsImage: (<MyImageList width={35} height={35} />)});
         this.setState({usersImage: (<MyImageList width={35} height={35} />)});
 
@@ -100,15 +100,18 @@ export default class Profile extends React.Component {
         this.offRefChild = this.data.child('confirmations/users/'+Firebase.uid).on('value', (snapshot) => {
             let number = 0;       
             if(snapshot.child('/money').exists()){
-                snapshot.child('/money').forEach((child) => number += child.numChildren());
+                number += snapshot.child('/money').numChildren(); //.forEach((child) => number += child.numChildren());
                 //this.setState({moneyImage: (<MyImageListNotifications width={35} height={35} />)});
             }
             if(snapshot.child('/items').exists()){
-                snapshot.child('/items').forEach((child) => number += child.numChildren());
+                number += snapshot.child('/items').numChildren(); //.forEach((child) => number += child.numChildren());
                 //this.setState({itemsImage: (<MyImageListNotifications width={35} height={35} />)});
             }
             if(snapshot.child('/items_returned').exists()){
-                snapshot.child('/items_returned').forEach((child) => number += child.numChildren());
+                number += snapshot.child('/items_returned').numChildren(); //.forEach((child) => number += child.numChildren());
+            }
+            if(snapshot.child('/delete_connections')){
+                number += snapshot.child('/delete_connections').numChildren();
             }
             this.props.navigation.setParams({
                 notificationsNumber: number
@@ -117,11 +120,19 @@ export default class Profile extends React.Component {
 
         this.offRefChild2 = this.data.child('connections/' + Firebase.uid).on('value', (snapshot) => {
             let number = 0;
+            this.setState({usersImage: (<MyImageList width={35} height={35} />)})
             if (snapshot.exists()) {
                 snapshot.forEach((child) => {
-                    if(child.val() !== true && child.val() !== Firebase.uid){
-                        this.setState({usersImage: (<MyImageListNotifications width={35} height={35} />)})
-                        number++;
+                    if(child.val() !== true){
+                        if(child.val().toString().includes('deleted_'))
+                            number++;
+                        else if(child.val().toString().includes('deleted')){
+                            this.setState({usersImage: (<MyImageList width={35} height={35} />)})
+                        }
+                        else{
+                            this.setState({usersImage: (<MyImageListNotifications width={35} height={35} />)})
+                            number++;
+                        }       
                     }
                 })
             }
@@ -150,6 +161,11 @@ export default class Profile extends React.Component {
                 this.setState({items_owed_by_me: owed_by_me});
                 this.setState({items_owed_to_me: owed_to_me});
             }
+            else{
+                this.setState({items_owed_by_me: 0});
+                this.setState({items_owed_to_me: 0});
+            }
+            
         });
 
         this.offRef2Child2 = this.data2.child('/money').on('value', (snapshot) => {
@@ -158,12 +174,16 @@ export default class Profile extends React.Component {
                 let owed_to_me = 0;
                 snapshot.forEach((childSnapshot) => {
                     if(childSnapshot.val() > 0)
-                        owed_by_me += Math.abs(Number(childSnapshot.val()));
+                        owed_by_me += Math.abs(childSnapshot.val());
                     else
-                        owed_to_me += Math.abs(Number(childSnapshot.val()));
+                        owed_to_me += Math.abs(childSnapshot.val());
                 });
                 this.setState({money_owed_by_me: owed_by_me});
                 this.setState({money_owed_to_me: owed_to_me});
+            }
+            else{
+                this.setState({items_owed_by_me: 0});
+                this.setState({items_owed_to_me: 0});
             }
         });
     };
@@ -199,7 +219,7 @@ export default class Profile extends React.Component {
                                     ? "Owed by me"
                                     : (this.state.money_owed_by_me === this.state.money_owed_to_me ? "" : "Owed to me")}
                             </Text>
-                            <Text style={{color: 'white', fontSize: 30, fontWeight: 'bold', marginBottom: 10}}>{Math.abs(this.state.money_owed_by_me - this.state.money_owed_to_me)}€</Text>
+                            <Text style={{color: 'white', fontSize: 30, fontWeight: 'bold', marginBottom: 10}}>{Math.abs(this.state.money_owed_by_me - this.state.money_owed_to_me).toFixed(2)}€</Text>
                         </View>
                     </View>
                     <View style={{flexDirection: 'row', alignItems: 'stretch', flex: 1}}>

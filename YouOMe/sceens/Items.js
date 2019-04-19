@@ -355,23 +355,21 @@ export default class Items extends React.Component {
         this.offRef = this.data.on('value', (snapshot) => {
             if(snapshot.exists()){
                 this.setState({'array': []});
-                snapshot.forEach(async (childSnapshot) => {
-                    let username = "";
+                snapshot.forEach((childSnapshot) => {
                     let userUid = childSnapshot.key;
-                    await Firebase.database.ref('users/'+userUid).once('value').then((userSnapshot) => {username = userSnapshot.val().username});
-                    
-                    let owed_by_me = 0;
-                    let owed_to_me = 0;
-                    if(childSnapshot.child('owed_by_me').exists())
-                        owed_by_me = childSnapshot.val().owed_by_me;
-                    if(childSnapshot.child('owed_to_me').exists())
-                        owed_to_me = childSnapshot.val().owed_to_me;
-
-                    let code = (
-                        <TransactionUser key={userUid} uid={userUid} username={username} balanceIOwe={owed_by_me} balanceOwes={owed_to_me} navigator={navigator}/>
-                    );
+                    Firebase.database.ref('users/'+userUid).once('value').then((userSnapshot) => {
+                        let owed_by_me = 0;
+                        let owed_to_me = 0;
+                        if(childSnapshot.child('owed_by_me').exists())
+                            owed_by_me = childSnapshot.val().owed_by_me;
+                        if(childSnapshot.child('owed_to_me').exists())
+                            owed_to_me = childSnapshot.val().owed_to_me;
     
-                    this.setState((previousState) => ({'array': [...previousState.array, code]}));
+                        let code = (
+                            <TransactionUser key={userUid} uid={userUid} username={userSnapshot.val().username} balanceIOwe={owed_by_me} balanceOwes={owed_to_me} navigator={navigator}/>
+                        );
+                        this.setState((previousState) => ({'array': [...previousState.array, code]}));
+                    });
                 });
             }
         });
