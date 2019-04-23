@@ -130,7 +130,7 @@ const AppNavigator = createStackNavigator({
     },
   }
 }, {
-  initialRouteName: 'Statistic'
+  initialRouteName: 'Loading'
 });
 
 const Navigator = createAppContainer(AppNavigator);
