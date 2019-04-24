@@ -1,8 +1,9 @@
 import React from 'react';
-import {View, Text, Picker} from 'react-native';
+import {View, Text, Picker, TouchableOpacity} from 'react-native';
 import Graph from '../components/Graph';
 import * as styles from '../components/Styles';
 import Firebase from '../components/Firebase';
+import { snapshotToArray } from '../components/Functions';
 
 export default class Statistic extends React.Component {
     constructor(){
@@ -10,12 +11,118 @@ export default class Statistic extends React.Component {
         this.state = {
             graphViewWidth: 0,
             graphViewHeight: 0,
-            users: []
+            users: [],
+            option: "money",
+            subOption: "gave",
+            dataGave: [],
+            dataReceived: [],
+            dateStart: new Date(),
+            dateEnd: new Date(),
+            timeOption: "week",
+            userValue: 'default',
+            userIndex: 0
         }
     }
 
     componentDidMount() {
         this.loadUsers();
+        this.getWeek(new Date());
+        this.getStartEndOfWeek(new Date());
+        this.loadData(this.state.option);
+    }
+
+    getWeek = (date) => {
+        //https://stackoverflow.com/questions/6117814/get-week-of-year-in-javascript-like-in-php
+        let onejan = new Date(date.getFullYear(), 0, 1);
+        return Math.ceil( (((date - onejan) / 86400000) + onejan.getDay() + 1) / 7 );
+    }
+
+    getStartEndOfWeek = (date) => {
+        //https://stackoverflow.com/questions/5210376/how-to-get-first-and-last-day-of-the-week-in-javascript
+        var firstday = new Date(date.setDate(date.getDate() - date.getDay() + 1));
+        var lastday = new Date(date.setDate(date.getDate() - date.getDay() + 7));
+        
+        this.setState({dateStart: firstday, dateEnd: lastday});
+    }
+
+    pastWeek = () => {
+        let start = this.state.dateStart;
+        let end = this.state.dateEnd;
+        var firstday = new Date(start.setDate(start.getDate() - 7));
+        var lastday = new Date(end.setDate(end.getDate() - 7));
+        
+        this.setState({dateStart: firstday, dateEnd: lastday});
+        this.loadData(this.state.option);
+    }
+
+    nextWeek = () => {
+        let start = this.state.dateStart;
+        let end = this.state.dateEnd;
+        var firstday = new Date(start.setDate(start.getDate() + 7));
+        var lastday = new Date(end.setDate(end.getDate() + 7));
+        
+        this.setState({dateStart: firstday, dateEnd: lastday});
+        this.loadData(this.state.option);
+    }
+
+    loadData = (path) => {
+        if(this.state.userValue == 'default'){
+            this.setState({dataGave: [], dataReceived: []});
+            let data = Firebase.database.ref('transactions/users/'+Firebase.uid);
+            data.child(path).once('value', (snapshot) => {
+                if(snapshot.exists()){
+                    this.getTransactions(path, snapshot);
+                }
+            });  
+        }
+        else{
+            let uid = this.state.users[this.state.userIndex].key;
+            this.setState({dataGave: [], dataReceived: []});
+            let data = Firebase.database.ref('transactions/users/'+Firebase.uid+'/'+path+'/'+uid);
+            data.once('value', (snapshot) => {
+                if(snapshot.exists()){
+                    this.getTransactions(path, snapshot);
+                }
+            });
+        }
+    }
+
+    getTransactions = (path, snapshot) => {
+        snapshot.forEach((child) => {
+            Firebase.database.ref('users/'+child.key).once('value').then((user) => { 
+                let objectGave = { username: user.val().username, data: [0, 0, 0, 0, 0, 0, 0] }
+                let objectReceived = { username: user.val().username, data: [0, 0, 0, 0, 0, 0, 0] }
+
+                let childArray = snapshotToArray(child);
+                childArray.reverse().forEach((transactionKey, index) => {
+                    Firebase.database.ref('transactions/'+path+'/'+transactionKey.val()).once('value', (transaction) => {
+                        if(new Date(transaction.val().date_incured) >= this.state.dateStart && new Date(transaction.val().date_incured) <= this.state.dateEnd){
+                            //getDay() start with Sunday - I need Monday
+                            let index = new Date(transaction.val().date_incured).getDay() - 1;
+                            if(index < 0)
+                                index = 6;
+
+                            if(path == 'money'){
+                                if(transaction.val().from == Firebase.uid)
+                                objectGave.data[index] += transaction.val().amount;
+                                else
+                                    objectReceived.data[index] += transaction.val().amount;
+                            }
+                            else{
+                                if(transaction.val().from == Firebase.uid)
+                                    objectGave.data[index] += 1;
+                                else
+                                    objectReceived.data[index] +=1;
+                            }
+                            
+                        }
+
+                        if(index == childArray.length - 1)
+                            this.setState((previousState) => ({subOption: previousState.subOption, dataGave: [...previousState.dataGave, objectGave], dataReceived: [...previousState.dataReceived, objectReceived]}));
+                    })
+                });
+            });
+        });
     }
 
     loadUsers = () => {
@@ -27,7 +134,7 @@ export default class Statistic extends React.Component {
                     data.once('value', (snapshot) => {
                         this.setState({users: []});
                         let codeDefault = (
-                            <Picker.Item key={"default"} label={""} value={'default'} />
+                            <Picker.Item key={"default"} label={"\t"+"All"} value={'default'} />
                         );
                         this.setState((previousState) => ({'users': [...previousState.users, codeDefault]}));
                         snapshot.forEach((child) => {
@@ -36,7 +143,7 @@ export default class Statistic extends React.Component {
                                     let code = "";
                                     if(child.val() === true){
                                         code = (
-                                            <Picker.Item key={child.key} label={snapshotUser.val().username} value={child.key} />
+                                            <Picker.Item key={child.key} label={"\t"+snapshotUser.val().username} value={child.key} />
                                         );
                                         this.setState((previousState) => ({'users': [...previousState.users, code]}));
                                     }
@@ -52,16 +159,65 @@ export default class Statistic extends React.Component {
     render() {
         return(
             <View style={{flex: 1, padding: 10, backgroundColor: styles.mainColorGrey}}>
-                <Picker
-                    selectedValue={this.state.userValue}
-                    style={{height: 45, backgroundColor: 'white'}}
-                    onValueChange={(itemValue, itemIndex) =>(
-                        this.setState({userIndex: itemIndex}),
-                        this.setState({userValue: itemValue})
-                    )
-                    }>
-                    {this.state.users}
-                </Picker>
+                <View style={{backgroundColor: styles.mainColorLightGrey}}>
+                    <Picker
+                        selectedValue={this.state.userValue}
+                        style={{height: 40}}
+                        onValueChange={(itemValue, itemIndex) =>(
+                            this.setState({userIndex: itemIndex}),
+                            this.setState({userValue: itemValue})
+                        )
+                        }>
+                        {this.state.users}
+                    </Picker>
+                </View>
+                <View style={{flexDirection: 'row', alignItems: 'stretch', backgroundColor: styles.mainColorLightGrey}}>
+                    <View style={{flex: 1, flexDirection: 'row', alignItems: 'stretch', backgroundColor: styles.mainColorLightGrey}}>
+                        <TouchableOpacity style={{flex: 1}} onPress={() => {this.setState({option: 'money'}); this.loadData('money')}}>
+                            <View style={{color: "white", backgroundColor: styles.mainColorGreen, opacity: this.state.option === "money" ? 1 : 0.5}}>
+                                <Text style={[styles.AddMoneyItem.buttonText, {fontSize: 14}]}>Money</Text>
+                            </View>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={{flex: 1}} onPress={() => {this.setState({option: 'items'}); this.loadData('items')}}>
+                            <View style={{color: "white", backgroundColor: styles.mainColorGreen, opacity: this.state.option === "items" ? 1 : 0.5}}>
+                                <Text style={[styles.AddMoneyItem.buttonText, {fontSize: 14}]}>Items</Text>
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+                    <View style={{flex: 1, flexDirection: 'row', alignItems: 'stretch', backgroundColor: styles.mainColorLightGrey}}>
+                        <TouchableOpacity style={{flex: 1}} onPress={() => (this.setState({subOption: 'gave'}))}>
+                            <View style={{color: "white", backgroundColor: styles.mainColorOrange, opacity: this.state.subOption === "gave" ? 1 : 0.5}}>
+                                <Text style={[styles.AddMoneyItem.buttonText, {fontSize: 14}]}>Gave</Text>
+                            </View>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={{flex: 1}} onPress={() => (this.setState({subOption: 'received'}))}>
+                            <View style={{color: "white", backgroundColor: styles.mainColorOrange, opacity: this.state.subOption === "received" ? 1 : 0.5}}>
+                                <Text style={[styles.AddMoneyItem.buttonText, {fontSize: 14}]}>Received</Text>
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+                <View style={{flexDirection: 'row', alignItems: 'stretch', marginHorizontal: 50, marginTop: 10}}>
+                        <TouchableOpacity style={{flex: 1}} onPress={() => (this.setState({timeOption: 'week'}))}>
+                            <View style={{color: "white", backgroundColor: styles.mainColorLightGrey2, opacity: this.state.timeOption === "week" ? 1 : 0.5}}>
+                                <Text style={[styles.AddMoneyItem.buttonText, {fontSize: 14, padding: 5}]}>Week</Text>
+                            </View>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={{flex: 1}} onPress={() => (this.setState({timeOption: 'month'}))}>
+                            <View style={{color: "white", backgroundColor: styles.mainColorLightGrey2, opacity: this.state.timeOption === "month" ? 1 : 0.5}}>
+                                <Text style={[styles.AddMoneyItem.buttonText, {fontSize: 14, padding: 5}]}>Month</Text>
+                            </View>
+                        </TouchableOpacity>
+                </View>
+                <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
+                    <TouchableOpacity style={{padding: 5, paddingHorizontal: 20}} onPress={() => this.pastWeek()}>
+                        <Text style={{color: 'white', fontWeight: 'bold'}}>{'<'}</Text>
+                    </TouchableOpacity>
+                    <Text style={{color: 'white'}}>{`${this.state.dateStart.toLocaleDateString()}  -  ${this.state.dateEnd.toLocaleDateString()}`}</Text>
+                    <TouchableOpacity style={{padding: 5, paddingHorizontal: 20, alignItems: 'flex-end'}} onPress={() => this.nextWeek()}>
+                        <Text style={{color: 'white', fontWeight: 'bold'}}>{'>'}</Text>
+                    </TouchableOpacity>
+                </View>
                 <View style={{flex:1}} 
                     onLayout={(event) => {
                         let {x, y, width, height} = event.nativeEvent.layout;
@@ -69,9 +225,7 @@ export default class Statistic extends React.Component {
                         console.log(x,y,width,height);
                     }}
                 >
-                    <Graph height={this.state.graphViewHeight} width={this.state.graphViewWidth} padding={30} data={[[1, 7, 0, 4, 23, 6, 10]]} format={"week"}></Graph>
-                </View>
-                <View style={{flex:1}} >
+                    <Graph height={this.state.graphViewHeight} width={this.state.graphViewWidth} padding={30} data={this.state.subOption == 'gave' ? this.state.dataGave : this.state.dataReceived} format={"week"}></Graph>
                 </View>
             </View>
             

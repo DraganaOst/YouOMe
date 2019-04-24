@@ -147,7 +147,22 @@ class Axis extends React.Component {
                         strokeWidth="2"
                     />
                 );
-            }  
+            }
+
+            for(let i=minValueY, j = 0; i<maxValueY; i++, j++){
+                array.push(
+                    <Line
+                        key={i + "MiniLine"}
+                        x1={(padding/2 + padding)}
+                        y1={transCoord(height, j * h + padding)}
+                        x2={width - padding/2}
+                        y2={transCoord(height, j * h + padding)}
+                        stroke="white"
+                        strokeWidth="0.2"
+                    />
+                );
+            }
+
             return array;
         }
         else 
@@ -174,7 +189,7 @@ class Axis extends React.Component {
 }
 
 class Data extends React.Component {
-    getData = (maxValueY, minValueY, ticksY, width, height, padding, format, data, color) => {
+    getData = (maxValueY, minValueY, ticksY, width, height, padding, format, data, color, label) => {
         if(height != 0 && width != 0){
             let array = [];
             let path ="";
@@ -193,6 +208,8 @@ class Data extends React.Component {
             let dotArray = [];
             let h = ((height - 2*padding) / (maxValueY-minValueY));
             let pathBack = "";
+            let x = 0;
+            let y = 0;
             for(let i=0; i<data.length; i++){
                 if(i == 0)
                     path += "M" + (padding + padding/2 + pathGap * (i)) + " " + transCoord(height, (data[i] - minValueY) * h + padding);
@@ -200,6 +217,8 @@ class Data extends React.Component {
                     path += " L" + (padding + padding/2 + pathGap * (i)) + " " + transCoord(height, (data[i] - minValueY) * h + padding);
 
                 pathBack += " L" + (padding + padding/2 + pathGap * (i)) + " " + transCoord(height, (data[i] - minValueY) * h + padding);
+                x = padding + padding/2 + pathGap * (i);
+                y = transCoord(height, (data[i] - minValueY) * h + padding);
                 dotArray.push(
                     <Circle key={i + "Dot"} cx={padding + padding/2 + pathGap * (i)} cy={transCoord(height, (data[i] - minValueY) * h + padding)} r="5" fill={color} stroke="white" 
                         onPress={() => {
@@ -229,6 +248,19 @@ class Data extends React.Component {
                 />
             );
 
+            array.push(
+                <Text
+                    key={"Name"}
+                    fill={color}
+                    stroke={color}
+                    fontSize="12"
+                    fontWeight="200"
+                    x={x}
+                    y={y - 10}
+                    textAnchor="end"
+                >{label}</Text>
+            );
+
             array = array.concat(dotArray);
 
             return array;
@@ -238,8 +270,8 @@ class Data extends React.Component {
     }
 
     render(){
-        let { maxValueY, minValueY, ticksY, width, height, padding, format, data, color} = this.props;
-        let lines = this.getData(maxValueY, minValueY, ticksY, width, height, padding, format, data, color);
+        let { maxValueY, minValueY, ticksY, width, height, padding, format, data, color, label} = this.props;
+        let lines = this.getData(maxValueY, minValueY, ticksY, width, height, padding, format, data, color, label);
         return(
             <Svg>
                 {lines}
@@ -277,14 +309,23 @@ export default class Graph extends React.Component {
         let code = [];
 
         for(let i=0; i<data.length; i++){
-            if(Math.max(...data[i]) > maxValueY)
-                maxValueY = Math.max(...data[i]);
-            if(Math.min(...data[i]) < minValueY)
-                minValueY = Math.min(...data[i]);
+            if(Math.max(...data[i].data) > maxValueY)
+                maxValueY = Math.max(...data[i].data);
+            if(Math.min(...data[i].data) < minValueY)
+                minValueY = Math.min(...data[i].data);
         }
-  
+
+        if((maxValueY-minValueY)%1 != 0){
+            maxValueY = Math.ceil(maxValueY);
+            minValueY = Math.floor(minValueY);
+        }
+
+        if(maxValueY == minValueY)
+            maxValueY += 5;
+        else if(maxValueY - minValueY <= 5)
+            maxValueY += 5;
         if(maxValueY - minValueY <= 10)
-            ticks = 1;
+            ticks = maxValueY - minValueY;
         else{
             let divisor = this.getDivisors(maxValueY - minValueY);
             ticks = 0;
@@ -307,10 +348,10 @@ export default class Graph extends React.Component {
                     height={height}
                     padding={padding}
                     format={format} //week, month, year
-                    data={data[i]}
+                    data={data[i].data}
                     color={color[i]}
-                />
-                
+                    label={data[i].username}
+                />  
             );
         }
         
