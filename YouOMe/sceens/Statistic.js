@@ -28,7 +28,7 @@ export default class Statistic extends React.Component {
         this.loadUsers();
         this.getWeek(new Date());
         this.getStartEndOfWeek(new Date());
-        this.loadData(this.state.option);
+        this.loadData(this.state.option, this.state.userValue);
     }
 
     getWeek = (date) => {
@@ -39,44 +39,83 @@ export default class Statistic extends React.Component {
 
     getStartEndOfWeek = (date) => {
         //https://stackoverflow.com/questions/5210376/how-to-get-first-and-last-day-of-the-week-in-javascript
-        var firstday = new Date(date.setDate(date.getDate() - date.getDay() + 1));
-        var lastday = new Date(date.setDate(date.getDate() - date.getDay() + 7));
+        var firstday = new Date(date.setDate(date.getDate() - date.getDay() + 1)); //+1 to start with Monday and not Sunday
+        var lastday = new Date(date.setDate(date.getDate() - date.getDay() + 7)); //+7 so it ends with Sunday and not Saturday
         
         this.setState({dateStart: firstday, dateEnd: lastday});
     }
 
     pastWeek = () => {
-        let start = this.state.dateStart;
-        let end = this.state.dateEnd;
-        var firstday = new Date(start.setDate(start.getDate() - 7));
-        var lastday = new Date(end.setDate(end.getDate() - 7));
-        
-        this.setState({dateStart: firstday, dateEnd: lastday});
-        this.loadData(this.state.option);
+        this.changeByWeek(-7); 
     }
 
     nextWeek = () => {
-        let start = this.state.dateStart;
-        let end = this.state.dateEnd;
-        var firstday = new Date(start.setDate(start.getDate() + 7));
-        var lastday = new Date(end.setDate(end.getDate() + 7));
-        
-        this.setState({dateStart: firstday, dateEnd: lastday});
-        this.loadData(this.state.option);
+        this.changeByWeek(7);
     }
 
-    loadData = (path) => {
-        if(this.state.userValue == 'default'){
+    pastMonth = () => {
+        this.changeByMonth(-1);
+    }
+
+    nextMonth = () => {
+        this.changeByMonth(1);
+    }
+
+    switchToWeek = () => {
+        this.getStartEndOfWeek(new Date());
+        this.loadData(this.state.option, this.state.userValue);
+    }
+
+    switchToMonth = () => {
+        let date = new Date();
+        var firstday = new Date(date.getFullYear(), date.getMonth(), 1); //first day of current month
+        var days = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate(); //get number of days
+        var lastday = new Date(date.getFullYear(), date.getMonth(), days);
+        
+        this.setState({dateStart: firstday, dateEnd: lastday});
+        this.loadData(this.state.option, this.state.userValue);
+    }
+
+    changeByMonth = (months) => {
+        let start = this.state.dateStart;
+        var firstday = new Date(start.getFullYear(), start.getMonth() + months, 1); //first day of current month
+
+        let m = 0;
+        if(months < 0)
+            m = months - 1;
+        else
+            m = months;
+        var days = new Date(start.getFullYear(), start.getMonth() - (months - 1), 0).getDate(); //get number of days
+        var lastday = new Date(start.getFullYear(), start.getMonth() + months, days);
+        
+        this.setState({dateStart: firstday, dateEnd: lastday});
+        this.loadData(this.state.option, this.state.userValue);
+    }
+
+    changeByWeek = (days) => {
+        let start = this.state.dateStart;
+        let end = this.state.dateEnd;
+        var firstday = new Date(start.setDate(start.getDate() + days));
+        var lastday = new Date(end.setDate(end.getDate() + days));
+        
+        this.setState({dateStart: firstday, dateEnd: lastday});
+        this.loadData(this.state.option, this.state.userValue);
+    }
+
+    loadData = (path, userValue) => {
+        if(userValue == 'default'){
             this.setState({dataGave: [], dataReceived: []});
             let data = Firebase.database.ref('transactions/users/'+Firebase.uid);
             data.child(path).once('value', (snapshot) => {
                 if(snapshot.exists()){
-                    this.getTransactions(path, snapshot);
+                    snapshot.forEach((child) => {
+                        this.getTransactions(path, child);
+                    });
                 }
             });  
         }
         else{
-            let uid = this.state.users[this.state.userIndex].key;
+            let uid = userValue;
             this.setState({dataGave: [], dataReceived: []});
             let data = Firebase.database.ref('transactions/users/'+Firebase.uid+'/'+path+'/'+uid);
             data.once('value', (snapshot) => {
@@ -87,24 +126,38 @@ export default class Statistic extends React.Component {
         }
     }
 
-    getTransactions = (path, snapshot) => {
-        snapshot.forEach((child) => {
+    getTransactions = (path, child) => {
             Firebase.database.ref('users/'+child.key).once('value').then((user) => { 
                 let objectGave = { username: user.val().username, data: [0, 0, 0, 0, 0, 0, 0] }
                 let objectReceived = { username: user.val().username, data: [0, 0, 0, 0, 0, 0, 0] }
+
+                if(this.state.timeOption != 'week'){
+                    objectGave.data = [];
+                    objectReceived.data = [];
+                    for(let i=0; i<this.state.dateEnd.getDate(); i++){
+                        objectGave.data.push(0);
+                        objectReceived.data.push(0);
+                    }
+                }
 
                 let childArray = snapshotToArray(child);
                 childArray.reverse().forEach((transactionKey, index) => {
                     Firebase.database.ref('transactions/'+path+'/'+transactionKey.val()).once('value', (transaction) => {
                         if(new Date(transaction.val().date_incured) >= this.state.dateStart && new Date(transaction.val().date_incured) <= this.state.dateEnd){
-                            //getDay() start with Sunday - I need Monday
-                            let index = new Date(transaction.val().date_incured).getDay() - 1;
+                            //getDay() starts with Sunday - I need Monday
+
+                            let index = 0;
+                            if(this.state.timeOption == 'week')
+                                index = new Date(transaction.val().date_incured).getDay() - 1;
+                            else
+                                index = new Date(transaction.val().date_incured).getDate() - 1;
+
                             if(index < 0)
                                 index = 6;
 
                             if(path == 'money'){
                                 if(transaction.val().from == Firebase.uid)
-                                objectGave.data[index] += transaction.val().amount;
+                                    objectGave.data[index] += transaction.val().amount;
                                 else
                                     objectReceived.data[index] += transaction.val().amount;
                             }
@@ -114,7 +167,6 @@ export default class Statistic extends React.Component {
                                 else
                                     objectReceived.data[index] +=1;
                             }
-                            
                         }
 
                         if(index == childArray.length - 1)
@@ -122,8 +174,9 @@ export default class Statistic extends React.Component {
                     })
                 });
             });
-        });
     }
+
+
 
     loadUsers = () => {
         Firebase.database.ref('/').once('value',
@@ -165,7 +218,8 @@ export default class Statistic extends React.Component {
                         style={{height: 40}}
                         onValueChange={(itemValue, itemIndex) =>(
                             this.setState({userIndex: itemIndex}),
-                            this.setState({userValue: itemValue})
+                            this.setState({userValue: itemValue}),
+                            this.loadData(this.state.option, itemValue)
                         )
                         }>
                         {this.state.users}
@@ -173,12 +227,12 @@ export default class Statistic extends React.Component {
                 </View>
                 <View style={{flexDirection: 'row', alignItems: 'stretch', backgroundColor: styles.mainColorLightGrey}}>
                     <View style={{flex: 1, flexDirection: 'row', alignItems: 'stretch', backgroundColor: styles.mainColorLightGrey}}>
-                        <TouchableOpacity style={{flex: 1}} onPress={() => {this.setState({option: 'money'}); this.loadData('money')}}>
+                        <TouchableOpacity style={{flex: 1}} onPress={() => {this.setState({option: 'money'}); this.loadData('money', this.state.userValue)}}>
                             <View style={{color: "white", backgroundColor: styles.mainColorGreen, opacity: this.state.option === "money" ? 1 : 0.5}}>
                                 <Text style={[styles.AddMoneyItem.buttonText, {fontSize: 14}]}>Money</Text>
                             </View>
                         </TouchableOpacity>
-                        <TouchableOpacity style={{flex: 1}} onPress={() => {this.setState({option: 'items'}); this.loadData('items')}}>
+                        <TouchableOpacity style={{flex: 1}} onPress={() => {this.setState({option: 'items'}); this.loadData('items', this.state.userValue)}}>
                             <View style={{color: "white", backgroundColor: styles.mainColorGreen, opacity: this.state.option === "items" ? 1 : 0.5}}>
                                 <Text style={[styles.AddMoneyItem.buttonText, {fontSize: 14}]}>Items</Text>
                             </View>
@@ -198,23 +252,23 @@ export default class Statistic extends React.Component {
                     </View>
                 </View>
                 <View style={{flexDirection: 'row', alignItems: 'stretch', marginHorizontal: 50, marginTop: 10}}>
-                        <TouchableOpacity style={{flex: 1}} onPress={() => (this.setState({timeOption: 'week'}))}>
+                        <TouchableOpacity style={{flex: 1}} onPress={() => {this.setState({timeOption: 'week'}); this.switchToWeek()}}>
                             <View style={{color: "white", backgroundColor: styles.mainColorLightGrey2, opacity: this.state.timeOption === "week" ? 1 : 0.5}}>
                                 <Text style={[styles.AddMoneyItem.buttonText, {fontSize: 14, padding: 5}]}>Week</Text>
                             </View>
                         </TouchableOpacity>
-                        <TouchableOpacity style={{flex: 1}} onPress={() => (this.setState({timeOption: 'month'}))}>
-                            <View style={{color: "white", backgroundColor: styles.mainColorLightGrey2, opacity: this.state.timeOption === "month" ? 1 : 0.5}}>
+                        <TouchableOpacity style={{flex: 1}} onPress={() => {this.setState({timeOption: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()}); this.switchToMonth()}}>
+                            <View style={{color: "white", backgroundColor: styles.mainColorLightGrey2, opacity: this.state.timeOption !== "week" ? 1 : 0.5}}>
                                 <Text style={[styles.AddMoneyItem.buttonText, {fontSize: 14, padding: 5}]}>Month</Text>
                             </View>
                         </TouchableOpacity>
                 </View>
                 <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
-                    <TouchableOpacity style={{padding: 5, paddingHorizontal: 20}} onPress={() => this.pastWeek()}>
+                    <TouchableOpacity style={{padding: 5, paddingHorizontal: 20}} onPress={() => this.state.timeOption == 'week' ? this.pastWeek() : this.pastMonth()}>
                         <Text style={{color: 'white', fontWeight: 'bold'}}>{'<'}</Text>
                     </TouchableOpacity>
                     <Text style={{color: 'white'}}>{`${this.state.dateStart.toLocaleDateString()}  -  ${this.state.dateEnd.toLocaleDateString()}`}</Text>
-                    <TouchableOpacity style={{padding: 5, paddingHorizontal: 20, alignItems: 'flex-end'}} onPress={() => this.nextWeek()}>
+                    <TouchableOpacity style={{padding: 5, paddingHorizontal: 20, alignItems: 'flex-end'}} onPress={() => this.state.timeOption == 'week' ? this.nextWeek() : this.nextMonth()}>
                         <Text style={{color: 'white', fontWeight: 'bold'}}>{'>'}</Text>
                     </TouchableOpacity>
                 </View>
@@ -225,7 +279,7 @@ export default class Statistic extends React.Component {
                         console.log(x,y,width,height);
                     }}
                 >
-                    <Graph height={this.state.graphViewHeight} width={this.state.graphViewWidth} padding={30} data={this.state.subOption == 'gave' ? this.state.dataGave : this.state.dataReceived} format={"week"}></Graph>
+                    <Graph height={this.state.graphViewHeight} width={this.state.graphViewWidth} padding={30} data={this.state.subOption == 'gave' ? this.state.dataGave : this.state.dataReceived} format={this.state.timeOption}></Graph>
                 </View>
             </View>
             

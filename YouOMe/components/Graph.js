@@ -7,7 +7,6 @@ import { RotationGestureHandler } from 'react-native-gesture-handler';
 
 const week = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const year = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Avg", "Sep", "Oct", "Nov", "Dec"];
-const month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
 //transformCoorinates
 transCoord = (height, y) => {
@@ -15,7 +14,7 @@ transCoord = (height, y) => {
 }
 
 class Axis extends React.Component {
-    getLines = (maxValueY, minValueY, ticksY, width, height, padding, format, data) => {
+    getLines = (maxValueY, minValueY, ticksY, width, height, padding, format) => {
         if(height != 0 && width != 0){
             let array = [];
             let gap = ((height - 2*padding) / (ticksY));
@@ -105,8 +104,8 @@ class Axis extends React.Component {
                     );
                 }
             } else {
-                let tickGapLabelsX = (l / (month[format] - 1));
-                for(let i=1; i<=month[format]; i++){
+                let tickGapLabelsX = (l / (format - 1));
+                for(let i=0; i<format; i++){
                     array.push(
                         <Line
                             key={i + "LineX"}
@@ -118,7 +117,7 @@ class Axis extends React.Component {
                             strokeWidth="1"
                         />
                     );
-                    if(i%3 == 0)
+                    if((i+1)%3 == 0)
                         array.push(
                             <Text
                                 key={i + "TextX"}
@@ -129,7 +128,7 @@ class Axis extends React.Component {
                                 x={padding + padding/2 + tickGapLabelsX * (i)}
                                 y={height - padding/3}
                                 textAnchor="middle"
-                            >{i}</Text>               
+                            >{i+1}</Text>               
                         );
                 }
             }
@@ -171,8 +170,8 @@ class Axis extends React.Component {
     }
 
     render(){
-        let { maxValueY, minValueY, ticksY, width, height, padding, format, data} = this.props;
-        let lines = this.getLines(maxValueY, minValueY, ticksY, width, height, padding, format, data);
+        let { maxValueY, minValueY, ticksY, width, height, padding, format} = this.props;
+        let lines = this.getLines(maxValueY, minValueY, ticksY, width, height, padding, format);
         return(
             <Svg>
                 <Path
@@ -188,9 +187,15 @@ class Axis extends React.Component {
     }
 }
 
+let labelPositions = [];
+
 class Data extends React.Component {
-    getData = (maxValueY, minValueY, ticksY, width, height, padding, format, data, color, label) => {
+    getData = (maxValueY, minValueY, ticksY, width, height, padding, format, data, color, label, multiple) => {
         if(height != 0 && width != 0){
+            let color2 = color;
+            if(multiple)
+                color2 += "";
+
             let array = [];
             let path ="";
             let pathGap = 0;
@@ -202,7 +207,7 @@ class Data extends React.Component {
             else if(format == "year"){
                 pathGap = l / (year.length - 1);
             } else {
-                pathGap = (l / (month[format] - 1));
+                pathGap = (l / (format - 1));
             }
 
             let dotArray = [];
@@ -210,6 +215,7 @@ class Data extends React.Component {
             let pathBack = "";
             let x = 0;
             let y = 0;
+            
             for(let i=0; i<data.length; i++){
                 if(i == 0)
                     path += "M" + (padding + padding/2 + pathGap * (i)) + " " + transCoord(height, (data[i] - minValueY) * h + padding);
@@ -219,8 +225,9 @@ class Data extends React.Component {
                 pathBack += " L" + (padding + padding/2 + pathGap * (i)) + " " + transCoord(height, (data[i] - minValueY) * h + padding);
                 x = padding + padding/2 + pathGap * (i);
                 y = transCoord(height, (data[i] - minValueY) * h + padding);
+                
                 dotArray.push(
-                    <Circle key={i + "Dot"} cx={padding + padding/2 + pathGap * (i)} cy={transCoord(height, (data[i] - minValueY) * h + padding)} r="5" fill={color} stroke="white" 
+                    <Circle key={i + "Dot"} cx={padding + padding/2 + pathGap * (i)} cy={transCoord(height, (data[i] - minValueY) * h + padding)} r="5" fill={color2} stroke="white" 
                         onPress={() => {
                             alert(data[i]);
                         }} 
@@ -233,21 +240,26 @@ class Data extends React.Component {
                     key="data"
                     d={`${path}`}
                     fill="none"
-                    stroke={color}
+                    stroke={color2}
                     strokeWidth="3"
                 />
             );
 
-            array.push(
-                <Path
-                    key="dataBackground"
-                    d={`M${padding + padding/2} ${height - padding} ${pathBack} L${width - padding/2} ${height - padding}`}
-                    fill={color + "88"}
-                    stroke="none"
-                    strokeWidth="3"
-                />
-            );
+            if(!multiple){
+                array.push(
+                    <Path
+                        key="dataBackground"
+                        d={`M${padding + padding/2} ${height - padding} ${pathBack} L${width - padding/2} ${height - padding}`}
+                        fill={color + "88"}
+                        stroke="none"
+                        strokeWidth="3"
+                    />
+                );
+            }
 
+            let labelPosition = y - 10;
+            while(labelPositions.find(x => x == labelPosition))
+                labelPosition -= 10;
             array.push(
                 <Text
                     key={"Name"}
@@ -256,10 +268,12 @@ class Data extends React.Component {
                     fontSize="12"
                     fontWeight="200"
                     x={x}
-                    y={y - 10}
+                    y={labelPosition}
                     textAnchor="end"
                 >{label}</Text>
             );
+
+            labelPositions.push(labelPosition);
 
             array = array.concat(dotArray);
 
@@ -270,8 +284,8 @@ class Data extends React.Component {
     }
 
     render(){
-        let { maxValueY, minValueY, ticksY, width, height, padding, format, data, color, label} = this.props;
-        let lines = this.getData(maxValueY, minValueY, ticksY, width, height, padding, format, data, color, label);
+        let { maxValueY, minValueY, ticksY, width, height, padding, format, data, color, label, multiple} = this.props;
+        let lines = this.getData(maxValueY, minValueY, ticksY, width, height, padding, format, data, color, label, multiple);
         return(
             <Svg>
                 {lines}
@@ -308,6 +322,8 @@ export default class Graph extends React.Component {
         let ticks = 0;
         let code = [];
 
+        labelPositions = [];
+
         for(let i=0; i<data.length; i++){
             if(Math.max(...data[i].data) > maxValueY)
                 maxValueY = Math.max(...data[i].data);
@@ -337,7 +353,11 @@ export default class Graph extends React.Component {
         }
 
         let color=[styles.mainColorGreen, styles.mainColorOrange];
-        for(let i=0; i<data.length; i++){     
+        let multiple = false;
+        if(data.length > 1){
+            multiple = true;
+        }
+        for(let i=0; i<data.length; i++){ 
             code.push(
                 <Data
                     key={i}
@@ -351,6 +371,7 @@ export default class Graph extends React.Component {
                     data={data[i].data}
                     color={color[i]}
                     label={data[i].username}
+                    multiple={multiple}
                 />  
             );
         }

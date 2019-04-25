@@ -1,12 +1,13 @@
 import React from 'react';
 import {StyleSheet} from 'react-native';
 
-export const mainColorLightGreen = '#E4FDE1';
+
+//export const mainColorLightGreen = '#E4FDE1';
 export const mainColorGreen = '#8acb88';
 export const mainColorGreen2 = "#9CD39A";
 export const mainColorBlue = '#648381';
 export const mainColorGrey = '#575761';
-export const mainColorOrange = '#ffbf46';
+export const mainColorOrange =  '#ffbf46';
 export const mainColorLightGrey = "#E5E5E5";
 export const mainColorLightBlue = '#709290';
 export const mainColorLightGrey2 = "#666671";
@@ -18,6 +19,15 @@ const margin = 20;
 export const Global = StyleSheet.create({
     text: {
         fontSize: fontSize
+    }
+});
+
+export const Loading = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: mainColorGreen,  
+        alignItems: 'center', 
+        justifyContent: 'center'
     }
 });
 

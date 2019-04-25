@@ -1,4 +1,5 @@
 import firebase from "firebase";
+import {NavigationActions, StackActions} from "react-navigation";
 
 const config = {
     apiKey: "AIzaSyD8q3UoNhIGJiu0VFOiuPm0emQk6LeinQg",
@@ -9,7 +10,7 @@ const config = {
     messagingSenderId: "644106863317"
 };
 
-const _firebase = firebase.initializeApp(config);
+const _firebase = firebase.initializeApp(config); //we can have only one instance of Firebase
 
 export default class Firebase {
     static auth;
@@ -18,45 +19,55 @@ export default class Firebase {
     static username;
 
     static init(){
-        //firebase.initializeApp(config);
         Firebase.auth = _firebase.auth();
         Firebase.database = _firebase.database();
     }
 
-    static async defaultLogin(){
+    static defaultLogin(navigation){
         if(Firebase.auth.currentUser.emailVerified){
             Firebase.uid = Firebase.auth.currentUser.uid;
             let data = Firebase.database.ref('/users/'+Firebase.uid);
-            await data.once('value').then((snapshot) => {
+            data.once('value').then((snapshot) => {
                 Firebase.username = snapshot.val().username
+                navigation.dispatch(StackActions.reset({
+                    index: 0,
+                    actions: [
+                        NavigationActions.navigate({ routeName: 'Settings'}),
+                        
+                    ],
+                }))
             });
-            return true;
-        }
-        else{
-            return false;
         }
     }
     
-    static async login(email, password){
+    static login(email, password){
         try{
-            await Firebase.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(() => Firebase.auth.signInWithEmailAndPassword(email, password));
-            if(Firebase.auth.currentUser.emailVerified){
-                Firebase.uid = Firebase.auth.currentUser.uid;
-                let data = Firebase.database.ref('/users/'+Firebase.uid);
-                await data.once('value', (snapshot) => {Firebase.username = snapshot.val().username});
-                return true;
-            }
-            else{
-                await Firebase.auth.currentUser.sendEmailVerification().then(()=>{
-
-                }).catch((error) => {
-                    alert(error);
-                });
-            }
+            Firebase.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(async () => {
+                await Firebase.auth.signInWithEmailAndPassword(email, password);
+                try{
+                    if(Firebase.auth.currentUser.emailVerified){
+                        Firebase.uid = Firebase.auth.currentUser.uid;
+                        let data = Firebase.database.ref('/users/'+Firebase.uid);
+                        data.once('value', (snapshot) => {
+                            Firebase.username = snapshot.val().username;
+                        });
+                    }
+                    else{
+                        Firebase.auth.currentUser.sendEmailVerification()
+                        .then(()=>
+                            alert("Email was send to confirm your email address"))
+                        .catch((error) => {
+                            alert(error);
+                        });
+                    }
+                }
+                catch (e) {
+                    alert(e);
+                }
+            });
         }
         catch (e) {
             alert(e);
-            return false;
         }
     }
 
@@ -67,7 +78,8 @@ export default class Firebase {
                     alert("Username already exists.")
                     console.log("exists");
                     return false;
-                }else{
+                }
+                else{
                     await Firebase.auth.createUserWithEmailAndPassword(email, password);
                     alert("Please verify your email address.");
 
@@ -76,7 +88,8 @@ export default class Firebase {
                         'username': username
                     });
 
-                    Firebase.auth.currentUser.sendEmailVerification().then(()=>{
+                    Firebase.auth.currentUser.sendEmailVerification()
+                    .then(()=>{
                         return true;
                     }).catch((error) => {
                         alert(error);

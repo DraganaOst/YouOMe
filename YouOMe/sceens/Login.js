@@ -14,23 +14,8 @@ export default class Login extends React.Component{
         };
     };
 
-    onPressLogin = async () => {
-        try{
-            let response = false;
-            response = await Firebase.login(this.state.email, this.state.password);
-            //response = await Firebase.login("dragana.ost@gmail.com", "testtest");
-            if(response === true){
-                this.props.navigation.dispatch(StackActions.reset({
-                    index: 0,
-                    actions: [
-                        NavigationActions.navigate({ routeName: 'Profile'} )
-                    ],
-                }))
-            }
-        }
-        catch (e) {
-            alert(e);
-        }
+    onPressLogin = () => {
+        Firebase.login(this.state.email, this.state.password);
     };
 
     render() {
