@@ -17,6 +17,7 @@ export default class Firebase {
     static uid;
     static database;
     static username;
+    static loggedIn = true;
 
     static init(){
         Firebase.auth = _firebase.auth();
@@ -42,7 +43,7 @@ export default class Firebase {
     
     static login(email, password){
         try{
-            Firebase.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(async () => {
+            Firebase.auth.setPersistence(Firebase.loggedIn ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.NONE).then(async () => {
                 await Firebase.auth.signInWithEmailAndPassword(email, password);
                 try{
                     if(Firebase.auth.currentUser.emailVerified){

@@ -10,7 +10,8 @@ export default class Login extends React.Component{
         this.state = {
             email: "",
             password: "",
-            auth: false
+            auth: false,
+            loggedIn: true
         };
     };
 
@@ -41,6 +42,14 @@ export default class Login extends React.Component{
                         secureTextEntry={true}
                         onChangeText={(text) => this.setState({password: text})}
                     />
+                    <View style={{flexDirection: 'row', marginHorizontal: 20, justifyContent: 'flex-end'}}>
+                        <TouchableOpacity onPress={() => {Firebase.loggedIn = !this.state.loggedIn; this.setState({loggedIn: !this.state.loggedIn});}} style={{flexDirection: 'row'}}>
+                            <View style={{marginHorizontal: 10, height: 20, width: 20, backgroundColor: styles.mainColorLightGrey, alignItems: 'center', justifyContent: 'center'}}>
+                                <View style={{height: 15, width: 15, backgroundColor: this.state.loggedIn ? styles.mainColorGreen : styles.mainColorLightGrey}}></View>
+                            </View>
+                            <Text>Keep me logged in</Text>
+                        </TouchableOpacity>             
+                    </View>
                     <TouchableOpacity
                         onPress={this.onPressLogin}
                         underlayColor="white"
