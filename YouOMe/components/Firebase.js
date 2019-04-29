@@ -33,7 +33,7 @@ export default class Firebase {
                 navigation.dispatch(StackActions.reset({
                     index: 0,
                     actions: [
-                        NavigationActions.navigate({ routeName: 'Settings'}),
+                        NavigationActions.navigate({ routeName: 'Profile'}),
                         
                     ],
                 }))

@@ -196,7 +196,6 @@ export default class Money extends React.Component {
 
     loadTransactions = () => {
         const navigator = this.props.navigation;
-
         this.data2 = Firebase.database.ref('balance/'+Firebase.uid+'/money');
         this.offRef2 = this.data2.on('value', (snapshot) => {
             if(snapshot.exists()){
@@ -212,7 +211,7 @@ export default class Money extends React.Component {
                             balanceText = '';
                         
                         let code = (
-                            <TransactionUser key={userUid} uid={userUid} username={userSnapshot.val().username} balanceText={balanceText} balance={Math.abs(balace.toFixed(2))} navigator={navigator}/>
+                            <TransactionUser key={userUid} uid={userUid} username={userSnapshot.val().username} balanceText={balanceText} balance={Math.abs(Number(balace).toFixed(2))} navigator={navigator}/>
                         );
                         this.setState((previousState) => ({'array': [...previousState.array, code]}));
                     });

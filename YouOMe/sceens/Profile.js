@@ -32,6 +32,12 @@ export default class Profile extends React.Component {
         };
     }
 
+    static navigationOptions = ({ navigation }) => ({
+        headerStyle: {
+            backgroundColor: 'red'
+        }
+    });
+
     componentDidMount(){
         this.loadBalance();
         this.loadNotifications();

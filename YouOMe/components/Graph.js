@@ -4,6 +4,7 @@ import {Button} from 'react-native';
 import {Svg, Polyline, Line, Text, G, Path, Circle} from 'react-native-svg';
 import * as styles from '../components/Styles';
 import { RotationGestureHandler } from 'react-native-gesture-handler';
+import { Rgb } from './Rgb';
 
 const week = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const year = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Avg", "Sep", "Oct", "Nov", "Dec"];
@@ -246,11 +247,13 @@ class Data extends React.Component {
             );
 
             if(!multiple){
+                let objectColor = new Rgb(color);
+                let transparentColor = `rgb(${objectColor.r},${objectColor.g},${objectColor.b},150)`;
                 array.push(
                     <Path
                         key="dataBackground"
                         d={`M${padding + padding/2} ${height - padding} ${pathBack} L${width - padding/2} ${height - padding}`}
-                        fill={color + "88"}
+                        fill={transparentColor}
                         stroke="none"
                         strokeWidth="3"
                     />
@@ -369,7 +372,7 @@ export default class Graph extends React.Component {
                     padding={padding}
                     format={format} //week, month, year
                     data={data[i].data}
-                    color={color[i]}
+                    color={i<color.length ? color[i] : new Rgb(Math.random() * 255, Math.random() * 255, Math.random * 255)}
                     label={data[i].username}
                     multiple={multiple}
                 />  

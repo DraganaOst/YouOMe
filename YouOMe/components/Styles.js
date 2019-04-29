@@ -3,15 +3,15 @@ import {StyleSheet} from 'react-native';
 
 
 //export const mainColorLightGreen = '#E4FDE1';
-export const mainColorGreen = '#8acb88';
-export const mainColorGreen2 = "#9CD39A";
-export const mainColorBlue = '#648381';
-export const mainColorGrey = '#575761';
-export const mainColorOrange =  '#ffbf46';
-export const mainColorLightGrey = "#E5E5E5";
-export const mainColorLightBlue = '#709290';
-export const mainColorLightGrey2 = "#666671";
-export const mainColorLightOrange = "#ffca66";
+export let mainColorGreen = "rgb(138,203,136)" //'#8acb88';
+export let mainColorBlue = "rgb(100,131,129)" //'#648381';
+export let mainColorGrey = "rgb(87,87,97)" //'#575761';
+export let mainColorOrange = "rgb(255,191,70)" //'#ffbf46';
+export let mainColorLightGrey = "rgb(229,229,229)" //"#E5E5E5";
+export let mainColorGreen2 = "rgb(156,211,154)" // "#9CD39A";
+export let mainColorLightBlue = "rgb(112,146,144)" //'#709290';
+export let mainColorLightGrey2 = "rgb(102,102,113)" //"#666671";
+export let mainColorLightOrange = "rgb(255,202,102)" //"#ffca66";
 
 const fontSize = 18;
 const margin = 20;
@@ -126,7 +126,7 @@ export const Profile = StyleSheet.create({
         marginHorizontal: 10,
         justifyContent: 'space-between',
         borderBottomWidth: 2,
-        borderColor: '#8acb88'
+        borderColor: mainColorGreen
     },
     containerText: {
         flexDirection: 'row',
@@ -152,7 +152,7 @@ export const AddUserScreen = StyleSheet.create({
         height: 40,
         borderRadius: 20,
         margin: 10,
-        backgroundColor: '#d9d9d9',
+        backgroundColor: mainColorLightGrey,
         paddingLeft: 30,
         paddingRight: 30
     },
@@ -312,7 +312,7 @@ export const Items = StyleSheet.create({
     containerBalance: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        backgroundColor: '#648381', 
+        backgroundColor: mainColorBlue, 
         paddingHorizontal: 20, 
         paddingVertical: 5, 
         flex: 1
@@ -321,7 +321,7 @@ export const Items = StyleSheet.create({
 
 export const History = StyleSheet.create({
     container: {
-        backgroundColor: "#E5E5E5", 
+        backgroundColor: mainColorLightGrey, 
         flex: 1
     },
     containerBar: {
