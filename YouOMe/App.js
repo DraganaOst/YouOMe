@@ -106,8 +106,8 @@ const AppNavigator = createStackNavigator({
 }, {
   initialRouteName: 'Loading',
   defaultNavigationOptions: {
-      headerStyle: styles.Profile.header,
-      headerTitleStyle: styles.Profile.headerText,
+      headerStyle: styles.Navigation.header,
+      headerTitleStyle: styles.Navigation.headerText,
       headerTintColor: 'white'
   }
 });

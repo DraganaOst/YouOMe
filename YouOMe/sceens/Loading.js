@@ -6,8 +6,9 @@ import * as styles from "../components/Styles";
 
 export default class Loading extends React.Component{
     componentDidMount(){
-        //if user logs in/out - it fires
+        //it fires everytime when user logs in/out
         Firebase.auth.onAuthStateChanged((user) => {
+            //checks if user is defined
             if (user) {
                 Firebase.defaultLogin(this.props.navigation);
             } else {

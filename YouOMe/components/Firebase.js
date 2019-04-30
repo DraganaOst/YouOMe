@@ -10,7 +10,7 @@ const config = {
     messagingSenderId: "644106863317"
 };
 
-const _firebase = firebase.initializeApp(config); //we can have only one instance of Firebase
+const _firebase = firebase.initializeApp(config); //we can only have one instance of Firebase
 
 export default class Firebase {
     static auth;
@@ -34,7 +34,6 @@ export default class Firebase {
                     index: 0,
                     actions: [
                         NavigationActions.navigate({ routeName: 'Profile'}),
-                        
                     ],
                 }))
             });
@@ -43,9 +42,10 @@ export default class Firebase {
     
     static login(email, password){
         try{
+            //setPersistence - LOCAL ... is signed until sign out, NONE ... needs to sign in everytime app is opened
             Firebase.auth.setPersistence(Firebase.loggedIn ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.NONE).then(async () => {
-                await Firebase.auth.signInWithEmailAndPassword(email, password);
-                try{
+                Firebase.auth.signInWithEmailAndPassword(email, password).then( () => {
+                    //check if user verified email else send it again
                     if(Firebase.auth.currentUser.emailVerified){
                         Firebase.uid = Firebase.auth.currentUser.uid;
                         let data = Firebase.database.ref('/users/'+Firebase.uid);
@@ -62,9 +62,8 @@ export default class Firebase {
                         });
                     }
                 }
-                catch (e) {
-                    alert(e);
-                }
+                        
+                );
             });
         }
         catch (e) {
@@ -72,28 +71,30 @@ export default class Firebase {
         }
     }
 
-    static async signUp(email, password, username){
+    static async signUp(email, password, username, navigation){
         try{
             Firebase.database.ref().child("users").orderByChild("username").equalTo(username).once("value", async function(snapshot) {
+                //check if username exists
                 if (snapshot.exists()) {
                     alert("Username already exists.")
                     console.log("exists");
                     return false;
                 }
                 else{
-                    await Firebase.auth.createUserWithEmailAndPassword(email, password);
-                    alert("Please verify your email address.");
+                    Firebase.auth.createUserWithEmailAndPassword(email, password).then(() => {     
+                        alert("Please verify your email address.");
 
-                    let ref = Firebase.database.ref('users/'+Firebase.auth.currentUser.uid).set({
-                        'email': email,
-                        'username': username
-                    });
-
-                    Firebase.auth.currentUser.sendEmailVerification()
-                    .then(()=>{
-                        return true;
-                    }).catch((error) => {
-                        alert(error);
+                        let ref = Firebase.database.ref('users/'+Firebase.auth.currentUser.uid).set({
+                            'email': email,
+                            'username': username
+                        });
+    
+                        Firebase.auth.currentUser.sendEmailVerification()
+                        .then(()=>{
+                            Firebase.auth.signOut();
+                        }).catch((error) => {
+                            alert(error);
+                        });
                     });
                 }
             });

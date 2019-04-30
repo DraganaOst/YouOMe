@@ -22,6 +22,7 @@ export default class Login extends React.Component{
     render() {
         return (
             <View style={styles.LoginSignUp.containerLogin}>
+                {/*logo image*/}
                 <View style={styles.LoginSignUp.containerImage}>
                     <Image
                         style={styles.LoginSignUp.image}
@@ -29,35 +30,38 @@ export default class Login extends React.Component{
                         resizeMode="center"
                     />
                 </View>
+                {/*form*/}
                 <View style={{flex: 1}}>
+                    {/*email input*/}
                     <TextInput
                         style={styles.LoginSignUp.input}
                         placeholder={'Email'}
                         onChangeText={(text) => this.setState({email: text})}
                         keyboardType={'email-address'}
                     />
+                    {/*password input*/}
                     <TextInput
                         style={styles.LoginSignUp.input}
                         placeholder={'Password'}
                         secureTextEntry={true}
                         onChangeText={(text) => this.setState({password: text})}
                     />
-                    <View style={{flexDirection: 'row', marginHorizontal: 20, justifyContent: 'flex-end'}}>
-                        <TouchableOpacity onPress={() => {Firebase.loggedIn = !this.state.loggedIn; this.setState({loggedIn: !this.state.loggedIn});}} style={{flexDirection: 'row'}}>
-                            <View style={{marginHorizontal: 10, height: 20, width: 20, backgroundColor: styles.mainColorLightGrey, alignItems: 'center', justifyContent: 'center'}}>
-                                <View style={{height: 15, width: 15, backgroundColor: this.state.loggedIn ? styles.mainColorGreen : styles.mainColorLightGrey}}></View>
+                    {/*keep logged in*/}
+                    <View style={styles.LoginSignUp.containerKeepLoggedIn}>
+                        <TouchableOpacity onPress={() => {Firebase.loggedIn = !this.state.loggedIn; this.setState({loggedIn: !this.state.loggedIn});}} style={styles.LoginSignUp.buttonKeepLoggedIn}>
+                            <View style={styles.LoginSignUp.checkboxOutBox}>
+                                <View style={[styles.LoginSignUp.checkboxInBox, {backgroundColor: this.state.loggedIn ? styles.mainColorGreen : styles.mainColorLightGrey}]}></View>
                             </View>
                             <Text>Keep me logged in</Text>
                         </TouchableOpacity>             
                     </View>
-                    <TouchableOpacity
-                        onPress={this.onPressLogin}
-                        underlayColor="white"
-                    >
+                    {/*login button*/}
+                    <TouchableOpacity onPress={this.onPressLogin} underlayColor="white">
                         <View style={styles.LoginSignUp.button}>
                             <Text style={styles.LoginSignUp.buttonText}>Login</Text>
                         </View>
                     </TouchableOpacity>
+                    {/*sign up button*/}
                     <TouchableOpacity
                         onPress={() => this.props.navigation.dispatch(StackActions.reset({
                             index: 0,

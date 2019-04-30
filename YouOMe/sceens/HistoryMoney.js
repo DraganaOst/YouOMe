@@ -1,6 +1,5 @@
 import React from 'react';
-import {Platform, Text, View, TextInput, TouchableOpacity, Image, Button, Picker, DatePickerAndroid, DatePickerIOS} from 'react-native';
-import {NavigationActions, StackActions} from "react-navigation";
+import {Text, View} from 'react-native';
 import Firebase from "../components/Firebase";
 import * as styles from "../components/Styles";
 import { ScrollView } from 'react-native-gesture-handler';
@@ -78,12 +77,7 @@ export default class History extends React.Component {
 
     static navigationOptions = ({ navigation }) => ({
         title: navigation.getParam('title'),
-        headerStyle: styles.Profile.header,
-        headerTitleStyle: styles.Profile.headerText,
-        headerTintColor: 'white',
     });
-
-    
 
     loadTransactions = () => {
         let uid = this.props.navigation.state.params.uid;

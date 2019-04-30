@@ -15,26 +15,13 @@ export default class SignUpScreen extends React.Component{
     };
 
     onPressSignUp = async () => {
-        try{
-            let response = false;
-            response = await Firebase.signUp(this.state.email, this.state.password, this.state.username);
-            if(response === true){
-                this.props.navigation.dispatch(StackActions.reset({
-                    index: 0,
-                    actions: [
-                        NavigationActions.navigate({ routeName: 'Login' })
-                    ],
-                }))
-            }
-        }
-        catch (e) {
-            alert(e);
-        }
+        Firebase.signUp(this.state.email, this.state.password, this.state.username, this.props.navigation);
     };
 
     render() {
         return (
             <View style={styles.LoginSignUp.containerLogin}>
+                {/*logo image*/}
                 <View style={styles.LoginSignUp.containerImage}>
                     <Image
                         style={styles.LoginSignUp.image}
@@ -42,24 +29,29 @@ export default class SignUpScreen extends React.Component{
                         resizeMode="center"
                     />
                 </View>
+                {/*form*/}
                 <View style={{flex: 1.5}}>
+                    {/*username input*/}
                     <TextInput
                         style={styles.LoginSignUp.input}
                         placeholder={'Username'}
                         onChangeText={(text) => this.setState({username: text})}
                     />
+                    {/*email input*/}
                     <TextInput
                         style={styles.LoginSignUp.input}
                         placeholder={'Email'}
                         onChangeText={(text) => this.setState({email: text})}
                         keyboardType={'email-address'}
                     />
+                    {/*password input*/}
                     <TextInput
                         style={styles.LoginSignUp.input}
                         placeholder={'Password'}
                         secureTextEntry={true}
                         onChangeText={(text) => this.setState({password: text})}
                     />
+                    {/*sign up button*/}
                     <TouchableOpacity
                         onPress={this.onPressSignUp}
                         underlayColor="white"
@@ -68,6 +60,7 @@ export default class SignUpScreen extends React.Component{
                             <Text style={styles.LoginSignUp.buttonText}>Sign Up</Text>
                         </View>
                     </TouchableOpacity>
+                    {/*login button*/}
                     <TouchableOpacity
                         onPress={() => this.props.navigation.dispatch(StackActions.reset({
                             index: 0,

@@ -16,9 +16,28 @@ export let mainColorLightOrange = "rgb(255,202,102)" //"#ffca66";
 const fontSize = 18;
 const margin = 20;
 
-export const Global = StyleSheet.create({
+export const Global2 = StyleSheet.create({
     text: {
         fontSize: fontSize
+    }
+});
+
+
+const Global = StyleSheet.create({
+    center: {
+        alignItems: 'center', 
+        justifyContent: 'center'
+    }
+});
+
+export const Navigation = StyleSheet.create({
+    header: {
+        backgroundColor: mainColorGreen
+    },
+    headerText:{
+        color: 'white',
+        fontSize: 25,
+        marginHorizontal: 20
     }
 });
 
@@ -36,9 +55,6 @@ export const LoginSignUp = StyleSheet.create({
         flex: 0.8,
         justifyContent: 'center',
     },
-    containerButton: {
-        backgroundColor: 'black'
-    },
     input: {
         margin: 10,
         marginHorizontal: 20,
@@ -50,8 +66,7 @@ export const LoginSignUp = StyleSheet.create({
     },
     button: {
         margin: 10,
-        marginLeft: 20,
-        marginRight: 20,
+        marginHorizontal: 20,
         borderRadius: 5,
         alignItems: 'stretch',
         backgroundColor: mainColorGreen
@@ -64,12 +79,11 @@ export const LoginSignUp = StyleSheet.create({
     },
     buttonInverse: {
         margin: 10,
-        marginLeft: 20,
-        marginRight: 20,
-        borderColor: mainColorGreen,
-        borderWidth: 1,
+        marginHorizontal: 20,
         borderRadius: 5,
         alignItems: 'stretch',
+        borderColor: mainColorGreen,
+        borderWidth: 1,
         backgroundColor: 'white'
     },
     buttonTextInverse: {
@@ -87,9 +101,99 @@ export const LoginSignUp = StyleSheet.create({
         flex: 0.7,
         height: undefined,
         width: undefined
+    },
+    containerKeepLoggedIn: {
+        flexDirection: 'row', 
+        marginHorizontal: 20, 
+        justifyContent: 'flex-end'
+    },
+    buttonKeepLoggedIn: {
+        flexDirection: 'row'
+    },
+    checkboxOutBox: {
+        marginHorizontal: 10, 
+        height: 20, 
+        width: 20, 
+        backgroundColor: mainColorLightGrey, 
+        ...Global.center
+    },
+    checkboxInBox: {
+        height: 15, 
+        width: 15, 
     }
 });
 
+export const Profile = StyleSheet.create({
+    container: {
+        flex: 1, 
+        ...Global.center
+    },
+    containerHeader: {
+        flexDirection: 'row',
+        ...Global.center,
+    },
+    containerNotification: {
+        backgroundColor: mainColorGreen2
+    },
+    buttonNotification: {
+        paddingVertical: 25,
+        marginBottom: 0, 
+        elevation: 10, 
+        paddingHorizontal: 20, 
+        backgroundColor: mainColorGreen2
+    },
+    containerNotificationNumber: {
+        position: 'absolute',
+        right: -5, 
+        top: -5
+    },
+    textNotificationNumber: {
+        backgroundColor: 'red', 
+        borderRadius: 6, 
+        textAlign: 'center',
+        minWidth: 12, 
+        height: 12, 
+        color: 'white', 
+        fontSize: 9
+    },
+    buttonNoNotification: {
+        paddingVertical: 25, 
+        marginBottom: 0, 
+        paddingHorizontal: 20, 
+    },
+    buttonMoreMenu: {
+        padding: 20, 
+    },
+    containerButtons: {
+        flexDirection: 'row', 
+        alignItems: 'stretch', 
+        flex: 1
+    },
+    button: {
+        elevation: 10, 
+        flex: 1, 
+        marginHorizontal: 10
+    },
+    text: {
+        color: 'white', 
+        fontSize: 30, 
+        fontWeight: 'bold'
+    },
+    textBalance: {
+        color: 'white', 
+        fontSize: 15, 
+        margin: -5
+    },
+    textMoneyValue: {
+        color: 'white', 
+        fontSize: 20, 
+        fontWeight: 'bold'
+    }
+    
+
+});
+
+/*
 export const Profile = StyleSheet.create({
     header: {
        backgroundColor: mainColorGreen
@@ -145,7 +249,7 @@ export const Profile = StyleSheet.create({
         fontSize: fontSize, 
         fontWeight: 'bold'
     }
-});
+});*/
 
 export const AddUserScreen = StyleSheet.create({
     search: {

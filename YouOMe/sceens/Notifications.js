@@ -2,10 +2,8 @@ import React from 'react';
 import {View, Text, Modal, TouchableOpacity, FlatList, Alert, TouchableWithoutFeedback} from 'react-native';
 import * as styles from '../components/Styles';
 import Firebase from '../components/Firebase';
-import { snapshotToArray } from '../components/Functions';
 import ImageCheck from '../images/checked_2.svg';
 import ImageCancel from '../images/cancel.svg';
-import ImageBin from '../images/rubbish-bin.svg';
 
 class NotificationDeletedConnection extends React.Component {
     constructor(){
@@ -71,23 +69,27 @@ class NotificationDeletedConnection extends React.Component {
     render() {
         return (
             <View style={{backgroundColor: styles.mainColorLightGrey2, margin: 5, elevation: 4}}>
+                {/*action request*/}
                 <Text style={{color: styles.mainColorOrange, fontWeight: 'bold', backgroundColor: styles.mainColorLightGrey2, textAlign: 'center'}}>
                     {this.props.text}
                 </Text>
+                {/*user who requested*/}
                 <View style={{flexDirection: 'row', alignItems: 'center', padding: 1}}>
                     <Text  style={{flex: 1, color: 'white',marginHorizontal: 5, textAlign: 'center'}}>
                         {this.props.username}
                     </Text>
                 </View>
-                 
+                {/*buttons*/}
                 {this.props.cancelRequest 
                     ?
+                        //my request - can cancel
                         <TouchableOpacity onPress={() => this.onDelete(this.props)} style={{flex: 1, padding: 5, justifyContent: 'center', alignItems: 'center', backgroundColor: styles.mainColorLightBlue}}>
                             <Text style={{fontSize: 15, color: 'white'}}>Cancel request</Text>
                         </TouchableOpacity>
                     :
                         (this.props.text == "DELETED CONNECTION" 
-                            ? 
+                            ?
+                                //another user deleted connection (balance is clear)
                                 <View style={{flexDirection: 'row'}}>
                                     <TouchableOpacity onPress={() => this.onDeleteHistory(this.props)} style={{flex: 1, padding: 5, justifyContent: 'center', alignItems: 'center', backgroundColor: styles.mainColorLightBlue}}>
                                         <Text style={{fontSize: 15, color: 'white'}}>Delete history</Text>
@@ -97,6 +99,7 @@ class NotificationDeletedConnection extends React.Component {
                                     </TouchableOpacity>       
                                 </View>
                             :
+                                //another user send request to delete connection (balance is NOT clear)
                                 <View style={{flexDirection: 'row'}}>
                                     <TouchableOpacity onPress={() => this.onCancelRequest(this.props)} style={{flex: 1, padding: 5, justifyContent: 'center', alignItems: 'center', backgroundColor: styles.mainColorLightBlue}}>
                                         <Text style={{fontSize: 15, color: 'white'}}>Cancel request</Text>
@@ -334,11 +337,13 @@ class Notification extends React.Component {
     render() {
         return (
             <View style={{backgroundColor: styles.mainColorLightGrey2, margin: 5, elevation: 4}}>
+                {/*action text*/}
                 <Text style={{color: 'white', fontWeight: 'bold', backgroundColor: styles.mainColorLightGrey2, textAlign: 'center'}}>
                     {this.props.text}
                 </Text>
                 {this.props.object != ""
                     ?
+                        //money or item
                         <View style={{flexDirection: 'row', alignItems: 'center', padding: 1}}>
                             <Text style={{flex: 1, color: 'white', marginHorizontal: 5, textAlign: 'center'}}>
                                 {this.props.object}
@@ -348,6 +353,7 @@ class Notification extends React.Component {
                             </Text>
                         </View>
                     :
+                        //connection
                         <View style={{flexDirection: 'row', alignItems: 'center', padding: 1}}>
                             <Text  style={{flex: 1, color: 'white',marginHorizontal: 5, textAlign: 'center'}}>
                                 {this.props.username}
@@ -356,10 +362,12 @@ class Notification extends React.Component {
                 }  
                 {this.props.cancelRequest 
                     ?
+                        //my request - can delete
                         <TouchableOpacity onPress={() => this.onDelete(this.props)} style={{flex: 1, padding: 5, justifyContent: 'center', alignItems: 'center', backgroundColor: styles.mainColorLightBlue}}>
                             <Text style={{fontSize: 15, color: 'white'}}>Cancel request</Text>
                         </TouchableOpacity>
                     :
+                        //request
                         <View style={{flexDirection: 'row'}}>
                             <TouchableOpacity onPress={() => this.onDelete(this.props)} style={{flex: 1, padding: 5, justifyContent: 'center', alignItems: 'center', backgroundColor: styles.mainColorLightBlue}}>
                                 <ImageCancel height={15} width={15} />
@@ -398,10 +406,15 @@ export default class Notifications extends React.Component {
     }
 
     componentWillUnmount(){
-        this.data.child('/money').off('value', this.offRefMoney);
-        this.data.child('/items').off('value', this.offRefItems);
-        this.data.child('/items_returned').off('value', this.offRefItemsReturned);
-        this.dataUsers.off('value', this.offRefUsers);
+        //off firebase listening
+        if(this.data !== undefined){
+            this.data.child('/money').off('value', this.offRefMoney);
+            this.data.child('/items').off('value', this.offRefItems);
+            this.data.child('/items_returned').off('value', this.offRefItemsReturned);
+            this.data.child('/delete_connections').off('value', this.offRefDelete);
+        }
+        if(this.dataUsers !== undefined)
+            this.dataUsers.off('value', this.offRefUsers);
     }
 
     loadNotifications = () => {
@@ -591,6 +604,7 @@ export default class Notifications extends React.Component {
             visible={this.props.modalVisibleNotifications}
         >
             <View style={{flex: 1}}>
+                    {/*offset*/}
                     <TouchableWithoutFeedback onPress={this.props.setModalVisibleNotifications}>
                         <View style={{height: 55, backgroundColor: 'transparent'}}></View>
                     </TouchableWithoutFeedback>
@@ -619,21 +633,26 @@ export default class Notifications extends React.Component {
                                 </View>
                             </TouchableOpacity>
                         </View>*/}
+                        
                         <View style={styles.AddMoneyItem.containerButton}>
+                            {/*reguests*/}
                             <TouchableOpacity style={{flex: 1}} onPress={() => (this.setState({subOption: 'requests'}))} underlayColor="white">
                                 <View style={[styles.AddMoneyItem.button, {backgroundColor: styles.mainColorGrey, opacity: this.state.subOption === "requests" ? 1 : 0.5}]}>
                                     <Text style={styles.AddMoneyItem.buttonText}>Requests</Text>
                                 </View>
                             </TouchableOpacity>
+                            {/*my requests*/}
                             <TouchableOpacity style={{flex: 1}} onPress={() => (this.setState({subOption: "cancel_requests"}))} underlayColor="white">
                                 <View style={[styles.AddMoneyItem.button, {backgroundColor: styles.mainColorGrey, opacity: this.state.subOption === "cancel_requests" ? 1 : 0.5}]}>
                                     <Text style={styles.AddMoneyItem.buttonText}>Cancel requests</Text>
                                 </View>
                             </TouchableOpacity>
                         </View>
+                        {/*notifications*/}
                         {(this.state.subOption == 'requests' && [].concat(this.state.connectionsRequests, this.state.connectionsDeleteRequests).length > 0) 
                         || (this.state.subOption != 'requests' && [].concat(this.state.connectionsMyRequests, this.state.connectionsDeleteMyRequests).length > 0)
                             ?
+                                //connection delete requests
                                 <FlatList 
                                     style={{backgroundColor: styles.mainColorGrey}}
                                     data={
@@ -654,7 +673,7 @@ export default class Notifications extends React.Component {
                             :
                                 null
                         }
-                        
+                        {/*money, items and new connections requests*/}
                         <FlatList 
                             style={{backgroundColor: styles.mainColorGrey}}
                             data={

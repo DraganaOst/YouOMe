@@ -1,6 +1,5 @@
 
 import React from 'react';
-import {Button} from 'react-native';
 import {Svg, Polyline, Line, Text, G, Path, Circle} from 'react-native-svg';
 import * as styles from '../components/Styles';
 import { RotationGestureHandler } from 'react-native-gesture-handler';
@@ -9,7 +8,7 @@ import { Rgb } from './Rgb';
 const week = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const year = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Avg", "Sep", "Oct", "Nov", "Dec"];
 
-//transformCoorinates
+//transformCoorinates - from View coordinates where 0,0 is in top left corner to math coordinates where 0,0 is in bottom left corner
 transCoord = (height, y) => {
     return (((height/2) - y) + height/2);
 }
@@ -20,6 +19,7 @@ class Axis extends React.Component {
             let array = [];
             let gap = ((height - 2*padding) / (ticksY));
             let tickGap = (maxValueY-minValueY)/(ticksY);
+            //y-ticks
             for(let i=minValueY, j=0; j<(ticksY+1); i=i+tickGap, j++){
                 array.push(
                     <Line
@@ -46,6 +46,7 @@ class Axis extends React.Component {
                 );
             }
 
+            //x-ticks
             let l = width - 2*padding;
             if(format == "week"){
                 let tickGapLabelsX = l / (week.length - 1);
@@ -134,6 +135,7 @@ class Axis extends React.Component {
                 }
             }
 
+            //line x = 0
             let h = ((height - 2*padding) / (maxValueY-minValueY));
             if(minValueY < 0){
                 array.push(
@@ -149,6 +151,8 @@ class Axis extends React.Component {
                 );
             }
 
+
+            //y-lines in between the main y-ticks 
             for(let i=minValueY, j = 0; i<maxValueY; i++, j++){
                 array.push(
                     <Line
@@ -175,13 +179,14 @@ class Axis extends React.Component {
         let lines = this.getLines(maxValueY, minValueY, ticksY, width, height, padding, format);
         return(
             <Svg>
+                {/*x-axis*/}
                 <Path
-                    //d={`M${0 + padding} ${0 + padding} L${0 + padding} ${height - padding} L${width - padding/2} ${height - padding}`}
                     d={`M${0 + padding + padding/2} ${height - padding} L${width - padding/2} ${height - padding}`}
                     fill="none"
                     stroke="white"
                     strokeWidth="3"
                 />
+                {/*ticks*/}
                 {lines}
             </Svg>
         );
@@ -248,7 +253,7 @@ class Data extends React.Component {
 
             if(!multiple){
                 let objectColor = new Rgb(color);
-                let transparentColor = `rgb(${objectColor.r},${objectColor.g},${objectColor.b},150)`;
+                let transparentColor = `rgb(${objectColor.r}, ${objectColor.g}, ${objectColor.b},150)`;
                 array.push(
                     <Path
                         key="dataBackground"
@@ -372,7 +377,7 @@ export default class Graph extends React.Component {
                     padding={padding}
                     format={format} //week, month, year
                     data={data[i].data}
-                    color={i<color.length ? color[i] : new Rgb(Math.random() * 255, Math.random() * 255, Math.random * 255)}
+                    color={i<color.length ? color[i] : new Rgb(Number((Math.random() * 255).toFixed(0)), Number((Math.random() * 255).toFixed(0)), Number((Math.random() * 255).toFixed(0))).toString()}
                     label={data[i].username}
                     multiple={multiple}
                 />  

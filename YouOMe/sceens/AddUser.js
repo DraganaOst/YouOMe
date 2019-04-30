@@ -1,6 +1,5 @@
 import React from 'react';
-import {StyleSheet, Text, View, TextInput, TouchableOpacity, Image, Button, Modal} from 'react-native';
-import {NavigationActions, StackActions} from "react-navigation";
+import {Text, View, TextInput, TouchableOpacity, Image} from 'react-native';
 import Firebase from "../components/Firebase";
 import * as styles from "../components/Styles";
 import ImageAddUser from '../images/add-user.svg';
@@ -25,9 +24,11 @@ class User extends React.Component {
     render() {
         return (
             <View style={[styles.AddUserScreen.user, {opacity: this.state.opacity}]}>
+                {/*username*/}
                 <Text style={[styles.AddUserScreen.text, {flex: 4}]}>
                     {this.props.username}
                 </Text>
+                {/*add button*/}
                 <View style={{flexDirection: 'row', flex: 2}}>
                     <TouchableOpacity style={[styles.AddUserScreen.button, {backgroundColor: styles.mainColorOrange}]} onPress={() => this.sendRequest(this.props.userUid)}>
                         <ImageAddUser width={32} height={32}/>
@@ -115,6 +116,7 @@ export default class AddUser extends React.Component{
     render() {
         return (
             <View style={{backgroundColor: styles.mainColorGrey, flex: 1}}>
+                {/*search bar*/}
                 <View style={{flexDirection: 'row'}}>
                     <TextInput
                         style={[styles.AddUserScreen.search, {flex: 1}]}
@@ -123,14 +125,17 @@ export default class AddUser extends React.Component{
                         defaultValue={this.state.search}
                     />
                     {this.state.search !== ""
-                        ? <TouchableOpacity style={{justifyContent: 'center'}} onPress={() => this.setState({search: "", array: []})}>
-                            <Image
-                                style={{margin: 10, marginLeft: 0, justifyContent: 'center', alignItems: 'center'}}
-                                source={require('../images/cancel_2.png')}
-                            />
-                        </TouchableOpacity>
+                        ?
+                            //clear search bar
+                            <TouchableOpacity style={{justifyContent: 'center'}} onPress={() => this.setState({search: "", array: []})}>
+                                <Image
+                                    style={{margin: 10, marginLeft: 0, justifyContent: 'center', alignItems: 'center'}}
+                                    source={require('../images/cancel_2.png')}
+                                />
+                            </TouchableOpacity>
                         : null}
                 </View>
+                {/*user list*/}
                 <View>{this.state.array}</View>
             </View>
         );

@@ -12,7 +12,9 @@ class TransactionUser extends React.Component {
         return (
             <TouchableOpacity style={styles.Money.button} onPress={() => this.props.navigator.navigate('HistoryMoney', {username: this.props.username, uid: this.props.uid})}>
                 <View style={styles.Money.container}>
+                    {/*username*/}
                     <Text style={styles.Money.textUser}>{this.props.username}</Text>
+                    {/*balance*/}
                     {this.props.balance != 0 
                         ? <View style={styles.Money.containerBalance}>
                             <Text style={styles.Money.balanceText}>{this.props.balanceText}</Text>
@@ -114,14 +116,17 @@ class Confirmation extends React.Component {
         let style = this.props.transaction.request == Firebase.uid ? {alignItems: 'center'} : null;
         return (
             <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 5, backgroundColor: styles.mainColorLightOrange, elevation: 4}}>
+                {/*if my request - one button, else - two buttons (one on each side)*/}
                 {this.props.transaction.request == Firebase.uid
                 ? 
                     null
                 :
+                    //request
                     <TouchableOpacity style={{backgroundColor: 'red', paddingHorizontal: 20, paddingVertical: 10}} onPress={() => this.onDelete(this.props)}>
                         <ImageCancel width={20} height={20} />
                     </TouchableOpacity>
                 }
+                {/*notification*/}
                 <View style={{flexDirection: 'row', paddingHorizontal: 20, style}}>
                     <Text style={{color: 'white', fontSize: 18, fontWeight: 'bold'}}>{this.props.transaction.amount}€</Text>
                     <Text style={{color: 'white', fontSize: 18, fontWeight: 'bold'}}>{this.props.transaction.from == Firebase.uid ? " to " : ' from '}</Text>
@@ -129,10 +134,12 @@ class Confirmation extends React.Component {
                 </View>
                 {this.props.transaction.request == Firebase.uid
                 ? 
+                    //my request - can cancel
                     <TouchableOpacity style={{backgroundColor: 'red', paddingHorizontal: 20, paddingVertical: 10}} onPress={() => this.onDelete(this.props)}>
                         <ImageCancel width={20} height={20} />
                     </TouchableOpacity>
                 :
+                    //requests
                     <TouchableOpacity style={{backgroundColor: styles.mainColorGreen, paddingHorizontal: 20, paddingVertical: 10}} onPress={() => this.onAccept(this.props)}>
                         <ImageCheck width={20} height={20} />
                     </TouchableOpacity>
@@ -158,6 +165,7 @@ export default class Money extends React.Component {
     }
 
     componentWillUnmount(){
+        //off firebase listening
         this.data.off('value', this.offRef);
         this.data2.off('value', this.offRef2);
     }
@@ -223,9 +231,11 @@ export default class Money extends React.Component {
     render() {
         return (
             <View style={{flex: 1}}>
+                {/*users and balances*/}
                 <ScrollView style={{backgroundColor: "#E5E5E5"}}>
                     {this.state.array}
                 </ScrollView>
+                {/*notifications*/}
                 {this.state.confirmation.length > 0 
                 ?
                     <View style={{backgroundColor: styles.mainColorOrange, maxHeight: '30%'}}>

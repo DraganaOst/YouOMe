@@ -142,9 +142,6 @@ export default class HistoryItems extends React.Component {
 
     static navigationOptions = ({ navigation }) => ({
         title: navigation.getParam('title'),
-        headerStyle: styles.Profile.header,
-        headerTitleStyle: styles.Profile.headerText,
-        headerTintColor: 'white',
     });
 
     loadTransactions = () => {

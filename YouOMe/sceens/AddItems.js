@@ -1,5 +1,5 @@
 import React from 'react';
-import {Platform, Text, View, TextInput, TouchableOpacity, Image, Button, Picker, DatePickerAndroid, DatePickerIOS, ScrollView} from 'react-native';
+import {Platform, Text, View, TextInput, TouchableOpacity,Picker, DatePickerAndroid, DatePickerIOS, ScrollView} from 'react-native';
 import {NavigationActions, StackActions} from "react-navigation";
 import Firebase from "../components/Firebase";
 import * as styles from "../components/Styles";
@@ -100,32 +100,12 @@ export default class AddItems extends React.Component {
             let ref = Firebase.database.ref('/confirmations/items');
             let uid = this.state.array[this.state.userIndex].key;
             
-            /*let balance = { owed_by_me: 0, owed_to_me: 0};
-            let balanceUser = {owed_by_me: 0, owed_to_me: 0};
-
-            await Firebase.database.ref('/balance/' + Firebase.uid + '/items/'+uid).once('value').then((snapshot) => {
-                if(snapshot.child('owed_by_me').exists()){
-                    balance.owed_by_me = snapshot.val().owed_by_me;
-                    balanceUser.owed_to_me = balance.owed_by_me;
-                }
-                if(snapshot.child('owed_to_me').exists()){
-                    balance.owed_to_me = snapshot.val().owed_to_me;
-                    balanceUser.owed_by_me = balance.owed_to_me;
-                }
-            });*/
-
             let from = Firebase.uid;
             let to = uid;
 
             if(this.state.option === 'i_received'){
                 from = uid;
                 to = Firebase.uid;
-                //update['balance/'+Firebase.uid+'/items/'+uid+'/owed_by_me'] = balance.owed_by_me + 1;
-                //update['balance/'+uid+'/items/'+Firebase.uid+'/owed_to_me'] = balanceUser.owed_to_me + 1;
-            }
-            else{
-                //update['balance/'+Firebase.uid+'/items/'+uid+'/owed_to_me'] = balance.owed_to_me + 1;
-                //update['balance/'+uid+'/items/'+Firebase.uid+'/owed_by_me'] = balanceUser.owed_by_me + 1;
             }
 
             let item = ref.push(
@@ -171,6 +151,7 @@ export default class AddItems extends React.Component {
 
         return (
             <View style={{flex: 1, backgroundColor: styles.mainColorGrey}}>
+                {/*toggle I gave / I Received*/}
                 <View style={styles.AddMoneyItem.containerButton}>
                     <TouchableOpacity style={{flex: 1}} onPress={() => (this.setState({option: 'i_gave'}))} underlayColor="white">
                         <View style={[styles.AddMoneyItem.button, {backgroundColor: styles.mainColorOrange, opacity: this.state.option === "i_gave" ? 1 : 0.5}]}>
@@ -183,12 +164,14 @@ export default class AddItems extends React.Component {
                         </View>
                     </TouchableOpacity>
                 </View>
+                {/*form*/}
                 <ScrollView style={{flex: 1}}>
                     <View style={{flex:1, marginTop: 10, marginBottom: 5}}>
                         <View style={{flexDirection: 'row'}}>
                             <Text style={{color: 'white', fontSize: 18, marginLeft: 20, fontWeight: 'bold'}}>{this.state.option === 'i_gave' ? "To" : "From"}</Text>
                             <Text style={{color: 'red', fontSize: 18}}>*</Text>
                         </View>
+                        {/*user picker*/}
                         <View style={{backgroundColor: styles.mainColorLightGrey, paddingLeft: 15, marginHorizontal: 10}}>
                             <Picker
                                     selectedValue={this.state.userValue}
@@ -202,6 +185,7 @@ export default class AddItems extends React.Component {
                             </Picker>
                         </View>   
                     </View>
+                    {/*item name input*/}
                     <View style={{flex:1, marginVertical: 5}}>
                         <View style={{flexDirection: 'row'}}>
                             <Text style={{color: 'white', fontSize: 18, marginLeft: 20, fontWeight: 'bold'}}>Item name</Text>
@@ -211,12 +195,14 @@ export default class AddItems extends React.Component {
                             <TextInput style={styles.AddMoneyItem.inputReason} onChangeText={(text) => {this.setState({name: text})}}></TextInput>
                         </View>   
                     </View>
+                    {/*reason input*/}
                     <View style={{flex:1, marginVertical: 5}}>
                         <Text style={{color: 'white', fontSize: 18, marginLeft: 20, fontWeight: 'bold'}}>Reason</Text>
                         <View style={{backgroundColor: styles.mainColorLightGrey, marginHorizontal: 10}}>
                             <TextInput style={styles.AddMoneyItem.inputReason} onChangeText={(text) => this.setState({reason: text})}></TextInput>
                         </View>       
                     </View>
+                    {/*date incured input*/}
                     <View style={{flex:1, marginVertical: 5}}>
                         <Text style={{color: 'white', fontSize: 18, marginLeft: 20, fontWeight: 'bold'}}>Date incured</Text>     
                         <TouchableOpacity style={{backgroundColor: styles.mainColorLightGrey, paddingHorizontal: 20, marginHorizontal: 10}} onPress={() => this.onPressCalendar('incured')}>
@@ -226,6 +212,7 @@ export default class AddItems extends React.Component {
                             </View>
                         </TouchableOpacity>
                     </View>
+                    {/*date due input*/}
                     <View style={{flex:1, marginVertical: 5}}>
                         <Text style={{color: 'white', fontSize: 18, marginLeft: 20, fontWeight: 'bold'}}>Date due</Text>     
                         <TouchableOpacity style={{backgroundColor: styles.mainColorLightGrey, paddingHorizontal: 20, marginHorizontal: 10}} onPress={() => this.onPressCalendar('due')}>
@@ -238,6 +225,7 @@ export default class AddItems extends React.Component {
                 </ScrollView>
                 {this.state.visibleDatePickerIOSDue ? datePickerIOSDue : null}
                 {this.state.visibleDatePickerIOSIncured ? datePickerIOSIncured : null}
+                {/*confirm button*/}
                 <View style={{flexDirection: 'row', alignItems: 'stretch'}}>
                     <TouchableOpacity style={{flex: 1}} onPress={() => this.onPressAddItem()} underlayColor="white">
                         <View style={[styles.AddMoneyItem.button2]}>

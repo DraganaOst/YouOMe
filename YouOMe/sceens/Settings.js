@@ -1,9 +1,8 @@
 import React from 'react';
-import {Text, View, TouchableOpacity, Image, ScrollView, RefreshControl, Button} from 'react-native';
+import {Text, View, TouchableOpacity} from 'react-native';
 import * as styles from "../components/Styles";
-import {Svg, Polyline, Line, G, Path, Circle, Polygon} from 'react-native-svg';
+import {Svg, Polygon} from 'react-native-svg';
 import {Rgb} from '../components/Rgb';
-import App from '../App';
 
 const mainColorLightGrey = "rgb(229,229,229)" //"#E5E5E5";
 const mainColorGreen = "rgb(138,203,136)" //'#8acb88';
@@ -30,13 +29,14 @@ export default class Settings extends React.Component{
     }
 
     componentWillUnmount(){
-        if(this.state.optionColor == 'default')
-            this.setDefaultMainColors();
-        else 
-            this.setCustomMainColors();
+        this.changeTheme();
     }
 
     componentDidUpdate(){
+        this.changeTheme();
+    }
+
+    changeTheme = () => {
         if(this.state.optionColor == 'default')
             this.setDefaultMainColors();
         else 
@@ -58,6 +58,15 @@ export default class Settings extends React.Component{
         this.getColorScale(color, 4);
     }
 
+    getLightColorFormul = (colorChannel) => {
+        return colorChannel + (255 - colorChannel) * 0.12;
+    }
+
+    getLightColor = (stringColor) => {
+        let color = new Rgb(stringColor);
+        return new Rgb(this.getLightColorFormul(color.r), this.getLightColorFormul(color.g), this.getLightColorFormul(color.b));
+    }
+
     setCustomMainColors = () => {
         styles.mainColorGreen = this.state.color2;
         styles.mainColorBlue = this.state.color3;
@@ -65,14 +74,10 @@ export default class Settings extends React.Component{
         styles.mainColorOrange = this.state.color5;
         styles.mainColorLightGrey = this.state.color1;
 
-        let color2 = new Rgb(this.state.color2);
-        let color3 = new Rgb(this.state.color3);
-        let color4 = new Rgb(this.state.color4);
-        let color5 = new Rgb(this.state.color5);
-        styles.mainColorGreen2 = new Rgb( color2.r  + (255 - color2.r) * 0.15,  color2.g  + (255 - color2.g) * 0.15, color2.b  + (255 - color2.b) * 0.15).toString();
-        styles.mainColorLightBlue = new Rgb(color3.r  + (255 - color3.r) * 0.15,  color3.g  + (255 - color3.g) * 0.15, color3.b  + (255 - color3.b) * 0.15).toString();
-        styles.mainColorLightGrey2 = new Rgb(color4.r  + (255 - color4.r) * 0.15,  color4.g  + (255 - color4.g) * 0.15, color4.b  + (255 - color4.b) * 0.15).toString();
-        styles.mainColorLightOrange = new Rgb(color5.r  + (255 - color5.r) * 0.15,  color5.g  + (255 - color5.g) * 0.15, color5.b  + (255 - color5.b) * 0.15).toString();
+        styles.mainColorGreen2 = this.getLightColor(this.state.color2).toString();
+        styles.mainColorLightBlue = this.getLightColor(this.state.color3).toString();
+        styles.mainColorLightGrey2 = this.getLightColor(this.state.color4).toString();
+        styles.mainColorLightOrange = this.getLightColor(this.state.color5).toString();
     }
 
     setDefaultMainColors = () => {
@@ -178,27 +183,11 @@ export default class Settings extends React.Component{
         return array;
     }
 
-    /*getObjectFromColor = (color) => {
-        let object = {
-            r: 0,
-            g: 0,
-            b: 0
-        }
-
-        let substring = color.substring(4, color.length-1);
-        let array = substring.split(',');
-        object.r = Number(array[0]);
-        object.g = Number(array[1]);
-        object.b = Number(array[2]);
-
-        return object;
-    }*/
-
     getColorScale = (color, numberOfShades) => {
         let array = [];
 
         let object = new Rgb(color);
-        let newColor = new Rgb(color); //this.getObjectFromColor(color);
+        let newColor = new Rgb(color); 
         let interval = 255 / (numberOfShades + 1);
 
         for(let i = numberOfShades; i>0; i--){
@@ -213,7 +202,7 @@ export default class Settings extends React.Component{
                 newColor.b = Number(object.b + (255 - object.b) * coeficient);
             }
 
-            let newColorString =  newColor.toString(); //`rgb(${newColor.r.toString()}, ${newColor.g.toString()}, ${newColor.b.toString()})`;
+            let newColorString =  newColor.toString(); 
 
             array.push(
                 <TouchableOpacity key={i + "Light"} onPress={() => this.setColor(newColorString)} style={{flex: 1, backgroundColor: newColorString}}></TouchableOpacity>

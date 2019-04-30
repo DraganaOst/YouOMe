@@ -13,7 +13,9 @@ class TransactionUser extends React.Component {
         return (
             <TouchableOpacity style={styles.Money.button} onPress={() => this.props.navigator.navigate('HistoryItems', {username: this.props.username, uid: this.props.uid})}>
                 <View style={styles.Money.container}>
+                    {/*username*/}
                     <Text style={styles.Money.textUser}>{this.props.username}</Text>
+                    {/*balance*/}
                     <View style={styles.Items.containerBalance}>
                         <View >
                             <Text style={styles.Money.balanceText}>I Owe</Text>
@@ -125,10 +127,12 @@ class Confirmation extends React.Component {
     render() {
         return (
             <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 5, backgroundColor: styles.mainColorLightOrange}}>
+                {/*if my request - one button, else - two buttons (one on each side)*/}
                 {this.props.transaction.request == Firebase.uid
                 ? 
                     null
                 :
+                    //request
                     <TouchableOpacity style={{flex: 0.5, backgroundColor: 'red', paddingHorizontal: 20, paddingVertical: 10}} onPress={() => this.onDelete(this.props)}>
                         <ImageCancel width={20} height={20} />
                     </TouchableOpacity>
@@ -140,10 +144,12 @@ class Confirmation extends React.Component {
                 </View>
                 {this.props.transaction.request == Firebase.uid
                 ? 
+                    //my request - can cancel
                     <TouchableOpacity style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'red', paddingHorizontal: 40, paddingVertical: 10}} onPress={() => this.onDelete(this.props)}>
                         <ImageBin width={20} height={20} />
                     </TouchableOpacity>
                 :
+                    //request
                     <TouchableOpacity style={{flex: 0.5, backgroundColor: styles.mainColorGreen, paddingHorizontal: 20, paddingVertical: 10}} onPress={() => this.onAccept(this.props)}>
                         <ImageCheck width={20} height={20} />
                     </TouchableOpacity>
@@ -273,6 +279,7 @@ export default class Items extends React.Component {
     }
 
     componentWillUnmount(){
+        //off firebase listening
         this.data.off('value', this.offRef);
         this.data2.child('/items').off('value',this.offRefChild);
         this.data2.child('items_returned').off('value', this.offRefChild2);
@@ -378,15 +385,19 @@ export default class Items extends React.Component {
     render() {
         return (
             <View style={{flex: 1}}>
+                {/*users and balances*/}
                 <ScrollView style={{backgroundColor: "#E5E5E5"}}>
                     {this.state.array}
                 </ScrollView>
+                {/*notifications*/}
                 {this.state.confirmation.length > 0 || this.state.confirmationReturned.length > 0
                 ?
                     <View style={{backgroundColor: styles.mainColorOrange, maxHeight: '50%'}}>
                         <TouchableOpacity onPress={() => this.setState({confirmationVisible: !this.state.confirmationVisible})}>
                             <Text style={{color: 'white', fontSize: 20, paddingHorizontal: 20, paddingVertical: 5, fontWeight: 'bold'}}>Need confirmation</Text>
                         </TouchableOpacity>
+
+                        {/*new added items*/}
                         {this.state.confirmation.length > 0 && this.state.confirmationVisible ? <Text style={{paddingHorizontal: 20, color: 'white'}}>Add Items</Text> : null}
                         {this.state.confirmationVisible 
                         ?
@@ -407,6 +418,8 @@ export default class Items extends React.Component {
                         : 
                             null
                         }
+
+                        {/*returned items*/}
                         {this.state.confirmationReturned.length > 0 && this.state.confirmationVisible ? <Text style={{paddingHorizontal: 20, color: 'white'}}>Return Items</Text> : null}
                         {this.state.confirmationVisible 
                         ?
