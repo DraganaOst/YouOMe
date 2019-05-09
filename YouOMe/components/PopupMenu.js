@@ -34,7 +34,7 @@ export default class PopupMenu extends React.Component {
                             </View>
                             {/*sign out*/}
                             <View style={{borderColor: 'grey', borderTopWidth: 2, marginHorizontal: 10}}>
-                                <TouchableOpacity onPress={() => Firebase.auth.signOut().then(() => {})} onPressOut={this.props.setModalVisible}>
+                                <TouchableOpacity onPress={() => Firebase.auth.signOut()} onPressOut={this.props.setModalVisible}>
                                     <Text style={{marginHorizontal: 20, paddingVertical: 10, fontSize: 18}}>Sign Out</Text>
                                 </TouchableOpacity>
                             </View>

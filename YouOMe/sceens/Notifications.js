@@ -182,12 +182,13 @@ class Notification extends React.Component {
             });
         }
         else if(props.path == 'items_returned'){
+
             let update = {};
 
             let balance = { owed_by_me: 0, owed_to_me: 0};
             let balanceUser = {owed_by_me: 0, owed_to_me: 0};
 
-            let uid = this.props.from == Firebase.uid ? this.props.to : this.props.from;
+            let uid = props.userUid;
 
             await Firebase.database.ref('/balance/' + Firebase.uid + '/items/'+uid).once('value').then((snapshot) => {
                 if(snapshot.child('owed_by_me').exists()){
@@ -221,7 +222,16 @@ class Notification extends React.Component {
             }
 
             Firebase.database.ref().update(update);
-            this.onDelete(this.props);
+
+            Firebase.database.ref('confirmations/users/'+Firebase.uid+'/items_returned/'+uid).orderByChild('transactionsKey').equalTo(props.keyTransaction).once('child_added', (snapshot) => {
+                snapshot.ref.remove();
+            }); 
+
+            Firebase.database.ref('confirmations/users/'+uid+'/items_returned/'+Firebase.uid).orderByChild('transactionsKey').equalTo(props.keyTransaction).once('child_added', (snapshot) => {
+                snapshot.ref.remove();
+            }); 
+
+            //this.onDelete(this.props);
         }
         else if(props.path == 'money'){
             let update = {};
